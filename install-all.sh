@@ -2,10 +2,10 @@
 
 ALL_MODUELS="mlsql-shell mlsql-assert mlsql-mllib mlsql-excel connect-persist last-command run-script save-then-load stream-persist table-repartition"
 
-MODUELS=${1}
+MODUELS=${1:-""}
 
 if [[ "${MODUELS}" == "" ]];then
-   MODUELS = ALL_MODUELS
+   MODUELS=${ALL_MODUELS}
 fi
 
 for spark_version in spark243 spark311

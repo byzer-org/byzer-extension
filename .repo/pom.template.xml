@@ -76,7 +76,7 @@
         <guava.version>16.0</guava.version>
         <httpclient.version>4.5.3</httpclient.version>
 
-        <common-utils-version>0.2.9</common-utils-version>
+        <common-utils-version>0.3.9.4</common-utils-version>
         <serviceframework.version>2.0.5</serviceframework.version>
         <scope>provided</scope>
         <hadoop-client-version>2.6.5</hadoop-client-version>
@@ -86,6 +86,13 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>tech.mlsql</groupId>
+            <artifactId>common-utils_${scala.binary.version}</artifactId>
+            <version>${common-utils-version}</version>
+            <scope>${scope}</scope>
+        </dependency>
 
         <dependency>
             <groupId>tech.mlsql</groupId>
