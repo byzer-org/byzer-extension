@@ -9,6 +9,7 @@ Requirements:
 
 1. Python >= 3.6
 2. Maven >= 3.0
+3. download [kolo-lang](https://github.com/byzer-org/kolo-lang), then execute : `mvn clean install  -DskipTests -Ponline   -Phive-thrift-server -Pjython-support -Pscala-2.12 -Pspark-3.0.0 -Pstreamingpro-spark-3.0.0-adaptor`
 
 You can install [mlsql_plugin_tool](https://github.com/allwefantasy/mlsql_plugin_tool) to build module in this project.
 
