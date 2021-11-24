@@ -3,13 +3,30 @@
 This project is a collection of plugins for MLSQL.
 Please check every module in project for more detail.
 
-## Build Shade Jar
 
-Requirements:
+
+## Requirements:
 
 1. Python >= 3.6
 2. Maven >= 3.0
-3. download [kolo-lang](https://github.com/byzer-org/kolo-lang), then execute : `mvn clean install  -DskipTests -Ponline   -Phive-thrift-server -Pjython-support -Pscala-2.12 -Pspark-3.0.0 -Pstreamingpro-spark-3.0.0-adaptor`
+
+## Kolo-lang dependencies
+
+clone [kolo-lang](https://github.com/byzer-org/kolo-lang), then execute
+
+```
+mvn clean install  -DskipTests -Ponline   -Phive-thrift-server -Pjython-support -Pscala-2.12 -Pspark-3.0.0 -Pstreamingpro-spark-3.0.0-adaptor
+```
+
+then
+
+```
+./dev/switch.sh 2.4
+mvn clean install  -DskipTests -Ponline   -Phive-thrift-server -Pjython-support -Pscala-2.11 -Pspark-2.4.0 -Pstreamingpro-spark-2.4.0-adaptor
+
+```
+
+## Build Shade Jar
 
 You can install [mlsql_plugin_tool](https://github.com/allwefantasy/mlsql_plugin_tool) to build module in this project.
 
