@@ -36,21 +36,21 @@ class AutoMLExt(override val uid: String) extends SQLAlg with Functions with Mll
     val evaluateTable = params.get("evaluateTable")
     setEvaluateTable(evaluateTable.getOrElse("None"))
     val sortedKey = params.getOrElse(sortedBy.name, "f1")
-    val algo_list = params.getOrElse("algos", "NaiveBayes,RandomForest")
-      .split(",").map(algo => algo.stripMargin)
+    val algo_list = params.getOrElse("algos", "GBTClassifier,LogisticRegression,NaiveBayes,RandomForest")
+      .split(",").map(algo => algo.trim())
     val classifier_list = algo_list.map(algo_name => {
       val tempPath = getAutoMLPath(path, algo_name)
       SQLPythonFunc.incrementVersion(tempPath, keepVersion)
       val sqlAlg = MLMapping.findAlg(algo_name)
-      (tempPath.split("/").last, sqlAlg.train(df, tempPath, params))
+      (tempPath.split(PathFun.pathSeparator).last, sqlAlg.train(df, tempPath, params))
     })
     val updatedDF = classifier_list.map(obj => {
       (obj._1, obj._2.withColumn("value", regexp_replace(obj._2("value"),
-        "/_model_", obj._1 + "/_model_")))
+        PathFun.pathSeparator+"_model_", obj._1 +PathFun.pathSeparator + "_model_")))
     }).map(d => {
       d._2.withColumn("value",
         when(d._2("name") === "algIndex",
-          functions.concat(lit(d._1.split(AutoMLExt.pathPrefix).last), lit("."), d._2("value")))
+          functions.concat(lit(d._1.split(SQLAutoML.pathPrefix).last), lit("."), d._2("value")))
           .otherwise(d._2("value")))
     })
     val classifier_df = updatedDF.map(obj => {
@@ -74,7 +74,7 @@ class AutoMLExt(override val uid: String) extends SQLAlg with Functions with Mll
         algIndex.substring(0, algIndex.indexOf("."))
       case None =>
         val bestModelPathAmongModels = autoMLfindBestModelPath(path, params, sparkSession)
-        bestModelPathAmongModels(0).split("__").last.split("/")(0)
+        bestModelPathAmongModels(0).split("__").last.split(PathFun.pathSeparator)(0)
     }
     (newParam, algoName)
   }
@@ -84,97 +84,6 @@ class AutoMLExt(override val uid: String) extends SQLAlg with Functions with Mll
     val bestModelBasePath = getAutoMLPath(path, algoName.asInstanceOf[String])
     val bestModel = MLMapping.findAlg(algoName.asInstanceOf[String]).load(sparkSession, bestModelBasePath, newParam.asInstanceOf[Map[String, String]])
     bestModel
-  }
-
-  def autoMLfindBestModelPath(basePath: String, params: Map[String, String], sparkSession: SparkSession): Seq[String] = {
-    val d = new File(basePath)
-    if (!d.exists || !d.isDirectory) {
-      return Seq.empty
-    }
-    val allETName = (MLMapping.mapping.keys ++ ETRegister.getMapping.keys).toSet
-    val algo_paths = d.listFiles().filter(f => {
-      val path = f.getPath.split("__").last
-      f.isDirectory && f.getPath.contains(AutoMLExt.pathPrefix) && allETName.contains(path)
-    }).map(_.getPath).toList
-    val autoSelectByMetric = params.getOrElse("autoSelectByMetric", "f1")
-    var allModels = Array[Row]()
-    allModels = algo_paths.map(path => {
-      val (baseModelPath, metaPath) = getBaseModelPathAndMetaPath(path, params)
-      val algo_name = path.split("/").last
-      (baseModelPath, metaPath, algo_name)
-    }).map(paths => {
-      val baseModelPath = paths._1
-      val metaModelPath = paths._2
-      val modelList = sparkSession.read.parquet(metaModelPath + "/0").collect()
-      modelList.map(t => {
-        val s = t.toSeq
-        Row.fromSeq((s.take(0) :+ "/" + paths._3 + s(0).asInstanceOf[String]) ++ s.drop(1))
-      })
-    }).reduce((x, y) => {
-      x ++ y
-    })
-    val algIndex = params.get("algIndex").map(f => f.toInt)
-    val bestModelPath = findBestModelPath(allModels, algIndex, basePath, autoSelectByMetric)
-    bestModelPath
-  }
-
-  def findBestModelPath(modelList: Array[Row], algoIndex: Option[Int], baseModelPath: String, autoSelectByMetric: String) = {
-    var algIndex = algoIndex
-    val bestModelPath = algIndex match {
-      case Some(i) => Seq(baseModelPath + "/" + i)
-      case None =>
-        modelList.map { row =>
-          var metric: Row = null
-          val metrics = row(3).asInstanceOf[scala.collection.mutable.WrappedArray[Row]]
-          if (metrics.size > 0) {
-            val targeMetrics = metrics.filter(f => f.getString(0) == autoSelectByMetric)
-            if (targeMetrics.size > 0) {
-              metric = targeMetrics.head
-            } else {
-              metric = metrics.head
-              logInfo(format(s"No target metric: ${autoSelectByMetric} is found, use the first metric: ${metric.getDouble(1)}"))
-            }
-          }
-          val metricScore = if (metric == null) {
-            logInfo(format("No metric is found, system  will use first model"))
-            0.0
-          } else {
-            metric.getAs[Double](1)
-          }
-          // if the model path contain __auto_ml__ that means, it is trained by autoML
-          var baseModelPathTmp = PathFun.joinPath(baseModelPath, row(0).asInstanceOf[String].split("/").last)
-          if (row(0).asInstanceOf[String].split("/")(1).contains(AutoMLExt.pathPrefix)) {
-            baseModelPathTmp = baseModelPath + row(0).asInstanceOf[String]
-          }
-          (metricScore, row(0).asInstanceOf[String], row(1).asInstanceOf[Int], baseModelPathTmp)
-        }
-          .toSeq
-          .sortBy(f => f._1)(Ordering[Double].reverse)
-          .take(1)
-          .map(f => {
-            algIndex = Option(f._3)
-            val baseModelPathTmp = f._4
-            baseModelPathTmp
-          })
-    }
-    bestModelPath
-  }
-
-  def getBaseModelPathAndMetaPath(path: String, params: Map[String, String]): (String, String) = {
-    val maxVersion = SQLPythonFunc.getModelVersion(path)
-    val versionEnabled = maxVersion match {
-      case Some(v) => true
-      case None => false
-    }
-    val modelVersion = params.getOrElse("modelVersion", maxVersion.getOrElse(-1).toString).toInt
-
-    val baseModelPath = if (modelVersion == -1) SQLPythonFunc.getAlgModelPath(path, versionEnabled)
-    else SQLPythonFunc.getAlgModelPathWithVersion(path, modelVersion)
-
-
-    val metaPath = if (modelVersion == -1) SQLPythonFunc.getAlgMetalPath(path, versionEnabled)
-    else SQLPythonFunc.getAlgMetalPathWithVersion(path, modelVersion)
-    (baseModelPath, metaPath)
   }
 
   override def predict(sparkSession: SparkSession, _model: Any, name: String, params: Map[String, String]): UserDefinedFunction = {
@@ -258,6 +167,6 @@ class AutoMLExt(override val uid: String) extends SQLAlg with Functions with Mll
     """.stripMargin)
 }
 
-object AutoMLExt {
+object SQLAutoML {
   val pathPrefix: String = "__auto_ml__"
 }
