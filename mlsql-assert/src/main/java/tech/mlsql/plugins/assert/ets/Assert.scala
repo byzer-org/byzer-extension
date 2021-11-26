@@ -13,7 +13,6 @@ import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.ets.SQLGenContext
 import tech.mlsql.lang.cmd.compile.internal.gc._
 import tech.mlsql.plugins.assert.app.MLSQLAssert
 import tech.mlsql.session.{SetItem, SetSession}
