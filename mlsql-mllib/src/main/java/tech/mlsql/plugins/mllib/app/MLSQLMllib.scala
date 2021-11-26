@@ -13,7 +13,7 @@ class MLSQLMllib extends tech.mlsql.app.App with VersionCompatibility with Loggi
   override def run(args: Seq[String]): Unit = {
     ETRegister.register("ClassificationEvaluator", classOf[ClassificationEvaluator].getName)
     ETRegister.register("RegressionEvaluator", classOf[RegressionEvaluator].getName)
-    ETRegister.register("AutoMLExt", classOf[AutoMLExt].getName)
+//    ETRegister.register("AutoMLExt", classOf[AutoMLExt].getName)
     ETRegister.register("SampleDatasetExt", classOf[SampleDatasetExt].getName)
     ETRegister.register("TakeRandomSampleExt", classOf[TakeRandomSampleExt].getName)
     ETRegister.register("ColumnsExt", classOf[ColumnsExt].getName)
