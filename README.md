@@ -1,6 +1,6 @@
-# mlsql-plugins
+# Byzer Extensions
 
-This project is a collection of plugins for MLSQL.
+This project is a collection of extensions for Byzer-lang.
 Please check every module in project for more detail.
 
 
@@ -10,9 +10,9 @@ Please check every module in project for more detail.
 1. Python >= 3.6
 2. Maven >= 3.0
 
-## Kolo-lang dependencies
+## Byzer-lang dependencies
 
-clone [kolo-lang](https://github.com/byzer-org/kolo-lang), then execute
+clone [byzer-lang](https://github.com/byzer-org/byzer-lang), then execute
 
 ```
 mvn clean install  -DskipTests -Ponline   -Phive-thrift-server -Pjython-support -Pscala-2.12 -Pspark-3.0.0 -Pstreamingpro-spark-3.0.0-adaptor
