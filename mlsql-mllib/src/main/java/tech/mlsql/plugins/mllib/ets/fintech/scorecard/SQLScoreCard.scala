@@ -29,7 +29,7 @@ import scala.util.parsing.json.JSON
  * @Date: 2022/1/4 16:36
  *
  */
-private class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
+class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
 
   def this() = this(BaseParams.randomUID())
 
