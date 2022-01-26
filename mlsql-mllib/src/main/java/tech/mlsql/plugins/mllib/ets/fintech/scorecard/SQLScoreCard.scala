@@ -5,6 +5,7 @@ import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressio
 import org.apache.spark.ml.feature.{Bucketizer, DiscretizerFeature, VectorAssembler}
 import org.apache.spark.ml.linalg.{DenseVector, Vector, Vectors}
 import org.apache.spark.ml.linalg.SQLDataTypes.VectorType
+import org.apache.spark.ml.param.Param
 import org.apache.spark.ml.util.MLWritable
 import org.apache.spark.sql.{DataFrame, MLSQLUtils, SparkSession}
 import org.apache.spark.sql.expressions.UserDefinedFunction
@@ -15,6 +16,7 @@ import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult,
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions, SQLPythonFunc}
 import streaming.dsl.mmlib.algs.param.BaseParams
+import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.common.utils.path.PathFun
 import tech.mlsql.dsl.adaptor.MLMapping
 import tech.mlsql.dsl.auth.ETAuth
@@ -58,7 +60,7 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
 
     val binningMap = constructBinningMap(binningDF)
     var trainDFTmp = trainDF
-    params.getOrElse(Binning.SELECTED_FEATURES, "").split(",").map(
+    params.getOrElse(selectedFeaturesParam.name, "").split(",").map(
       f => {
         binningMap.get(f).get.map(bm => {
           val woe = bm._2
@@ -66,7 +68,7 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
         })
       }
     )
-    val selectedFeatures = params.getOrElse(Binning.SELECTED_FEATURES, "").split(",")
+    val selectedFeatures = params.getOrElse(selectedFeaturesParam.name, "").split(",")
     selectedFeatures.map(
       f => {
         trainDFTmp = trainDFTmp.drop(f).withColumnRenamed(f + "_output", f)
@@ -120,21 +122,21 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val spark = df.sparkSession
     // the data in the table df is expected to being processed by binning ET
-    val binningInfoTableName = params.getOrElse(ScoreCard.BINNING_TABLE, "")
+    val binningInfoTableName = params.getOrElse(binningTableParam.name, "")
     require(!binningInfoTableName.isEmpty, "The binning information table is required! " +
       "Please specify the binning info table name")
 
-    val goodValue = params.getOrElse(ScoreCard.GOOD_VALUE_NAME, "1")
-    val odds = params.getOrElse(ScoreCard.ODDS_NAME, "50").toInt
-    val pdo = params.getOrElse(ScoreCard.PDO_NAME, "25").toInt
-    val scaledValue = params.getOrElse(ScoreCard.SCALE_VALUE_NAME, "800").toInt
+    val goodValue = params.getOrElse(goodValueParam.name, "1")
+    val odds = params.getOrElse(oddValueParam.name, "50").toInt
+    val pdo = params.getOrElse(pdoValueParam.name, "25").toInt
+    val scaledValue = params.getOrElse(scaledValueParam.name, "800").toInt
 
     ScoreCard.GOOD_VALUE = goodValue
     ScoreCard.ODDS = odds
     ScoreCard.PDO = pdo
     ScoreCard.SCALE_VALUE = scaledValue
 
-    val binningPath = params.getOrElse(ScoreCard.BINNING_PATH, "")
+    val binningPath = params.getOrElse(binningPathParam.name, "")
     require(!binningInfoTableName.isEmpty, "The binning path is required! Please specify the binning path")
     val dfAfterBinning = MLMapping.findAlg("Binning").batchPredict(df, binningPath, Map())
     val binningInfoTable = spark.table(binningInfoTableName)
@@ -151,7 +153,7 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
     val lrModel = LogisticRegressionModel.load(modelPath)
 
     //2. load Discretizer model
-    val binningPath = params.getOrElse(ScoreCard.BINNING_PATH, "")
+    val binningPath = params.getOrElse(binningPathParam.name, "")
     val (stringCols, labelArrays, bucketizer, dTypeCols) = MLMapping.findAlg("Binning").load(sparkSession, binningPath, params).asInstanceOf[(Array[String], Array[Array[String]], Bucketizer, Array[String])]
     val binningModel = BinningTrainData(
       bucketizer.getInputCols,
@@ -163,7 +165,7 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
       dTypeCols)
 
     //3. read binning info table
-    val binningInfoTableName = params.getOrElse(ScoreCard.BINNING_TABLE, "")
+    val binningInfoTableName = params.getOrElse(binningTableParam.name, "")
     require(!binningInfoTableName.isEmpty, "The binning information table is required! " +
       "Please specify the binning info table name")
     val binningInfoTable = sparkSession.table(binningInfoTableName)
@@ -239,11 +241,11 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
 
   override def batchPredict(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val (lrModel, binningModel, binningInfoTable) = load(df.sparkSession, path, params).asInstanceOf[(LogisticRegressionModel, BinningTrainData, DataFrame)]
-    val binningModelPath = params.get(ScoreCard.BINNING_PATH).get
+    val binningModelPath = params.get(binningPathParam.name).get
     val dataAfterDiscretizer = MLMapping.findAlg("Binning").batchPredict(df, binningModelPath, Map())
     val dataWithWOE = replaceFeatureWithWOE(dataAfterDiscretizer, binningInfoTable, params)
     val scorecardPred = scorecardPrediction(dataWithWOE, lrModel)
-    transformProdToScore(scorecardPred,ScoreCard.GOOD_VALUE, ScoreCard.PDO, ScoreCard.SCALE_VALUE, ScoreCard.ODDS)
+    transformProdToScore(scorecardPred, ScoreCard.GOOD_VALUE, ScoreCard.PDO, ScoreCard.SCALE_VALUE, ScoreCard.ODDS)
   }
 
   override def auth(etMethod: ETMethod, path: String, params: Map[String, String]): List[TableAuthResult] = {
@@ -262,6 +264,154 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
         List(TableAuthResult(granted = true, ""))
     }
   }
+
+  val selectedFeaturesParam: Param[String] = new Param[String](this, Binning.SELECTED_FEATURES,
+    FormParams.toJson(Text(
+      name = Binning.SELECTED_FEATURES,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The selected columns that are going to be processed!
+          """,
+        label = "The selected column name",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val binningTableParam: Param[String] = new Param[String](this, ScoreCard.BINNING_TABLE,
+    FormParams.toJson(Text(
+      name = ScoreCard.BINNING_TABLE,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The binning table name for scorecard training
+          """,
+        label = "The binning table name from previous step!",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val scaledValueParam: Param[String] = new Param[String](this, ScoreCard.SCALE_VALUE_NAME,
+    FormParams.toJson(Text(
+      name = ScoreCard.SCALE_VALUE_NAME,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The scaled value for transforming to credit score
+          """,
+        label = "The scaled value for transforming to credit score!",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "false",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val pdoValueParam: Param[String] = new Param[String](this, ScoreCard.PDO_NAME,
+    FormParams.toJson(Text(
+      name = ScoreCard.PDO_NAME,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The PDO value for transforming to credit score
+          """,
+        label = "The PDO value for transforming to credit score!",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "false",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val oddValueParam: Param[String] = new Param[String](this, ScoreCard.ODDS_NAME,
+    FormParams.toJson(Text(
+      name = ScoreCard.ODDS_NAME,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The ODD value for transforming to credit score
+          """,
+        label = "The ODD value for transforming to credit score!",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "false",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val goodValueParam: Param[String] = new Param[String](this, ScoreCard.GOOD_VALUE_NAME,
+    FormParams.toJson(Text(
+      name = ScoreCard.GOOD_VALUE_NAME,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The value that indicated the good user class, default with 1
+          """,
+        label = "The value that indicated the good user class!",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "false",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val binningPathParam: Param[String] = new Param[String](this, ScoreCard.BINNING_PATH,
+    FormParams.toJson(Text(
+      name = ScoreCard.BINNING_PATH,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The binning model path
+          """,
+        label = "The binning model path",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
 }
 
 object ScoreCard {
