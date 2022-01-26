@@ -1,4 +1,5 @@
-package streaming.dsl.mmlib.fe
+package tech.mlsql.plugins.mllib.ets.fe
+
 
 import org.apache.spark.ml.Estimator
 import org.apache.spark.ml.feature.{DiscretizerFeature, VectorAssembler}
@@ -12,7 +13,7 @@ import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult,
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}
 import streaming.dsl.mmlib.algs.param.BaseParams
-import tech.mlsql.common.form.{Extra, FormParams, KV, Select}
+import tech.mlsql.common.form.{Extra, FormParams, KV, Select, Text}
 import tech.mlsql.dsl.adaptor.MLMapping
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
@@ -83,8 +84,8 @@ class SQLMissingValueProcess(override val uid: String) extends SQLAlg with Mllib
   }
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
-    val processColumns = params.getOrElse("processColumns", "").split(",")
-    val method = params.getOrElse("method", "mean")
+    val processColumns = params.getOrElse(processColumnsParam.name, "").split(",")
+    val method = params.getOrElse(methodParam.name, "mean")
     val data = method match {
       case "mean" => fillByMeanValue(df, params, processColumns)
       case "mode" => fillByModeValue(df, params, processColumns)
@@ -133,6 +134,64 @@ class SQLMissingValueProcess(override val uid: String) extends SQLAlg with Mllib
         List(TableAuthResult(granted = true, ""))
     }
   }
+
+  val processColumnsParam: Param[String] = new Param[String](this, MissingValueProcessConstant.PORCOESS_COLUMNS,
+    FormParams.toJson(Text(
+      name = MissingValueProcessConstant.PORCOESS_COLUMNS,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The selected columns that are going to be processed!
+          """,
+        label = "The selected column name",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val methodParam: Param[String] = new Param[String](this, MissingValueProcessConstant.METHOD, FormParams.toJson(
+    Select(
+      name = MissingValueProcessConstant.METHOD,
+      values = List(),
+      extra = Extra(
+        doc = "",
+        label = "",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+        )), valueProvider = Option(() => {
+        List(
+          KV(Some("method"), Some(MissingValueProcessConstant.PROCESS_BY_MEAN)),
+          KV(Some("method"), Some(MissingValueProcessConstant.PROCESS_BY_MODE)),
+          KV(Some("method"), Some(MissingValueProcessConstant.PROCESS_BY_DROP)),
+          KV(Some("method"), Some(MissingValueProcessConstant.PROCESS_BY_RF))
+        )
+      })
+    )
+  ))
+
+
+}
+
+object MissingValueProcessConstant {
+  val METHOD = "method"
+
+  val PORCOESS_COLUMNS = "processColumns"
+
+  val PROCESS_BY_MEAN = "mean"
+
+  val PROCESS_BY_MODE = "mode"
+
+  val PROCESS_BY_DROP = "drop"
+
+  val PROCESS_BY_RF = "randomforest"
 
 
 }

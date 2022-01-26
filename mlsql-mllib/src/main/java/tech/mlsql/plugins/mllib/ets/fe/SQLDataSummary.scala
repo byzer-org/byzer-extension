@@ -1,4 +1,4 @@
-package streaming.dsl.mmlib.fe
+package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.expressions.UserDefinedFunction

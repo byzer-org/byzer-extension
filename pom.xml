@@ -110,17 +110,18 @@
 
         <dependency>
             <groupId>tech.mlsql</groupId>
-            <artifactId>streamingpro-spark-3.0.0-adaptor_${scala.binary.version}</artifactId>
+            <artifactId>streamingpro-common-${spark.bigversion}_${scala.binary.version}</artifactId>
             <version>${mlsql.version}</version>
             <scope>${scope}</scope>
         </dependency>
 
         <dependency>
             <groupId>tech.mlsql</groupId>
-            <artifactId>streamingpro-common-${spark.bigversion}_${scala.binary.version}</artifactId>
+            <artifactId>streamingpro-spark-3.0.0-adaptor_${scala.binary.version}</artifactId>
             <version>${mlsql.version}</version>
             <scope>${scope}</scope>
         </dependency>
+
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-mllib_${scala.binary.version}</artifactId>

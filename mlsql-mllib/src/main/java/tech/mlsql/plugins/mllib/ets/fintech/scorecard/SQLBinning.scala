@@ -21,8 +21,9 @@ import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.{ETMethod, PREDICT}
 import org.apache.spark.sql.functions._
 import org.apache.spark.util.collection.OpenHashMap
 import streaming.dsl.ScriptSQLExec
-import tech.mlsql.common.form.{Extra, FormParams, KV, Select}
+import tech.mlsql.common.form.{Extra, FormParams, KV, Select, Text}
 import tech.mlsql.dsl.adaptor.MLMapping
+import tech.mlsql.plugins.mllib.ets.fe.MissingValueProcessConstant
 
 import scala.collection.mutable
 import scala.util.parsing.json.{JSON, JSONObject}
@@ -185,7 +186,7 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
     // val processFeatures = "col1,col2,col3,col4";
     //    val processFeatures = params.getOrElse(Binning.SELECTED_FEATURES, "")
     //    require(!processFeatures.isEmpty, "The param [processFeatures] is required!")
-    val numBucketStr = params.getOrElse(Binning.NUM_BUCKETS, "")
+    val numBucketStr = params.getOrElse(numBucketParam.name, "")
     require(!numBucketStr.isEmpty, "The param [numBucket] is required!")
     val numBucket = numBucketStr.toInt
     val bucketMap = processFeatures.map(t => {
@@ -193,7 +194,7 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
     }).toMap
     var res = Map() ++ bucketMap
     //    val customizedBuckets = "col1:10,col2:100"
-    val customizedBuckets = params.getOrElse(Binning.CUSTOMIZED_CONFIG, "")
+    val customizedBuckets = params.getOrElse(customizedConfigParam.name, "")
     if (!customizedBuckets.isEmpty) {
       customizedBuckets.split(",").map(f => {
         val meta = f.split(":")
@@ -331,9 +332,9 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
 
 
     // val processFeatures = "col1,col2,col3,col4";
-    val selectedFetauresStr = params.getOrElse(Binning.SELECTED_FEATURES, "")
+    val selectedFetauresStr = params.getOrElse(selectedFeaturesParam.name, "")
     require(!selectedFetauresStr.isEmpty, "The param [processFeatures] is required!")
-    val goodValue = params.getOrElse(Binning.GOOD_VALUE, "1").toInt
+    val goodValue = params.getOrElse(goodValueParam.name, "1").toInt
     val selectedFetaures = selectedFetauresStr.split(",")
     val dTypeCols = df.select(selectedFetaures.head, selectedFetaures.toList.tail: _*).limit(1).dtypes.map(
       m => {
@@ -355,8 +356,8 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
     }
 
     // df.select("label").dtypes(0)._2 == DoubleType.toString
-    val method = params.getOrElse(Binning.BINNING_METHOD, "EF")
-    val labelCol = params.getOrElse(Binning.LABEL_COLNAME, "label")
+    val method = params.getOrElse(binningMethodParam.name, "EF")
+    val labelCol = params.getOrElse(labelColNameParam.name, "label")
     //    val goodValue = params.getOrElse("")
     val processFeatures = otherCols
     val (res, model) = method match {
@@ -502,6 +503,133 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
     }
   }
 
+  val selectedFeaturesParam: Param[String] = new Param[String](this, Binning.SELECTED_FEATURES,
+    FormParams.toJson(Text(
+      name = Binning.SELECTED_FEATURES,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The selected columns that are going to be processed!
+          """,
+        label = "The selected column name",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val labelColNameParam: Param[String] = new Param[String](this, Binning.LABEL_COLNAME,
+    FormParams.toJson(Text(
+      name = Binning.LABEL_COLNAME,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The column name of the label
+          """,
+        label = "The column name of the label",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val numBucketParam: Param[String] = new Param[String](this, Binning.NUM_BUCKETS,
+    FormParams.toJson(Text(
+      name = Binning.NUM_BUCKETS,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The number of bucket that split the features
+          """,
+        label = "The number of bucket",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val customizedConfigParam: Param[String] = new Param[String](this, Binning.CUSTOMIZED_CONFIG,
+    FormParams.toJson(Text(
+      name = Binning.CUSTOMIZED_CONFIG,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The customized config setting for each column. e.g., col1:3,col2:4 means the column col1
+            |  will be binned with bukcet number 3 and the col2 will be binned with 4 buckets.
+          """,
+        label = "The customized config setting for each column!",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val goodValueParam: Param[String] = new Param[String](this, Binning.GOOD_VALUE,
+    FormParams.toJson(Text(
+      name = Binning.GOOD_VALUE,
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | The number that indicates the good users, which is default 1
+          """,
+        label = "The customized config setting for each column!",
+        options = Map(
+          "valueType" -> "string",
+          "required" -> "true",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  val binningMethodParam: Param[String] = new Param[String](this, Binning.BINNING_METHOD,
+    FormParams.toJson(
+      Select(
+        name = Binning.BINNING_METHOD,
+        values = List(),
+        extra = Extra(
+          doc = "",
+          label = "",
+          options = Map(
+            "valueType" -> "string",
+            "required" -> "true",
+          )), valueProvider = Option(() => {
+          List(
+            KV(Some(Binning.BINNING_METHOD), Some(Binning.EF_BINNING_METHOD)),
+            KV(Some(Binning.BINNING_METHOD), Some(Binning.ED_BINNING_METHOD))
+          )
+        })
+      )
+    )
+  )
+
 }
 
 object Binning {
@@ -511,6 +639,8 @@ object Binning {
   val BINNING_METHOD = "method"
   val LABEL_COLNAME = "label"
   val GOOD_VALUE = "goodValue"
+  val EF_BINNING_METHOD = "EF"
+  val ED_BINNING_METHOD = "ED"
 }
 
 
