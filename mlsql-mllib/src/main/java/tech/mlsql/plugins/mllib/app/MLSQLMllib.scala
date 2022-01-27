@@ -1,9 +1,12 @@
 package tech.mlsql.plugins.mllib.app
 
+import streaming.dsl.mmlib.fe.SQLDataSummary
+import streaming.dsl.mmlib.fe.SQLMissingValueProcess
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.plugins.mllib.ets._
+import tech.mlsql.plugins.mllib.ets.fintech.scorecard.{SQLBinning, SQLScoreCard}
 import tech.mlsql.version.VersionCompatibility
 
 /**
@@ -13,10 +16,14 @@ class MLSQLMllib extends tech.mlsql.app.App with VersionCompatibility with Loggi
   override def run(args: Seq[String]): Unit = {
     ETRegister.register("ClassificationEvaluator", classOf[ClassificationEvaluator].getName)
     ETRegister.register("RegressionEvaluator", classOf[RegressionEvaluator].getName)
-//    ETRegister.register("AutoMLExt", classOf[AutoMLExt].getName)
+    //    ETRegister.register("AutoMLExt", classOf[AutoMLExt].getName)
     ETRegister.register("SampleDatasetExt", classOf[SampleDatasetExt].getName)
     ETRegister.register("TakeRandomSampleExt", classOf[TakeRandomSampleExt].getName)
     ETRegister.register("ColumnsExt", classOf[ColumnsExt].getName)
+    ETRegister.register("DataSummary", classOf[SQLDataSummary].getName)
+    ETRegister.register("DataMissingValueProcess", classOf[SQLMissingValueProcess].getName)
+    ETRegister.register("Binning", classOf[SQLBinning].getName)
+    ETRegister.register("ScoreCard", classOf[SQLScoreCard].getName)
 
     // !columns drop fields from tableName;
     CommandCollection.refreshCommandMapping(Map("columns" ->
