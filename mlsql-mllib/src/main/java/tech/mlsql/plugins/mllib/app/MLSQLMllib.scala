@@ -1,11 +1,11 @@
 package tech.mlsql.plugins.mllib.app
 
-import streaming.dsl.mmlib.fe.SQLDataSummary
-import streaming.dsl.mmlib.fe.SQLMissingValueProcess
+
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.plugins.mllib.ets._
+import tech.mlsql.plugins.mllib.ets.fe.{SQLDataSummary, SQLMissingValueProcess}
 import tech.mlsql.plugins.mllib.ets.fintech.scorecard.{SQLBinning, SQLScoreCard}
 import tech.mlsql.version.VersionCompatibility
 
