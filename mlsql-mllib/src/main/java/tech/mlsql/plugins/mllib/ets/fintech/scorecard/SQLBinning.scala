@@ -371,7 +371,8 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
 
 
     // Store the model
-    val metaPath = getMetaPath(path)
+    val binningPath = Binning.generateBinningPath(path)
+    val metaPath = getMetaPath(binningPath)
     val metas = Array((0, BinningTrainData(model.getInputCols, model.getOutputCols, false, model.getSplitsArray, strCols, labelsArray, dTypeCols)))
     spark.createDataset(metas).write.mode(SaveMode.Overwrite).parquet(DISCRETIZER_PATH(metaPath))
 
@@ -397,7 +398,8 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
 
   override def load(spark: SparkSession, _path: String, params: Map[String, String]): Any = {
     import spark.implicits._
-    val path = getMetaPath(_path)
+    val binningPath = Binning.generateBinningPath(_path)
+    val path = getMetaPath(binningPath)
     val metas = spark.read
       .parquet(DISCRETIZER_PATH(path))
       .as[(Int, BinningTrainData)]
@@ -430,7 +432,7 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
       |''';
       |load jsonStr.`abc` as table1;
       |
-      |run table1 as Binning.`/tmp/fe_test/binning` where
+      |run table1 as Binning.`/tmp/fintech` where
       |label='label' and method='EF'
       |and numBucket='3'
       |and selectedFeatures="name,age,income"
@@ -641,6 +643,10 @@ object Binning {
   val GOOD_VALUE = "goodValue"
   val EF_BINNING_METHOD = "EF"
   val ED_BINNING_METHOD = "ED"
+
+  def generateBinningPath(path: String): String = {
+    s"${path.stripSuffix("/")}/binning"
+  }
 }
 
 

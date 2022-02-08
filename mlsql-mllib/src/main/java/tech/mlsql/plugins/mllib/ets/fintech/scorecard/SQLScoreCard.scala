@@ -136,12 +136,13 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
     ScoreCard.PDO = pdo
     ScoreCard.SCALE_VALUE = scaledValue
 
-    val binningPath = params.getOrElse(binningPathParam.name, "")
-    require(!binningInfoTableName.isEmpty, "The binning path is required! Please specify the binning path")
-    val dfAfterBinning = MLMapping.findAlg("Binning").batchPredict(df, binningPath, Map())
+    val binningAlg = MLMapping.findAlg("Binning")
+    val dfAfterBinning = binningAlg.batchPredict(df, path, Map())
     val binningInfoTable = spark.table(binningInfoTableName)
     val dfWithWoe = replaceFeatureWithWOE(dfAfterBinning, binningInfoTable, params)
-    val updatedParams = params ++ Map("path" -> path)
+
+    val scorecardPath = ScoreCard.generateScorecardPath(path)
+    val updatedParams = params ++ Map("path" -> scorecardPath)
     val scorecardModel = scorecardTraining(dfWithWoe, updatedParams).asInstanceOf[LogisticRegressionModel]
     val pred = scorecardPrediction(dfWithWoe, scorecardModel)
     transformProdToScore(pred, goodValue, pdo, scaledValue, odds)
@@ -149,12 +150,14 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
 
   override def load(sparkSession: SparkSession, path: String, params: Map[String, String]): Any = {
     //1. load LogisticRegression/LinearRgression model
-    val modelPath = SQLPythonFunc.getAlgModelPath(path) + "/" + 0
+    val scoreCardPath = ScoreCard.generateScorecardPath(path)
+    val modelPath = SQLPythonFunc.getAlgModelPath(scoreCardPath) + "/" + 0
     val lrModel = LogisticRegressionModel.load(modelPath)
 
     //2. load Discretizer model
-    val binningPath = params.getOrElse(binningPathParam.name, "")
-    val (stringCols, labelArrays, bucketizer, dTypeCols) = MLMapping.findAlg("Binning").load(sparkSession, binningPath, params).asInstanceOf[(Array[String], Array[Array[String]], Bucketizer, Array[String])]
+    val binningAlg = MLMapping.findAlg("Binning")
+    val (stringCols, labelArrays, bucketizer, dTypeCols) = binningAlg.load(sparkSession, path, params).asInstanceOf[(Array[String], Array[Array[String]], Bucketizer, Array[String])]
+
     val binningModel = BinningTrainData(
       bucketizer.getInputCols,
       bucketizer.getOutputCols,
@@ -216,33 +219,32 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
       |''';
       |load jsonStr.`abc` as table1;
       |
-      |run table1 as Binning.`/tmp/fe_test/binning` where
+      |run table1 as Binning.`/tmp/fintech` where
       |label='label' and method='EF'
       |and numBucket='3'
       |and selectedFeatures="name,age,income"
       |as binningTestTable;
       |
-      |run table1 as ScoreCard.`/tmp/fe_test/scorecard1`
+      |run table1 as ScoreCard.`/tmp/fintech`
       |where binningTable="binningTestTable"
-      |and binningPath = '/tmp/fe_test/binning'
       |and selectedFeatures='name,age,income'
       |and scaledValue='900'
       |and odds='60'
       |and pdo='10'
       |as scorecardTable;
       |
-      |predict table1 as ScoreCard.`/tmp/fe_test/scorecard1`
+      |predict table1 as ScoreCard.`/tmp/fintech`
       |where binningPath='/tmp/fe_test/binning'
       |and binningTable='binningTestTable'
       |and selectedFeatures='name,age,income'
       |as predictedScoreCardTable;
+      |
       |;
     """.stripMargin)
 
   override def batchPredict(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val (lrModel, binningModel, binningInfoTable) = load(df.sparkSession, path, params).asInstanceOf[(LogisticRegressionModel, BinningTrainData, DataFrame)]
-    val binningModelPath = params.get(binningPathParam.name).get
-    val dataAfterDiscretizer = MLMapping.findAlg("Binning").batchPredict(df, binningModelPath, Map())
+    val dataAfterDiscretizer = MLMapping.findAlg("Binning").batchPredict(df, path, Map())
     val dataWithWOE = replaceFeatureWithWOE(dataAfterDiscretizer, binningInfoTable, params)
     val scorecardPred = scorecardPrediction(dataWithWOE, lrModel)
     transformProdToScore(scorecardPred, ScoreCard.GOOD_VALUE, ScoreCard.PDO, ScoreCard.SCALE_VALUE, ScoreCard.ODDS)
@@ -390,28 +392,6 @@ class SQLScoreCard(override val uid: String) extends SQLAlg with MllibFunctions 
     )
     )
   )
-
-  val binningPathParam: Param[String] = new Param[String](this, ScoreCard.BINNING_PATH,
-    FormParams.toJson(Text(
-      name = ScoreCard.BINNING_PATH,
-      value = "",
-      extra = Extra(
-        doc =
-          """
-            | The binning model path
-          """,
-        label = "The binning model path",
-        options = Map(
-          "valueType" -> "string",
-          "required" -> "true",
-          "derivedType" -> "NONE"
-        )), valueProvider = Option(() => {
-        ""
-      })
-    )
-    )
-  )
-
 }
 
 object ScoreCard {
@@ -424,6 +404,9 @@ object ScoreCard {
   val PDO_NAME = "pdo"
   val GOOD_VALUE_NAME = "goodValue"
   val BINNING_TABLE = "binningTable"
-  val BINNING_PATH = "binningPath"
   val SELECTED_FEATURES = "selectedFeatures"
+
+  def generateScorecardPath(path: String): String = {
+    s"${path.stripSuffix("/")}/scorecard"
+  }
 }
