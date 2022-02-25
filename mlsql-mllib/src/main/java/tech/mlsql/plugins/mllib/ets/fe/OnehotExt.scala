@@ -145,13 +145,11 @@ case class OnehotExt(override val uid: String) extends SQLAlg with Functions wit
       |{"subject":"语文","name":"宫九","score":87}
       |{"subject":"英语","name":"宫九","score":90}
       |''';
-      |load jsonStr.`jsonStr` as data;
-      |run data as DataTranspose.`` where method='pivot'
-      |and indexCols='name'
-      |and inputCol='subject'
-      |and aggCol='score'
-      |as data1;
       |
+      |load jsonStr.`jsonStr` as data;
+      |run data as Onehot.`/tmp/onehottest`
+      |where selectedFeatures='name'
+      |as onehotTable;
       |;
     """.stripMargin)
 
