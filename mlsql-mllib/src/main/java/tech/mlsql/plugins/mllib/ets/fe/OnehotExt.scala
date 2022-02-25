@@ -1,16 +1,10 @@
 package tech.mlsql.plugins.mllib.ets.fe
 
-import com.ibm.icu.text.SimpleDateFormat
 import org.apache.spark.ml.feature.{DiscretizerFeature, Normalizer, OneHotEncoder, OneHotEncoderModel, StringIndexer, StringIndexerModel, VectorAssembler}
-import org.apache.spark.ml.linalg.SparkMLTool.getAxpy
-import org.apache.spark.ml.linalg.{Vector, Vectors}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.ml.util.MLWritable
-import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, MLSQLUtils, Row, SaveMode, SparkSession}
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.{col, lit}
-import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
 import streaming.dsl.ScriptSQLExec
 import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
@@ -21,12 +15,6 @@ import streaming.dsl.mmlib.algs.param.BaseParams
 import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.ets.algs.DataTranpose
-import tech.mlsql.ets.algs.OnehotExtTest.{get_dataType, load, onehotFunc}
-
-import java.util.Date
-import scala.collection.mutable.ArrayBuffer
-import scala.util.Random
 
 /**
  *
