@@ -160,6 +160,15 @@ class DataTranspose(override val uid: String) extends SQLAlg with Functions with
       |and aggCol='score'
       |as data1;
       |
+      |
+      |-- try to unpivot
+      |run data1 as DataTranspose.`` where method='unpivot'
+      |and indexCols='name'
+      |and mergedCol='sbject'
+      |and unPivotCols='数学,英语,语文'
+      |and aggCol='score'
+      |as res;
+      |
       |;
     """.stripMargin)
 
