@@ -5,7 +5,7 @@ import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.plugins.mllib.ets._
-import tech.mlsql.plugins.mllib.ets.fe.{DataTranspose, OnehotExt, SQLDataSummary, SQLMissingValueProcess}
+import tech.mlsql.plugins.mllib.ets.fe.{DataTranspose, OnehotExt, PSIExt, SQLDataSummary, SQLMissingValueProcess}
 import tech.mlsql.plugins.mllib.ets.fintech.scorecard.{SQLBinning, SQLScoreCard}
 import tech.mlsql.version.VersionCompatibility
 
@@ -26,6 +26,7 @@ class MLSQLMllib extends tech.mlsql.app.App with VersionCompatibility with Loggi
     ETRegister.register("ScoreCard", classOf[SQLScoreCard].getName)
     ETRegister.register("DataTranspose", classOf[DataTranspose].getName)
     ETRegister.register("Onehot", classOf[OnehotExt].getName)
+    ETRegister.register("PSI", classOf[PSIExt].getName)
 
     // !columns drop fields from tableName;
     CommandCollection.refreshCommandMapping(Map("columns" ->
