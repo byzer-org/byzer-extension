@@ -2,7 +2,7 @@ package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.types.{DoubleType, FloatType, IntegerType, LongType, StringType, StructField, StructType}
 import streaming.dsl.ScriptSQLExec
 import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
@@ -16,8 +16,27 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
   def this() = this(BaseParams.randomUID())
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
-    val summary = df.describe()
-    val quantileNum = df.stat.approxQuantile(df.columns, Array(0.25, 0.5, 0.75), 0.05)
+
+    val columns = df.columns
+    columns.map(col => {
+      if (col.contains(".") || col.contains("`")) {
+        throw new RuntimeException(s"The column name : ${col} contains special symbols, like . or `, please rename it first!! ")
+      }
+    })
+    val new_columns = df.schema.filter(sc => {
+      sc.dataType match {
+        case IntegerType => true
+        case DoubleType => true
+        case FloatType => true
+        case LongType => true
+        case _ => false
+      }
+    }).map(sc => {
+      sc.name
+    }).toArray
+    var new_df = df.select(new_columns.head, new_columns.tail: _*)
+    val summary = new_df.describe()
+    val quantileNum = new_df.stat.approxQuantile(new_columns, Array(0.25, 0.5, 0.75), 0.05)
     val transpose = quantileNum.transpose
     var transformedRows = transpose.map(row => {
       var newRow = Seq("PLACEHOLDER")
