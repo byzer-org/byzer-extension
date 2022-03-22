@@ -34,6 +34,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }).map(sc => {
       sc.name
     }).toArray
+    require(!new_columns.isEmpty,"There is not any numeric columns for Summary. Please double check with the dataType!");
     var new_df = df.select(new_columns.head, new_columns.tail: _*)
     val summary = new_df.describe()
     val quantileNum = new_df.stat.approxQuantile(new_columns, Array(0.25, 0.5, 0.75), 0.05)
