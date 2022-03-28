@@ -35,7 +35,7 @@ class DataTranspose(override val uid: String) extends SQLAlg with Functions with
     val formatedUnPivotCols = unPivotCols.map(col => s"'$col',`$col`")
     val formatedUnpivotColsStr = formatedUnPivotCols.mkString(",")
     val newcol = formatedIndexCols++Array(s"stack($unPivotColLen,$formatedUnpivotColsStr) as (`$mergedColName`,`$aggCol`)");
-    df.selectExpr(newcol.toList.tail:_*)
+    df.selectExpr(newcol.toList:_*)
   }
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
