@@ -13,15 +13,7 @@ class MLSQLExcelApp extends tech.mlsql.app.App with VersionCompatibility with Lo
 
 
   override def supportedVersions: Seq[String] = {
-    Seq("1.5.0-SNAPSHOT",
-      "1.5.0", "1.6.0-SNAPSHOT",
-      "1.6.0", "2.0.0",
-      "2.0.1",
-      "2.0.1-SNAPSHOT",
-      "2.0.1",
-      "2.1.0-SNAPSHOT",
-      "2.1.0"
-    )
+    Seq(">1.6.0")
   }
 
   override def run(args: Seq[String]): Unit = {
@@ -68,7 +60,6 @@ class MLSQLExcel(override val uid: String)
   final val sheetName: Param[String] = new Param[String](this, "sheetName", "Optional, For save excel")
 
   override def supportedVersions: Seq[String] = {
-    Seq("1.5.0-SNAPSHOT", "1.5.0", "1.6.0-SNAPSHOT", "1.6.0", "2.0.0", "2.0.1", "2.0.1-SNAPSHOT","2.1.0-SNAPSHOT",
-      "2.1.0")
+    Seq(">1.6.0")
   }
 }
