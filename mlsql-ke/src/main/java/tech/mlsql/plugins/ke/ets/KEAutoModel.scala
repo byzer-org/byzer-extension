@@ -84,7 +84,8 @@ class KEAutoModel(override val uid: String) extends KEAPISchedule with WowParams
 //    println(lp.toString())
     var sources:Map[String,Map[String, String]] = Map()
     lp transform {
-      case lr@HiveTableRelation(catalogTable, _, _) =>
+      case _lr if _lr.isInstanceOf[HiveTableRelation] =>
+        val lr = _lr.asInstanceOf[HiveTableRelation]
         var dbName = "default"
         if(lr.tableMeta.identifier.database.nonEmpty){
           dbName = lr.tableMeta.identifier.database.get

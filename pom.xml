@@ -19,7 +19,7 @@
         <module>ds-hbase-2x</module>
         <module>save-then-load</module>
         <module>connect-persist</module>
-        <module>mlsql-bigdl</module>
+<!--        <module>mlsql-bigdl</module>-->
         <module>mlsql-excel</module>
         <module>mlsql-analysis-toolkit</module>
         <module>mlsql-mllib</module>
