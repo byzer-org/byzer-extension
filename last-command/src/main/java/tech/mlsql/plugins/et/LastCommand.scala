@@ -34,7 +34,7 @@ class LastCommand(override val uid: String) extends SQLAlg with VersionCompatibi
 
 
   override def supportedVersions: Seq[String] = {
-    Seq("1.5.0-SNAPSHOT", "1.5.0", "1.6.0-SNAPSHOT", "1.6.0")
+    Seq(">=1.6.0")
   }
 
 
@@ -43,9 +43,9 @@ class LastCommand(override val uid: String) extends SQLAlg with VersionCompatibi
        |When you want to get the result from command and used
        | in next command(SQL), you can use !last command.
        |
-      |For example:
+       |For example:
        |
-      |```
+       |```
        |${codeExample.code}
        |```
     """.stripMargin)

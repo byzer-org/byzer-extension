@@ -1,4 +1,4 @@
-PROJECT=/Users/allwefantasy/Volumes/Samsung_T5/allwefantasy/CSDNWorkSpace/mlsqlplugins
+PROJECT=/Users/allwefantasy/projects/byzer-extension
 
 MOUDLE_NAME=$1
 VERSION="0.1.0-SNAPSHOT"
