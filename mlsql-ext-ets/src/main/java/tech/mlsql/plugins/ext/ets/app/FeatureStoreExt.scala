@@ -1,8 +1,9 @@
 package tech.mlsql.plugins.ext.ets.app
 
+import com._4paradigm.openmldb.jdbc.SQLResultSet
+import com._4paradigm.openmldb.sdk.SdkOption
 import com._4paradigm.openmldb.sdk.impl.SqlClusterExecutor
-import com._4paradigm.openmldb.sdk.{Column, Schema, SdkOption}
-import net.sf.json.JSONObject
+import com._4paradigm.openmldb.{DataType, Schema => RsSchema}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -10,86 +11,155 @@ import streaming.dsl.mmlib.SQLAlg
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.form.{Extra, FormParams, Text}
+import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.version.VersionCompatibility
 
 import java.sql.{ResultSet, Statement}
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-/**
- * 20/6/2022 WilliamZhu(allwefantasy@gmail.com)
- */
-class FeatureStoreExt(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams {
-  def this() = this(BaseParams.randomUID())
+case class RsColumn(name: String, sqlType: DataType)
 
-  def getRsCloumns(rs: ResultSet, schema: Schema): Array[Column] = {
-    val columnList = schema.getColumnList
-    (0 until columnList.size()).map { index =>
-      columnList.get(index)
+object FeatureStoreExt {
+  def getRsCloumns(rs: ResultSet, schema: RsSchema): Array[RsColumn] = {
+
+    (0 until schema.GetColumnCnt()).map { index =>
+      RsColumn(schema.GetColumnName(index), schema.GetColumnType(index))
     }.toArray
   }
 
-  def rsToMaps(rs: ResultSet, schema: Schema): Seq[Map[String, Any]] = {
+  def rsToMaps(rs: ResultSet): Seq[Map[String, Any]] = {
     val buffer = new ArrayBuffer[Map[String, Any]]()
+    val rsI = rs.asInstanceOf[SQLResultSet]
+    val innerSchema = rsI.GetInternalSchema()
     while (rs.next()) {
-      buffer += rsToMap(rs, getRsCloumns(rs, schema))
+      buffer += rsToMap(rs, getRsCloumns(rs, innerSchema))
     }
     buffer
   }
 
-  def rsToMap(rs: ResultSet, columns: Array[Column]): Map[String, Any] = {
+  def rsToMap(rs: ResultSet, columns: Array[RsColumn]): Map[String, Any] = {
     val item = new mutable.HashMap[String, Any]()
     columns.zipWithIndex.foreach { case (col, _index) =>
       val index = _index + 1
-      val v = col.getSqlType match {
+      val v = col.sqlType match {
         // scalastyle:off
-        case java.sql.Types.ARRAY => null
-        case java.sql.Types.BIGINT => rs.getLong(index)
-        case java.sql.Types.BINARY => null
-        case java.sql.Types.BIT => rs.getBoolean(index) // @see JdbcDialect for quirks
-        case java.sql.Types.BLOB => null
-        case java.sql.Types.BOOLEAN => rs.getBoolean(index)
-        case java.sql.Types.CHAR => rs.getString(index)
-        case java.sql.Types.CLOB => rs.getString(index)
-        case java.sql.Types.DATALINK => null
-        case java.sql.Types.DATE => rs.getDate(index)
-        case java.sql.Types.DISTINCT => null
-        case java.sql.Types.DOUBLE => rs.getDouble(index)
-        case java.sql.Types.FLOAT => rs.getFloat(index)
-        case java.sql.Types.INTEGER => rs.getInt(index)
-        case java.sql.Types.JAVA_OBJECT => null
-        case java.sql.Types.LONGNVARCHAR => rs.getString(index)
-        case java.sql.Types.LONGVARBINARY => null
-        case java.sql.Types.LONGVARCHAR => rs.getString(index)
-        case java.sql.Types.NCHAR => rs.getString(index)
-        case java.sql.Types.NCLOB => rs.getString(index)
-        case java.sql.Types.NULL => null
-        case java.sql.Types.NUMERIC => null
-        case java.sql.Types.NVARCHAR => rs.getString(index)
-        case java.sql.Types.OTHER => null
-        case java.sql.Types.REAL => rs.getDouble(index)
-        case java.sql.Types.REF => rs.getString(index)
-        case java.sql.Types.REF_CURSOR => null
-        case java.sql.Types.ROWID => rs.getLong(index)
-        case java.sql.Types.SMALLINT => rs.getInt(index)
-        case java.sql.Types.SQLXML => rs.getString(index)
-        case java.sql.Types.STRUCT => rs.getString(index)
-        case java.sql.Types.TIME => rs.getTimestamp(index)
-        case java.sql.Types.TIME_WITH_TIMEZONE
-        => null
-        case java.sql.Types.TIMESTAMP => rs.getTimestamp(index)
-        case java.sql.Types.TIMESTAMP_WITH_TIMEZONE
-        => null
-        case java.sql.Types.TINYINT => rs.getInt(index)
-        case java.sql.Types.VARBINARY => null
-        case java.sql.Types.VARCHAR => rs.getString(index)
+        case DataType.kTypeDate => rs.getDate(index)
+        case DataType.kTypeInt64 => rs.getLong(index)
+        case DataType.kTypeInt32 => rs.getInt(index)
+        case DataType.kTypeBool => rs.getBoolean(index)
+        case DataType.kTypeFloat => rs.getFloat(index)
+        case DataType.kTypeTimestamp => rs.getTimestamp(index)
+        case DataType.kTypeInt16 => rs.getInt(index)
+        case DataType.kTypeString => rs.getString(index)
         case _ =>
-          throw new java.sql.SQLException("Unrecognized SQL type " + col.getSqlType)
+          throw new java.sql.SQLException("Unrecognized SQL type " + col.name)
         // scalastyle:on
 
       }
-      item.put(col.getColumnName, v)
+      item.put(col.name, v)
+    }
+    item.toMap
+  }
+
+  def main(args: Array[String]): Unit = {
+    val _zkAddress = "192.168.3.14:7181"
+    val _zkPath = "/openmldb"
+    val _code2 =
+      """
+        |LOAD DATA INFILE '/home/williamzhu/byzer-home/allwefantasy/sample_data/data/taxi_tour_table_train_simple'
+        |INTO TABLE t1 options(format='parquet', header=true, mode='append');
+        |""".stripMargin
+
+
+    val _code =
+      """
+        |select * from t1 limit 10;
+        |""".stripMargin
+
+
+    val _action = "query"
+    val _db = "demo_db"
+    var sqlExecutor: SqlClusterExecutor = null
+    var state: Statement = null
+
+    try {
+      val option = new SdkOption
+      option.setZkCluster(_zkAddress)
+      option.setZkPath(_zkPath)
+      option.setSessionTimeout(1000000)
+      option.setRequestTimeout(600000000)
+      sqlExecutor = new SqlClusterExecutor(option)
+
+      _action match {
+        case "ddl" =>
+          state = sqlExecutor.getStatement
+          state.execute(s"use ${_db};")
+          state.execute(s"SET @@sync_job=true;")
+          state.execute("SET @@execute_mode='offline';")
+          state.execute("SET @@job_timeout=20000000;")
+          state.execute(_code)
+        case _ =>
+          state = sqlExecutor.getStatement
+          state.execute(s"use ${_db}")
+          val inputSchema = sqlExecutor.getInputSchema(_db, _code)
+          state.execute(_code)
+          val rs = state.getResultSet
+          val resultSet = rsToMaps(rs)
+          println(resultSet)
+      }
+
+    } finally {
+      if (state != null) {
+        state.close()
+      }
+      if (sqlExecutor != null) {
+        sqlExecutor.close()
+      }
+    }
+  }
+}
+
+class FeatureStoreExt(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams {
+  def this() = this(BaseParams.randomUID())
+
+  def getRsCloumns(rs: ResultSet, schema: RsSchema): Array[RsColumn] = {
+
+    (0 until schema.GetColumnCnt()).map { index =>
+      RsColumn(schema.GetColumnName(index), schema.GetColumnType(index))
+    }.toArray
+  }
+
+  def rsToMaps(rs: ResultSet): Seq[Map[String, Any]] = {
+    val buffer = new ArrayBuffer[Map[String, Any]]()
+    val rsI = rs.asInstanceOf[SQLResultSet]
+    val innerSchema = rsI.GetInternalSchema()
+    while (rs.next()) {
+      buffer += rsToMap(rs, getRsCloumns(rs, innerSchema))
+    }
+    buffer
+  }
+
+  def rsToMap(rs: ResultSet, columns: Array[RsColumn]): Map[String, Any] = {
+    val item = new mutable.HashMap[String, Any]()
+    columns.zipWithIndex.foreach { case (col, _index) =>
+      val index = _index + 1
+      val v = col.sqlType match {
+        // scalastyle:off
+        case DataType.kTypeDate => rs.getDate(index)
+        case DataType.kTypeInt64 => rs.getLong(index)
+        case DataType.kTypeInt32 => rs.getInt(index)
+        case DataType.kTypeBool => rs.getBoolean(index)
+        case DataType.kTypeFloat => rs.getFloat(index)
+        case DataType.kTypeTimestamp => rs.getTimestamp(index)
+        case DataType.kTypeInt16 => rs.getInt(index)
+        case DataType.kTypeString => rs.getString(index)
+        case _ =>
+          throw new java.sql.SQLException("Unrecognized SQL type " + col.name)
+        // scalastyle:on
+
+      }
+      item.put(col.name, v)
     }
     item.toMap
   }
@@ -97,7 +167,13 @@ class FeatureStoreExt(override val uid: String) extends SQLAlg with VersionCompa
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val _zkAddress = params(zkAddress.name)
     val _zkPath = params.getOrElse(zkPath.name, "/openmldb")
-    val _code = params(code.name)
+
+    val statements = params.filter(f => """sql\-[0-9]+""".r.findFirstMatchIn(f._1).nonEmpty).
+      map(f => (f._1.split("-").last.toInt, f._2)).toSeq.sortBy(f => f._1).map(f => f._2).map { f =>
+      logInfo(s"${getClass.getName} execute: ${f}")
+      f
+    }
+
     val _action = params(action.name)
     val _db = params(db.name)
     var sqlExecutor: SqlClusterExecutor = null
@@ -107,24 +183,23 @@ class FeatureStoreExt(override val uid: String) extends SQLAlg with VersionCompa
       val option = new SdkOption
       option.setZkCluster(_zkAddress)
       option.setZkPath(_zkPath)
-      option.setSessionTimeout(10000)
-      option.setRequestTimeout(600000)
+      option.setSessionTimeout(100000000)
+      option.setRequestTimeout(600000000)
       sqlExecutor = new SqlClusterExecutor(option)
 
-      _action match {
-        case "ddl" =>
-          state = sqlExecutor.getStatement
-          state.execute(s"use ${_db}")
-          state.execute(_code)
-        case _ =>
-          state = sqlExecutor.getStatement
-          state.execute(s"use ${_db}")
-          val inputSchema = sqlExecutor.getInputSchema(_db, _code)
-          val rs = state.executeQuery(_code)
-          val resultSet = rsToMaps(rs, inputSchema: Schema)
-          val rdd = df.sparkSession.sparkContext.parallelize(resultSet.map(item => JSONObject.fromObject(item.asJava).toString()))
-          return df.sparkSession.read.json(rdd)
+      state = sqlExecutor.getStatement
+      state.execute(s"use ${_db}")
+      var last: Boolean = false
+      statements.foreach { code =>
+        last = state.execute(code)
       }
+      if (last) {
+        val rs = state.getResultSet
+        val resultSet = rsToMaps(rs)
+        val rdd = df.sparkSession.sparkContext.parallelize(resultSet.map(item => JSONTool.toJsonStr(item)))
+        return df.sparkSession.read.json(rdd)
+      }
+
 
     } finally {
       if (state != null) {
@@ -173,27 +248,6 @@ class FeatureStoreExt(override val uid: String) extends SQLAlg with VersionCompa
             | The action of OpenMLDB. query|ddl
           """,
         label = "The action of OpenMLDB. query|ddl",
-        options = Map(
-          "valueType" -> "string",
-          "required" -> "true",
-          "derivedType" -> "NONE"
-        )), valueProvider = Option(() => {
-        ""
-      })
-    )
-    )
-  )
-
-  final val code: Param[String] = new Param[String](this, "code",
-    FormParams.toJson(Text(
-      name = "code",
-      value = "",
-      extra = Extra(
-        doc =
-          """
-            | The code of OpenMLDB
-          """,
-        label = "The code of OpenMLDB",
         options = Map(
           "valueType" -> "string",
           "required" -> "true",
