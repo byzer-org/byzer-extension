@@ -31,7 +31,7 @@
         </dependency>
         <dependency>
             <groupId>tech.mlsql</groupId>
-            <artifactId>byzer-extension-tests</artifactId>
+            <artifactId>byzer-extension-tests-3.0_2.12</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

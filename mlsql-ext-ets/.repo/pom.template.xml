@@ -29,6 +29,12 @@
             <artifactId>openmldb-native</artifactId>
             <version>0.5.2</version>
         </dependency>
+        <dependency>
+            <groupId>tech.mlsql</groupId>
+            <artifactId>byzer-extension-tests-{{spark_binary_version}}_{{scala_binary_version}}</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
