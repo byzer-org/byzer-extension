@@ -47,14 +47,18 @@ class SQLDataSummaryTest extends FlatSpec with SparkOperationUtil with Matchers 
       val seq_df1 = seq_df.select(seq_df("income").cast(DoubleType).alias("income1"), col("*"))
       val res = et.train(seq_df1, "", Map("atRound" -> "2"))
       res.show()
-//      val r0 = res.collectAsList().get(0).toSeq
-//      assert(r0.mkString(",") === "income1,433000.00,0.67,0.17,0.00,453000.00,5.00,44726.95,18259.70,533000.00,432000.00,0.00,0.00,0,8,double,1,433000.0,433000.0,434000.0")
-//      val r1 = res.collectAsList().get(1).toSeq
-//      assert(r1.mkString(",") === "name,,1.0,0.0,0.17,0,6,,,,,5,0,1,-2,string,2,0.0,0.0,0.0")
-//      val r2 = res.collectAsList().get(2).toSeq
-//      assert(r2.mkString(",") === "age,40.00,1.00,0.00,0.00,34.67,6.00,17.77,7.26,57.00,10.00,0.00,0.00,1,4,integer,3,21.0,30.0,50.0")
-//      val r3 = res.collectAsList().get(3).toSeq
-//      assert(r3.mkString(",") === "income,,0.83,0.0,0.17,0,6,,,,,6,0,0,-2,string,4,0.0,0.0,0.0")
+      val r0 = res.collectAsList().get(0).toSeq
+      println(r0.mkString(","))
+      assert(r0.mkString(",") === "income1,433000.00,1.00,0.17,0.00,453000.00,5.00,44726.95,18259.70,533000.00,432000.00,0.00,0.00,0,8,double,1,433000.0,433000.0,434000.0")
+      val r1 = res.collectAsList().get(1).toSeq
+      println(r1.mkString(","))
+      assert(r1.mkString(",") === "name,,1.0,0.0,0.17,0,6,,,,,5,0,1,-2,string,2,0.0,0.0,0.0")
+      val r2 = res.collectAsList().get(2).toSeq
+      println(r2.mkString(","))
+      assert(r2.mkString(",") === "age,40.00,0.17,0.00,0.00,34.67,6.00,17.77,7.26,57.00,10.00,0.00,0.00,1,4,integer,3,21.0,30.0,50.0")
+      val r3 = res.collectAsList().get(3).toSeq
+      println(r3.mkString(","))
+      assert(r3.mkString(",") === "income,,0.83,0.0,0.17,0,6,,,,,6,0,0,-2,string,4,0.0,0.0,0.0")
     }
   }
 }
