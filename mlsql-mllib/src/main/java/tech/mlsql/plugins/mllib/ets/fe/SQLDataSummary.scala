@@ -18,10 +18,14 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   def this() = this(BaseParams.randomUID())
 
-  def countColsNullNumber(columns: Array[String], total_count: Long, round_at: Integer): Array[Column] = {
-    columns.map(c => {
-      round(count(when(col(c).isNull || col(c).isNaN, c)) / total_count, round_at).alias(c)
-    })
+  def countColsNullNumber(schema: StructType, total_count: Long, round_at: Integer): Array[Column] = {
+    schema.map(sc => {
+      sc.dataType match {
+        case DoubleType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at).alias(sc.name)
+        case FloatType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at).alias(sc.name)
+        case _ => round(count(when(col(sc.name).isNull, sc.name)) / total_count, round_at).alias(sc.name)
+      }
+    }).toArray
   }
 
   def countColsEmptyNumber(columns: Array[String], total_count: Long, round_at: Integer): Array[Column] = {
@@ -205,7 +209,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       round(col(c) / total_count, round_at)
     }): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
     val is_primary_key_df = df.select(isPrimaryKey(df.columns, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias("metric"), col("*"))
-    var null_value_proportion_df = df.select(countColsNullNumber(df.columns, total_count, round_at): _*).select(lit("nullValueRatio").alias("metric"), col("*"))
+    var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count, round_at): _*).select(lit("nullValueRatio").alias("metric"), col("*"))
     var empty_value_proportion_df = df.select(countColsEmptyNumber(df.columns, total_count, round_at): _*).select(lit("blankValueRatio").alias("metric"), col("*"))
     var mean_df = df.select(getMeanValue(df.schema): _*).select(lit("mean").alias("metric"), col("*"))
     var stddev_df = df.select(countColsStdDevNumber(df.columns, numeric_columns, round_at): _*).select(lit("standardDeviation").alias("metric"), col("*"))
