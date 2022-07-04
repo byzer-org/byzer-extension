@@ -11,8 +11,12 @@
 
     <artifactId>mlsql-mllib-3.0_2.12</artifactId>
     <dependencies>
-       
-
+        <dependency>
+            <groupId>tech.mlsql</groupId>
+            <artifactId>byzer-extension-tests-3.0_2.12</artifactId>
+            <version>${project.version}</version>
+<!--            <scope>test</scope>-->
+        </dependency>
     </dependencies>
 
     <profiles>
