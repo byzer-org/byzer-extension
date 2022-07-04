@@ -26,7 +26,7 @@ class Fig(s: String) {
 }
 
 trait TranslateRuntime {
-  def translate(s: String): String
+  def translate(s: String, dataset: String): String
 }
 
 case class VisualSource(confFrom: Option[String], runtime: Map[String, String], fig: Settings) {
@@ -118,7 +118,7 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
 class PlotlyRuntime extends TranslateRuntime {
   private var rawVisualSource: Settings = null
 
-  def toVisualSource(s: Settings) = {
+  private def toVisualSource(s: Settings, dataset: String) = {
     val confFrom = s.get("confFrom")
     val runtimeConf = s.getByPrefix("runtime.")
     val fig = s.getByPrefix("fig.")
@@ -129,13 +129,13 @@ class PlotlyRuntime extends TranslateRuntime {
       }.toMap
     } else Map[String, String]()
 
-    val vs = VisualSource(confFromTemp, runtimeConfTemp, fig)
+    val vs = VisualSource(confFromTemp, runtimeConfTemp ++ Map("input" -> dataset), fig)
     vs
   }
 
-  override def translate(s: String): String = {
+  override def translate(s: String, dataset: String): String = {
     rawVisualSource = ImmutableSettings.settingsBuilder.loadFromSource(s).build()
-    val vs = toVisualSource(rawVisualSource)
-    ""
+    val vs = toVisualSource(rawVisualSource, dataset)
+    vs.toCode
   }
 }

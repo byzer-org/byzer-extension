@@ -5,13 +5,30 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import streaming.dsl.mmlib.SQLAlg
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
+import tech.mlsql.common.utils.serder.json.JSONTool
+import tech.mlsql.ets.ScriptRunner
+import tech.mlsql.plugins.visualization.{PlotlyRuntime, PythonHint}
 import tech.mlsql.version.VersionCompatibility
 
 class VisualizationExt(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams {
   def this() = this(BaseParams.randomUID())
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
-    null
+    val args = JSONTool.parseJson[List[String]](params("parameters"))
+    args match {
+      case List(dataset, code) =>
+        val pr = new PlotlyRuntime()
+        val pythonCode = pr.translate(code, dataset)
+        val hint = new PythonHint()
+        val byzerCode = hint.rewrite(pythonCode, Map())
+        val newDF: DataFrame = ScriptRunner.rubSubJob(
+          byzerCode,
+          (_df: DataFrame) => {},
+          Option(df.sparkSession),
+          true,
+          true).get
+        newDF
+    }
   }
 
 

@@ -39,8 +39,7 @@ class FigTest extends FlatSpec {
 
   "yaml" should "to python code" in {
     val pr = new PlotlyRuntime()
-    val rawVisualSource = ImmutableSettings.settingsBuilder.loadFromSource(template).build()
-    val vs = pr.toVisualSource(rawVisualSource)
-    println(vs.toCode)
+    val pythonCode = pr.translate(template,"ww")
+    println(pythonCode)
   }
 }

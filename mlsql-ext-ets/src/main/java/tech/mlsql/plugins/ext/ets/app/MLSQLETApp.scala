@@ -1,6 +1,7 @@
 package tech.mlsql.plugins.ext.ets.app
 
 import tech.mlsql.common.utils.log.Logging
+import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.version.VersionCompatibility
 
@@ -13,6 +14,10 @@ class MLSQLETApp extends tech.mlsql.app.App with VersionCompatibility with Loggi
     ETRegister.register("AthenaSchemaExt", classOf[AthenaSchemaExt].getName)
     ETRegister.register("FeatureStoreExt", classOf[FeatureStoreExt].getName)
     ETRegister.register("VisualizationExt", classOf[VisualizationExt].getName)
+    CommandCollection.refreshCommandMapping(Map("visualize" ->
+      """
+        |run command as VisualizationExt.`` where parameters='''{:all}'''
+        |""".stripMargin))
   }
 
 
