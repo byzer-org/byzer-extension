@@ -12,6 +12,7 @@ class MLSQLETApp extends tech.mlsql.app.App with VersionCompatibility with Loggi
     ETRegister.register("AthenaExt", classOf[AthenaExt].getName)
     ETRegister.register("AthenaSchemaExt", classOf[AthenaSchemaExt].getName)
     ETRegister.register("FeatureStoreExt", classOf[FeatureStoreExt].getName)
+    ETRegister.register("VisualizationExt", classOf[VisualizationExt].getName)
   }
 
 
