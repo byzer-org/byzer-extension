@@ -19,22 +19,12 @@
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.4paradigm.openmldb</groupId>
-            <artifactId>openmldb-jdbc</artifactId>
-            <version>0.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.4paradigm.openmldb</groupId>
-            <artifactId>openmldb-native</artifactId>
-            <version>0.5.2-macos</version>
-        </dependency>
-        <dependency>
-            <groupId>tech.mlsql</groupId>
-            <artifactId>byzer-extension-tests-3.0_2.12</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>tech.mlsql</groupId>-->
+<!--            <artifactId>byzer-extension-tests-3.0_2.12</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
     <profiles>

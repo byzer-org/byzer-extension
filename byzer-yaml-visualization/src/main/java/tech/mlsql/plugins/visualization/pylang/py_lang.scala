@@ -95,7 +95,7 @@ class Options[T](parent: BaseNode[T]) {
         if (kv.name.isEmpty) {
           ""
         } else {
-          s"${kv.name.get}="
+          s"""${kv.name.get}="""
         }
       }
 

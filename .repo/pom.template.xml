@@ -31,6 +31,7 @@
         <module>mlsql-language-server</module>
         <module>mlsql-ext-ets</module>
         <module>mlsql-cli</module>
+        <module>byzer-yaml-visualization</module>
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>

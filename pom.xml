@@ -19,7 +19,7 @@
         <module>ds-hbase-2x</module>
         <module>save-then-load</module>
         <module>connect-persist</module>
-        <!--        <module>mlsql-bigdl</module>-->
+        <module>byzer-extension-tests</module>
         <module>mlsql-excel</module>
         <module>mlsql-analysis-toolkit</module>
         <module>mlsql-mllib</module>
@@ -31,7 +31,7 @@
         <module>mlsql-language-server</module>
         <module>mlsql-ext-ets</module>
         <module>mlsql-cli</module>
-        <module>byzer-extension-tests</module>
+        <module>byzer-yaml-visualization</module>
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>
@@ -88,12 +88,14 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.binary.version}</artifactId>
             <version>${scalatest.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>tech.mlsql</groupId>
             <artifactId>common-utils_${scala.binary.version}</artifactId>
@@ -104,13 +106,6 @@
         <dependency>
             <groupId>tech.mlsql</groupId>
             <artifactId>streamingpro-mlsql-spark_${spark.bigversion}_${scala.binary.version}</artifactId>
-            <version>${mlsql.version}</version>
-            <scope>${scope}</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>tech.mlsql</groupId>
-            <artifactId>streamingpro-dsl-${spark.bigversion}_${scala.binary.version}</artifactId>
             <version>${mlsql.version}</version>
             <scope>${scope}</scope>
         </dependency>

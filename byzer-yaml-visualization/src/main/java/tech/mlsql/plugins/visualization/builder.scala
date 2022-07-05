@@ -44,31 +44,33 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     figParams.getAsMap.keySet().asScala.map(item => item.split("\\.")(0)).toList
   }
 
-  private def putIfPresentStringOrArray[T](s: String, builder: Options[PyLang]): Option[String] = {
+  private def putIfPresentStringOrArray[T](s: String, k: Option[String], builder: Options[PyLang]): Option[String] = {
+    val key = k.getOrElse(s)
     val x = figParams.get(s)
     if (x != null) {
-      builder.addKV(s, x, Some("\""))
+      builder.addKV(key, x, Some("\""))
       return Some("")
     }
     val x1 = figParams.getAsArray(s)
     if (x1 != null && x1.length != 0) {
       val a = x1.map(item => s""""${item}"""").mkString(",")
-      builder.addKV(s, s"[${a}]", None)
+      builder.addKV(key, s"[${a}]", None)
       return Some("")
     }
     return None
   }
 
-  private def putIfPresentStringOrMap[T](s: String, builder: Options[PyLang]): Option[String] = {
+  private def putIfPresentStringOrMap[T](s: String, k: Option[String], builder: Options[PyLang]): Option[String] = {
+    val key = k.getOrElse(s)
     val x = figParams.get(s)
     if (x != null) {
-      builder.addKV(s, x, Some("\""))
+      builder.addKV(key, x, Some("\""))
       return Some("")
     }
     val x1 = figParams.getByPrefix(s + ".")
     if (x1 != null) {
-      val a = x1.getAsMap.asScala.toMap.map(item => s"""${item._1}:"${item._2}"""").mkString(",")
-      builder.addKV(s, s"{${a}}", None)
+      val a = x1.getAsMap.asScala.toMap.map(item => s""""${item._1}":"${item._2}"""").mkString(",")
+      builder.addKV(key, s"{${a}}", None)
       return Some("")
     }
     return None
@@ -96,16 +98,20 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     pyLang.raw.code("ray_context = RayContext.connect(globals(),None)").end
     pyLang.raw.code("df = ray_context.to_pandas()").end
 
-    val builder = pyLang.let("fig").invokeFunc(getFigType).params.add("df", None)
+    val builderTemp = pyLang.let("df").invokeFunc("sort_values").params
+    putIfPresentStringOrArray[PyLang]("x", Some("by"), builderTemp)
+    builderTemp.end.namedVariableName("df").end
+
+    val builder = pyLang.let("px").invokeFunc(getFigType).params.add("df", None)
 
     getFigParamsKeys.foreach { item =>
-      val temp = putIfPresentStringOrArray[PyLang](item, builder)
+      val temp = putIfPresentStringOrArray[PyLang](item, None, builder)
       if (temp.isEmpty) {
-        putIfPresentStringOrMap[PyLang](item, builder)
+        putIfPresentStringOrMap[PyLang](item, None, builder)
       }
     }
 
-    builder.end.end
+    builder.end.namedVariableName("fig").end
 
     pyLang.raw.code("content = fig.to_html()").end
     pyLang.raw.code("""context.build_result([{"content":content,"mime":"html"}])""").end

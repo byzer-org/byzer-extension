@@ -1,9 +1,5 @@
-package tech.mlsql.plugins.ext.ets.app
+package tech.mlsql.plugins.openmldb
 
-import com._4paradigm.openmldb.jdbc.SQLResultSet
-import com._4paradigm.openmldb.sdk.SdkOption
-import com._4paradigm.openmldb.sdk.impl.SqlClusterExecutor
-import com._4paradigm.openmldb.{DataType, Schema => RsSchema}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}

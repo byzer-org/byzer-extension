@@ -1,0 +1,15 @@
+moduleName=byzer-extension-tests-3.0
+mainClass=tech.mlsql.plugins.ext.ets.app.MLSQLETApp
+scala_version=2.12
+spark_version=3.0
+version=0.1.0-SNAPSHOT
+author=allwefantasy
+mlsqlVersions=""
+githubUrl=https://github.com/allwefantasy/mlsql-plugins/tree/master/mlsql-ext-ets
+mlsqlPluginType=app
+desc=mlsql-ext-ets
+
+
+
+
+

@@ -1,4 +1,4 @@
-package tech.mlsql.plugins.ext.ets.app
+package tech.mlsql.plugins.visualization
 
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -7,7 +7,6 @@ import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.ets.ScriptRunner
-import tech.mlsql.plugins.visualization.{PlotlyRuntime, PythonHint}
 import tech.mlsql.version.VersionCompatibility
 
 class VisualizationExt(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams {

@@ -12,12 +12,6 @@ class MLSQLETApp extends tech.mlsql.app.App with VersionCompatibility with Loggi
   override def run(args: Seq[String]): Unit = {
     ETRegister.register("AthenaExt", classOf[AthenaExt].getName)
     ETRegister.register("AthenaSchemaExt", classOf[AthenaSchemaExt].getName)
-    ETRegister.register("FeatureStoreExt", classOf[FeatureStoreExt].getName)
-    ETRegister.register("VisualizationExt", classOf[VisualizationExt].getName)
-    CommandCollection.refreshCommandMapping(Map("visualize" ->
-      """
-        |run command as VisualizationExt.`` where parameters='''{:all}'''
-        |""".stripMargin))
   }
 
 

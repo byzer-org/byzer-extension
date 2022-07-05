@@ -9,26 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>byzer-extension-tests-3.0_2.12</artifactId>
+    <artifactId>byzer-yaml-visualization-3.0_2.12</artifactId>
     <properties>
         <fastjson.version>1.2.32</fastjson.version>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>${fastjson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.4paradigm.openmldb</groupId>
-            <artifactId>openmldb-jdbc</artifactId>
-            <version>0.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.4paradigm.openmldb</groupId>
-            <artifactId>openmldb-native</artifactId>
-            <version>0.5.2</version>
-        </dependency>
+        
     </dependencies>
 
     <profiles>

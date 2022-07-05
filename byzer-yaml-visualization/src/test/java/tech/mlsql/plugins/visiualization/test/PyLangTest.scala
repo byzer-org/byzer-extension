@@ -1,4 +1,4 @@
-package tech.mlsql.test
+package tech.mlsql.plugins.visiualization.test
 
 import org.scalatest.FlatSpec
 import tech.mlsql.plugins.visualization.pylang.PyLang
@@ -54,6 +54,6 @@ class PyLangTest extends FlatSpec {
       end.
       namedVariableName("df").end.
       toScript
-    assert(genCode == "df = rayContext.to_pandas(day , y = \"jack\")")
+    assert(genCode == "df = rayContext.to_pandas(day , y=\"jack\")")
   }
 }
