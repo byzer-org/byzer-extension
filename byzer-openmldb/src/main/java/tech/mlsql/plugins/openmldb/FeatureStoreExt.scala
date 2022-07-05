@@ -1,5 +1,10 @@
 package tech.mlsql.plugins.openmldb
 
+import com._4paradigm.openmldb.DataType
+import com._4paradigm.openmldb.jdbc.SQLResultSet
+import com._4paradigm.openmldb.sdk.SdkOption
+import com._4paradigm.openmldb.{Schema => RsSchema}
+import com._4paradigm.openmldb.sdk.impl.SqlClusterExecutor
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -18,7 +23,6 @@ case class RsColumn(name: String, sqlType: DataType)
 
 object FeatureStoreExt {
   def getRsCloumns(rs: ResultSet, schema: RsSchema): Array[RsColumn] = {
-
     (0 until schema.GetColumnCnt()).map { index =>
       RsColumn(schema.GetColumnName(index), schema.GetColumnType(index))
     }.toArray
