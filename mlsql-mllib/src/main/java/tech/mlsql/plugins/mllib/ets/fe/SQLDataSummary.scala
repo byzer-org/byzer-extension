@@ -251,10 +251,8 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       .union(spark.createDataFrame(spark.sparkContext.parallelize(new_quantile_df, 1), StructType(datatype_schema)))
 
     if (metrics == null || metrics.length == 0) {
-      println("Metric is not set")
       res = res.select(col("*"))
     } else {
-      println("Metric is set")
       res.select(col("*")).where(s"${DataSummary.metrics} in (${metric_values})")
     }
     //    res.summary()
