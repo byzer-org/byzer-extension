@@ -39,7 +39,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       if (numeric_columns.contains(c)) {
         round(stddev(col(c)), round_at).alias(c)
       } else {
-        lit("").alias(c)
+        max(lit("")).alias(c)
       }
     })
   }
@@ -49,7 +49,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       if (numeric_columns.contains(c)) {
         round(stddev(col(c)) / sqrt(total_count), round_at).alias(c)
       } else {
-        lit("").alias(c)
+        max(lit("")).alias(c)
       }
     })
   }
@@ -65,7 +65,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       if (numeric_columns.contains(c)) {
         (max(col(c))).alias(c)
       } else {
-        lit("").alias(c)
+        max(lit("")).alias(c)
       }
     })
   }
@@ -75,7 +75,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       if (numeric_columns.contains(c)) {
         (min(col(c))).alias(c)
       } else {
-        lit("").alias(c)
+        min(lit("")).alias(c)
       }
     })
   }
@@ -161,7 +161,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
   def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
 
     val round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
-    var metrics = params.getOrElse(DataSummary.metrics, "").split(",")
+    var metrics = params.getOrElse(DataSummary.metrics, "").split(",").filter(!_.equalsIgnoreCase(""))
 
     val columns = df.columns
     columns.map(col => {
@@ -181,7 +181,6 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }).map(sc => {
       sc.name
     }).toArray
-    var new_df = df.select(numeric_columns.head, numeric_columns.tail: _*)
     // get the quantile number for the numeric columns
     val spark = df.sparkSession
     val total_count = df.count()
@@ -191,7 +190,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       case FloatType => col(sc.name)
       case LongType => col(sc.name)
       case _ => lit(0.0).as(sc.name)
-    }): _*).stat.approxQuantile(df.columns, Array(0.25, 0.5, 0.75), 0.05).transpose.map(_.map(String.valueOf(_)).toSeq).map(row =>
+    }): _*).na.fill(0.0).stat.approxQuantile(df.columns, Array(0.25, 0.5, 0.75), 0.25).transpose.map(_.map(String.valueOf(_)).toSeq).map(row =>
       "Q" +: row
     )
     new_quantile_rows = new_quantile_rows.updated(0, new_quantile_rows(0).updated(0, "%25"))
@@ -199,7 +198,6 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     new_quantile_rows = new_quantile_rows.updated(2, new_quantile_rows(2).updated(0, "%75"))
     var new_quantile_df = new_quantile_rows.map(Row.fromSeq(_)).toSeq
     var mode_df = df.select(getModeNum(df.columns, numeric_columns, df): _*).select(lit("mode").alias("metric"), col("*"))
-    val quantileNum = new_df.stat.approxQuantile(numeric_columns, Array(0.25, 0.5, 0.75), 0.05)
     val maxlength_df = df.select(getMaxLength(df.schema): _*).select(lit("maximumLength").alias("metric"), col("*"))
     val minlength_df = df.select(getMinLength(df.schema): _*).select(lit("minimumLength").alias("metric"), col("*"))
 
@@ -251,6 +249,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       .union(spark.createDataFrame(spark.sparkContext.parallelize(datatype_sq, 1), StructType(datatype_schema)))
       .union(spark.createDataFrame(spark.sparkContext.parallelize(colunm_idx, 1), StructType(datatype_schema)))
       .union(spark.createDataFrame(spark.sparkContext.parallelize(new_quantile_df, 1), StructType(datatype_schema)))
+
     if (metrics == null || metrics.length == 0) {
       res = res.select(col("*"))
     } else {
