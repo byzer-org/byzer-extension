@@ -12,6 +12,9 @@ class FigTest extends FlatSpec {
     """confFrom: confTable
       |runtime:
       |   env: "{conda-env}"
+      |control:
+      |   ignoreSort: false
+      |   format: image
       |fig:
       |    line:
       |       title: "日PV/UV曲线图"

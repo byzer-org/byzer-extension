@@ -29,7 +29,7 @@ trait TranslateRuntime {
   def translate(s: String, dataset: String): String
 }
 
-case class VisualSource(confFrom: Option[String], runtime: Map[String, String], fig: Settings) {
+case class VisualSource(confFrom: Option[String], runtime: Map[String, String], control: Settings, fig: Settings) {
 
   private def getFigType = {
     val key = fig.getAsMap.keySet().asList().get(0).split("\\.")(0)
@@ -92,15 +92,18 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     pyLang.raw.code("from pyjava.api.mlsql import RayContext,PythonContext").end
     pyLang.raw.code("from pyjava.api import Utils").end
     pyLang.raw.code("import plotly.express as px").end
+    pyLang.raw.code("import base64").end
 
     //default variables
     pyLang.raw.code("context:PythonContext = context").end
     pyLang.raw.code("ray_context = RayContext.connect(globals(),None)").end
     pyLang.raw.code("df = ray_context.to_pandas()").end
 
-    val builderTemp = pyLang.let("df").invokeFunc("sort_values").params
-    putIfPresentStringOrArray[PyLang]("x", Some("by"), builderTemp)
-    builderTemp.end.namedVariableName("df").end
+    if (control.getAsBoolean("ignoreSort", false)) {
+      val builderTemp = pyLang.let("df").invokeFunc("sort_values").params
+      putIfPresentStringOrArray[PyLang]("x", Some("by"), builderTemp)
+      builderTemp.end.namedVariableName("df").end
+    }
 
     val builder = pyLang.let("px").invokeFunc(getFigType).params.add("df", None)
 
@@ -112,9 +115,14 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     }
 
     builder.end.namedVariableName("fig").end
-
-    pyLang.raw.code("content = fig.to_html()").end
-    pyLang.raw.code("""context.build_result([{"content":content,"mime":"html"}])""").end
+    val format = control.get("format", "html")
+    format match {
+      case "html" =>
+        pyLang.raw.code("content = fig.to_html()").end
+      case "image" =>
+        pyLang.raw.code("""content = base64.b64encode(fig.to_image(format="png")).decode()""").end
+    }
+    pyLang.raw.code(s"""context.build_result([{"content":content,"mime":"${format}"}])""").end
     pyLang.toScript
   }
 
@@ -127,6 +135,8 @@ class PlotlyRuntime extends TranslateRuntime {
   private def toVisualSource(s: Settings, dataset: String) = {
     val confFrom = s.get("confFrom")
     val runtimeConf = s.getByPrefix("runtime.")
+    val controlConf = s.getByPrefix("control.")
+
     val fig = s.getByPrefix("fig.")
     val confFromTemp = if (confFrom != null) Some(confFrom) else None
     val runtimeConfTemp = if (runtimeConf != null) {
@@ -135,7 +145,7 @@ class PlotlyRuntime extends TranslateRuntime {
       }.toMap
     } else Map[String, String]()
 
-    val vs = VisualSource(confFromTemp, runtimeConfTemp ++ Map("input" -> dataset), fig)
+    val vs = VisualSource(confFromTemp, runtimeConfTemp ++ Map("input" -> dataset), controlConf, fig)
     vs
   }
 
