@@ -2,7 +2,7 @@ package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession, functions => F}
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.{avg, bround, col, count, countDistinct, expr, first, grouping, length, lit, max, min, round, stddev, when}
+import org.apache.spark.sql.functions.{avg, bround, col, count, countDistinct, expr, first, grouping, length, lit, max, min, last, round, stddev, when}
 import org.apache.spark.sql.types.{BooleanType, DecimalType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, StructField, StructType, TimestampType, VarcharType}
 import streaming.dsl.ScriptSQLExec
 
@@ -13,6 +13,8 @@ import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}
 import streaming.dsl.mmlib.algs.param.BaseParams
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.{ETMethod, PREDICT}
+
+import scala.util.Try
 
 class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
 
@@ -80,16 +82,29 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     })
   }
 
+  def roundAtSingleCol(sc: StructField, column: Column, round_at: Integer): Column = {
+    sc.dataType match {
+      case DoubleType => round(column, round_at)
+      case FloatType => round(column, round_at)
+      case _ => column.cast(StringType)
+    }
+  }
 
-  def getModeNum(columns: Array[String], numeric_columns: Array[String], df: DataFrame): Array[Column] = {
-    columns.map(c => {
-      if (numeric_columns.contains(c)) {
-        val mode = df.groupBy(col(c)).count().orderBy(F.desc("count")).first().get(0)
-        max(lit(mode)).alias(c)
+  def getModeNum(schema: StructType, numeric_columns: Array[String], df: DataFrame, round_at: Integer): Array[Column] = {
+    schema.map(sc => {
+      if (numeric_columns.contains(sc.name)) {
+        val mode = df.groupBy(col(sc.name)).count().orderBy(F.desc("count")).first().get(0)
+        (sc, max(lit(mode)).alias(sc.name))
       } else {
-        max(lit("")).alias(c)
+        (sc, max(lit("")).alias(sc.name))
       }
-    })
+    }).toArray.map(t => roundAtSingleCol(t._1, t._2, round_at).alias(t._1.name))
+  }
+
+  def countNonNullValue(schema: StructType): Array[Column] = {
+    schema.map(sc => {
+      count(sc.name).cast(StringType)
+    }).toArray
   }
 
   def getMaxLength(schema: StructType): Array[Column] = {
@@ -110,11 +125,6 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }).toArray
   }
 
-  def countNonNullValue(columns: Array[String]): Array[Column] = {
-    columns.map(c => {
-      count(c).alias(c)
-    })
-  }
 
   def getMeanValue(schema: StructType): Array[Column] = {
     schema.map(sc => {
@@ -123,7 +133,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
         case DoubleType => avg(col(sc.name))
         case FloatType => avg(col(sc.name))
         case LongType => avg(col(sc.name))
-        case _ => min(lit(0)).alias(sc.name)
+        case _ => last(lit("")).alias(sc.name)
       }
     }).toArray
   }
@@ -137,11 +147,11 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
         case LongType => first(lit(8L)).alias(sc.name)
         case FloatType => first(lit(4L)).alias(sc.name)
         case DoubleType => first(lit(8L)).alias(sc.name)
-        case StringType => first(lit(-2L)).alias(sc.name)
+        case StringType => first(lit("")).alias(sc.name)
         case org.apache.spark.sql.types.DateType => first(lit(8L)).alias(sc.name)
         case TimestampType => first(lit(8L)).alias(sc.name)
         case BooleanType => first(lit(1L)).alias(sc.name)
-        case _ => first(lit(-1L)).alias(sc.name)
+        case _ => first(lit("")).alias(sc.name)
       }
     }).toArray
   }
@@ -149,10 +159,8 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
   def roundNumericCols(df: DataFrame, round_at: Integer): DataFrame = {
     df.select(df.schema.map(sc => {
       sc.dataType match {
-        case IntegerType => expr(s"cast (${sc.name} as decimal(38,2)) as ${sc.name}")
         case DoubleType => expr(s"cast (${sc.name} as decimal(38,2)) as ${sc.name}")
         case FloatType => expr(s"cast (${sc.name} as decimal(38,2)) as ${sc.name}")
-        case LongType => expr(s"cast (${sc.name} as decimal(38,2)) as ${sc.name}")
         case _ => col(sc.name)
       }
     }): _*)
@@ -161,6 +169,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
   def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
 
     val round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
+    val approxSwitch = Try(params.getOrElse("approxSwitch", "false").toBoolean).getOrElse(false)
     var metrics = params.getOrElse(DataSummary.metrics, "").split(",").filter(!_.equalsIgnoreCase(""))
 
     val columns = df.columns
@@ -173,6 +182,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     val numeric_columns = df.schema.filter(sc => {
       sc.dataType match {
         case IntegerType => true
+        case ShortType => true
         case DoubleType => true
         case FloatType => true
         case LongType => true
@@ -197,23 +207,31 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     new_quantile_rows = new_quantile_rows.updated(1, new_quantile_rows(1).updated(0, "median"))
     new_quantile_rows = new_quantile_rows.updated(2, new_quantile_rows(2).updated(0, "%75"))
     var new_quantile_df = new_quantile_rows.map(Row.fromSeq(_)).toSeq
-    var mode_df = df.select(getModeNum(df.columns, numeric_columns, df): _*).select(lit("mode").alias("metric"), col("*"))
+    var mode_df = df.select(getModeNum(df.schema, numeric_columns, df, round_at): _*).select(lit("mode").alias("metric"), col("*"))
     val maxlength_df = df.select(getMaxLength(df.schema): _*).select(lit("maximumLength").alias("metric"), col("*"))
     val minlength_df = df.select(getMinLength(df.schema): _*).select(lit("minimumLength").alias("metric"), col("*"))
 
-    val distinctValexprs = df.columns.map((_ -> "approx_count_distinct")).toMap
-    val distinctvalDF = df.agg(distinctValexprs)
+    // If the approx switch is turn on, then calculate the distinct value by approx_count_distinct function,
+    // otherwise count distinct by default.
+    val distinctvalDF = approxSwitch match {
+      case true => {
+        val distinctValexprs = df.columns.map((_ -> "approx_count_distinct")).toMap
+        df.agg(distinctValexprs)
+      }
+      case false => df.select(df.columns.map(c => countDistinct(col(c)).alias(c)): _*)
+    }
+
     var distinct_proportion_df = distinctvalDF.select(distinctvalDF.columns.map(c => {
       round(col(c) / total_count, round_at)
     }): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
+
     val is_primary_key_df = df.select(isPrimaryKey(df.columns, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias("metric"), col("*"))
     var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count, round_at): _*).select(lit("nullValueRatio").alias("metric"), col("*"))
     var empty_value_proportion_df = df.select(countColsEmptyNumber(df.columns, total_count, round_at): _*).select(lit("blankValueRatio").alias("metric"), col("*"))
     var mean_df = df.select(getMeanValue(df.schema): _*).select(lit("mean").alias("metric"), col("*"))
     var stddev_df = df.select(countColsStdDevNumber(df.columns, numeric_columns, round_at): _*).select(lit("standardDeviation").alias("metric"), col("*"))
     var stderr_df = df.select(countColsStdErrNumber(df.columns, numeric_columns, total_count, round_at): _*).select(lit("standardError").alias("metric"), col("*"))
-    var non_null_df = df.select(countNonNullValue(df.columns): _*).select(lit("nonNullCount").alias("metric"), col("*"))
-
+    var non_null_df = df.select(countNonNullValue(df.schema): _*).select(lit("nonNullCount").alias("metric"), col("*"))
     val maxvalue_df = df.select(getMaxNum(df.columns, numeric_columns): _*).select(lit("max").alias("metric"), col("*"))
     val minvalue_df = df.select(getMinNum(df.columns, numeric_columns): _*).select(lit("min").alias("metric"), col("*"))
     val datatypelen_df = df.select(getTypeLength(df.schema): _*).select(lit("dataLength").alias("metric"), col("*"))
@@ -222,7 +240,6 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       StructField("col_" + t, StringType)
     })
     val colunm_idx = Seq("ordinalPosition" +: df.columns.map(col_name => String.valueOf(df.columns.indexOf(col_name) + 1))).map(Row.fromSeq(_))
-
     var numeric_metric_df = mode_df
       .union(distinct_proportion_df)
       .union(null_value_proportion_df)
@@ -236,7 +253,6 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       .union(maxlength_df)
       .union(minlength_df)
     numeric_metric_df = roundNumericCols(numeric_metric_df, round_at)
-
 
     val schema = StructType(StructField("metrics", StringType, true) +: df.columns.map(StructField(_, StringType, true)).toSeq)
     val sc = spark.sparkContext.emptyRDD[Row]
@@ -316,4 +332,5 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 object DataSummary {
   val metrics = "metrics"
   val roundAt = "roundAt"
+  val approxSwitch = "approxSwitch"
 }
