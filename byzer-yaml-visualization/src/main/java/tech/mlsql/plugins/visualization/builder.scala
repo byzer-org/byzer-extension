@@ -22,29 +22,8 @@ import scala.collection.JavaConverters._
 //           uv: "uv"
 
 
-class Fig(s: String) {
-}
-
-trait TranslateRuntime {
-  def translate(s: String, dataset: String): String
-}
-
-case class VisualSource(confFrom: Option[String], runtime: Map[String, String], control: Settings, fig: Settings) {
-
-  private def getFigType = {
-    val key = fig.getAsMap.keySet().asList().get(0).split("\\.")(0)
-    key
-  }
-
-  private def figParams = {
-    fig.getByPrefix(getFigType + ".")
-  }
-
-  private def getFigParamsKeys = {
-    figParams.getAsMap.keySet().asScala.map(item => item.split("\\.")(0)).toList
-  }
-
-  private def valueWithQuote(s: String) = {
+object FigUtils {
+  def valueWithQuote(s: String) = {
     var realS = s
     var isStr = true
     try {
@@ -68,18 +47,67 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     }
     if (isStr) s""""${realS}"""" else realS
   }
+}
+
+trait TranslateRuntime {
+  def translate(s: String, dataset: String): String
+}
+
+case class VVValue(k: String, vvValue: String, vvType: Option[String]) {
+
+
+  def toValue: String = {
+    vvType match {
+      case Some("number") => vvValue
+      case Some("bool") => vvValue.capitalize
+      case Some("code") => vvValue
+      case Some("jsonObj") => s"""json.loads(context.conf["${vvValue}"])"""
+      case Some("ref") => s"""context.conf["${vvValue}"]"""
+      case None =>
+        FigUtils.valueWithQuote(vvValue)
+    }
+  }
+}
+
+case class VisualSource(confFrom: Option[String], runtime: Map[String, String], control: Settings, fig: Settings) {
+
+  private def getFigType = {
+    val key = fig.getAsMap.keySet().asList().get(0).split("\\.")(0)
+    key
+  }
+
+  private def figParams = {
+    fig.getByPrefix(getFigType + ".")
+  }
+
+  private def getFigParamsKeys = {
+    figParams.getAsMap.keySet().asScala.map(item => item.split("\\.")(0)).toList
+  }
+
+  private def tryGetValueWithVVType(settings: Settings, s: String): Option[VVValue] = {
+    val x = settings.get(s)
+    if (x == null) {
+      val x1 = settings.getByPrefix(s + ".").getAsMap
+      if (x1.get("vv_type") != null) {
+        return Some(VVValue(s, x1.get("vv_value"), Some(x1.get("vv_type"))))
+      } else {
+        return None
+      }
+    }
+
+    Some(VVValue(s, x, None))
+  }
 
   private def putIfPresentStringOrArray[T](s: String, k: Option[String], builder: Options[PyLang]): Option[String] = {
     val key = k.getOrElse(s)
-    val x = figParams.get(s)
-
-    if (x != null) {
-      builder.addKV(key, valueWithQuote(x), None)
+    val x = tryGetValueWithVVType(figParams, s)
+    if (x.isDefined) {
+      builder.addKV(key, x.get.toValue, None)
       return Some("")
     }
     val x1 = figParams.getAsArray(s)
     if (x1 != null && x1.length != 0) {
-      val a = x1.map(item => s"""${valueWithQuote(item)}""").mkString(",")
+      val a = x1.map(item => s"""${FigUtils.valueWithQuote(item)}""").mkString(",")
       builder.addKV(key, s"[${a}]", None)
       return Some("")
     }
@@ -88,14 +116,14 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
 
   private def putIfPresentStringOrMap[T](s: String, k: Option[String], builder: Options[PyLang]): Option[String] = {
     val key = k.getOrElse(s)
-    val x = figParams.get(s)
-    if (x != null) {
-      builder.addKV(key, valueWithQuote(x), None)
+    val x = tryGetValueWithVVType(figParams, s)
+    if (x.isDefined) {
+      builder.addKV(key, x.get.toValue, None)
       return Some("")
     }
     val x1 = figParams.getByPrefix(s + ".")
     if (x1 != null) {
-      val a = x1.getAsMap.asScala.toMap.map(item => s""""${item._1}":${valueWithQuote(item._2)}""").mkString(",")
+      val a = x1.getAsMap.asScala.toMap.map(item => s""""${item._1}":${FigUtils.valueWithQuote(item._2)}""").mkString(",")
       builder.addKV(key, s"{${a}}", None)
       return Some("")
     }
@@ -114,11 +142,18 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     runtime.foreach { item =>
       pyLang.raw.code(s"""#%${item._1}=${item._2}""").end
     }
+
+    if (confFrom.isDefined) {
+      pyLang.raw.code(s"""#%confTable=${confFrom.get}""").end
+    }
+
     //default imports
     pyLang.raw.code("from pyjava.api.mlsql import RayContext,PythonContext").end
     pyLang.raw.code("from pyjava.api import Utils").end
     pyLang.raw.code("import plotly.express as px").end
+    pyLang.raw.code("import plotly.graph_objects as go")
     pyLang.raw.code("import base64").end
+    pyLang.raw.code("import json").end
 
     //default variables
     pyLang.raw.code("context:PythonContext = context").end
@@ -131,7 +166,13 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
       builderTemp.end.namedVariableName("df").end
     }
 
-    val builder = pyLang.let("px").invokeFunc(getFigType).params.add("df", None)
+    val builder = getFigType match {
+      //      case "sankey" =>
+      //        pyLang.let("go").invokeFunc("Figure").params.addKV("data","data",None)
+      case _ =>
+        pyLang.let("px").invokeFunc(getFigType).params.add("df", None)
+    }
+
 
     getFigParamsKeys.foreach { item =>
       val temp = putIfPresentStringOrArray[PyLang](item, None, builder)
