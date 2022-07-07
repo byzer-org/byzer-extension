@@ -197,6 +197,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     var new_quantile_rows = df.select(df.schema.map(sc => sc.dataType match {
       case IntegerType => col(sc.name)
       case DoubleType => col(sc.name)
+      case ShortType => col(sc.name)
       case FloatType => col(sc.name)
       case LongType => col(sc.name)
       case _ => lit(0.0).as(sc.name)
