@@ -99,7 +99,7 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     pyLang.raw.code("ray_context = RayContext.connect(globals(),None)").end
     pyLang.raw.code("df = ray_context.to_pandas()").end
 
-    if (control.getAsBoolean("ignoreSort", false)) {
+    if (!control.getAsBoolean("ignoreSort", false)) {
       val builderTemp = pyLang.let("df").invokeFunc("sort_values").params
       putIfPresentStringOrArray[PyLang]("x", Some("by"), builderTemp)
       builderTemp.end.namedVariableName("df").end
