@@ -44,16 +44,42 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     figParams.getAsMap.keySet().asScala.map(item => item.split("\\.")(0)).toList
   }
 
+  private def valueWithQuote(s: String) = {
+    var realS = s
+    var isStr = true
+    try {
+      s.toLong
+      isStr = false
+    } catch {
+      case _: Exception =>
+        try {
+          s.toDouble
+          isStr = false
+        } catch {
+          case _: Exception =>
+            try {
+              s.toBoolean
+              isStr = false
+              realS = s.capitalize
+            } catch {
+              case _: Exception =>
+            }
+        }
+    }
+    if (isStr) s""""${realS}"""" else realS
+  }
+
   private def putIfPresentStringOrArray[T](s: String, k: Option[String], builder: Options[PyLang]): Option[String] = {
     val key = k.getOrElse(s)
     val x = figParams.get(s)
+
     if (x != null) {
-      builder.addKV(key, x, Some("\""))
+      builder.addKV(key, valueWithQuote(x), None)
       return Some("")
     }
     val x1 = figParams.getAsArray(s)
     if (x1 != null && x1.length != 0) {
-      val a = x1.map(item => s""""${item}"""").mkString(",")
+      val a = x1.map(item => s"""${valueWithQuote(item)}""").mkString(",")
       builder.addKV(key, s"[${a}]", None)
       return Some("")
     }
@@ -64,12 +90,12 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     val key = k.getOrElse(s)
     val x = figParams.get(s)
     if (x != null) {
-      builder.addKV(key, x, Some("\""))
+      builder.addKV(key, valueWithQuote(x), None)
       return Some("")
     }
     val x1 = figParams.getByPrefix(s + ".")
     if (x1 != null) {
-      val a = x1.getAsMap.asScala.toMap.map(item => s""""${item._1}":"${item._2}"""").mkString(",")
+      val a = x1.getAsMap.asScala.toMap.map(item => s""""${item._1}":${valueWithQuote(item._2)}""").mkString(",")
       builder.addKV(key, s"{${a}}", None)
       return Some("")
     }

@@ -35,4 +35,28 @@ class FigTest extends FlatSpec {
     val byzerCode = hint.rewrite(pythonCode, Map())
     println(byzerCode)
   }
+
+  "yaml" should "parse Boolean" in  {
+     val t =
+       """
+         |runtime:
+         |   env: source /opt/miniconda3/bin/activate ray-1.12.0
+         |   cache: false
+         |fig:
+         |   scatter:
+         |      title: "欧洲人口分布"
+         |      x: gdpPercap
+         |      y: lifeExp
+         |      size: pop
+         |      color: continent
+         |      hover_name: country
+         |      log_x: True
+         |      size_max: 60 """.stripMargin
+
+    val pr = new PlotlyRuntime()
+    val pythonCode = pr.translate(t,"ww")
+    val hint = new PythonHint()
+    val byzerCode = hint.rewrite(pythonCode, Map())
+    println(byzerCode)
+  }
 }
