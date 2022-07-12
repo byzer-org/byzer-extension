@@ -20,7 +20,9 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   def this() = this(BaseParams.randomUID())
 
-  def countColsNullNumber(schema: StructType, total_count: Long, round_at: Integer): Array[Column] = {
+  var round_at = 2
+
+  def countColsNullNumber(schema: StructType, total_count: Long): Array[Column] = {
     schema.map(sc => {
       sc.dataType match {
         case DoubleType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at).alias(sc.name)
@@ -30,13 +32,13 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }).toArray
   }
 
-  def countColsEmptyNumber(columns: Array[String], total_count: Long, round_at: Integer): Array[Column] = {
+  def countColsEmptyNumber(columns: Array[String], total_count: Long): Array[Column] = {
     columns.map(c => {
       round(count(when(col(c) === "", c)) / total_count, round_at).alias(c)
     })
   }
 
-  def countColsStdDevNumber(columns: Array[String], numeric_columns: Array[String], round_at: Integer): Array[Column] = {
+  def countColsStdDevNumber(columns: Array[String], numeric_columns: Array[String]): Array[Column] = {
     columns.map(c => {
       if (numeric_columns.contains(c)) {
         round(stddev(col(c)), round_at).alias(c)
@@ -46,7 +48,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     })
   }
 
-  def countColsStdErrNumber(columns: Array[String], numeric_columns: Array[String], total_count: Long, round_at: Integer): Array[Column] = {
+  def countColsStdErrNumber(columns: Array[String], numeric_columns: Array[String], total_count: Long): Array[Column] = {
     columns.map(c => {
       if (numeric_columns.contains(c)) {
         round(stddev(col(c)) / sqrt(total_count), round_at).alias(c)
@@ -82,7 +84,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     })
   }
 
-  def roundAtSingleCol(sc: StructField, column: Column, round_at: Integer): Column = {
+  def roundAtSingleCol(sc: StructField, column: Column): Column = {
     sc.dataType match {
       case DoubleType => round(column, round_at)
       case FloatType => round(column, round_at)
@@ -98,7 +100,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       } else {
         (sc, max(lit("")).alias(sc.name))
       }
-    }).toArray.map(t => roundAtSingleCol(t._1, t._2, round_at).alias(t._1.name))
+    }).toArray.map(t => roundAtSingleCol(t._1, t._2).alias(t._1.name))
   }
 
   def countNonNullValue(schema: StructType): Array[Column] = {
@@ -128,13 +130,14 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   def getMeanValue(schema: StructType): Array[Column] = {
     schema.map(sc => {
-      sc.dataType match {
-        case IntegerType => avg(col(sc.name))
-        case DoubleType => avg(col(sc.name))
-        case FloatType => avg(col(sc.name))
-        case LongType => avg(col(sc.name))
+      val new_col = sc.dataType match {
+        case IntegerType => round(avg(col(sc.name)).cast(DoubleType), round_at)
+        case DoubleType => round(avg(col(sc.name)).cast(DoubleType), round_at)
+        case FloatType => round(avg(col(sc.name)).cast(DoubleType), round_at)
+        case LongType => round(avg(col(sc.name)).cast(DoubleType), round_at)
         case _ => last(lit("")).alias(sc.name)
       }
+      new_col
     }).toArray
   }
 
@@ -168,7 +171,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
 
-    val round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
+    round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
     val approxSwitch = Try(params.getOrElse("approxSwitch", "false").toBoolean).getOrElse(false)
     var metrics = params.getOrElse(DataSummary.metrics, "").split(",").filter(!_.equalsIgnoreCase(""))
 
@@ -227,11 +230,11 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
 
     val is_primary_key_df = df.select(isPrimaryKey(df.columns, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias("metric"), col("*"))
-    var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count, round_at): _*).select(lit("nullValueRatio").alias("metric"), col("*"))
-    var empty_value_proportion_df = df.select(countColsEmptyNumber(df.columns, total_count, round_at): _*).select(lit("blankValueRatio").alias("metric"), col("*"))
+    var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count): _*).select(lit("nullValueRatio").alias("metric"), col("*"))
+    var empty_value_proportion_df = df.select(countColsEmptyNumber(df.columns, total_count): _*).select(lit("blankValueRatio").alias("metric"), col("*"))
     var mean_df = df.select(getMeanValue(df.schema): _*).select(lit("mean").alias("metric"), col("*"))
-    var stddev_df = df.select(countColsStdDevNumber(df.columns, numeric_columns, round_at): _*).select(lit("standardDeviation").alias("metric"), col("*"))
-    var stderr_df = df.select(countColsStdErrNumber(df.columns, numeric_columns, total_count, round_at): _*).select(lit("standardError").alias("metric"), col("*"))
+    var stddev_df = df.select(countColsStdDevNumber(df.columns, numeric_columns): _*).select(lit("standardDeviation").alias("metric"), col("*"))
+    var stderr_df = df.select(countColsStdErrNumber(df.columns, numeric_columns, total_count): _*).select(lit("standardError").alias("metric"), col("*"))
     var non_null_df = df.select(countNonNullValue(df.schema): _*).select(lit("nonNullCount").alias("metric"), col("*"))
     val maxvalue_df = df.select(getMaxNum(df.columns, numeric_columns): _*).select(lit("max").alias("metric"), col("*"))
     val minvalue_df = df.select(getMinNum(df.columns, numeric_columns): _*).select(lit("min").alias("metric"), col("*"))
