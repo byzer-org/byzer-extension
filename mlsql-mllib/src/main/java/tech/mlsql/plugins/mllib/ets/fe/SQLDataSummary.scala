@@ -1,8 +1,9 @@
 package tech.mlsql.plugins.mllib.ets.fe
 
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession, functions => F}
-import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.{avg, bround, col, count, countDistinct, expr, first, grouping, length, lit, max, min, last, round, stddev, when}
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{Column, ColumnName, DataFrame, Row, SparkSession, TypedColumn, functions => F}
+import org.apache.spark.sql.expressions.{UserDefinedFunction, Window}
+import org.apache.spark.sql.functions.{avg, bround, col, count, countDistinct, desc, expr, first, grouping, last, length, lit, map_zip_with, max, min, monotonically_increasing_id, round, row_number, spark_partition_id, stddev, when, window}
 import org.apache.spark.sql.types.{BooleanType, DecimalType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, StructField, StructType, TimestampType, VarcharType}
 import streaming.dsl.ScriptSQLExec
 
@@ -69,7 +70,8 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       if (numeric_columns.contains(c)) {
         (max(col(c))).alias(c)
       } else {
-        max(lit("")).alias(c)
+        //        max(lit("")).alias(c)
+        (max(col(c))).alias(c)
       }
     })
   }
@@ -94,13 +96,14 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   def getModeNum(schema: StructType, numeric_columns: Array[String], df: DataFrame, round_at: Integer): Array[Column] = {
     schema.map(sc => {
-      if (numeric_columns.contains(sc.name)) {
-        val mode = df.groupBy(col(sc.name)).count().orderBy(F.desc("count")).first().get(0)
-        (sc, max(lit(mode)).alias(sc.name))
+      val dfWithoutNa = df.select(col(sc.name)).na.drop()
+      if (dfWithoutNa.isEmpty) {
+        first(lit(""))
       } else {
-        (sc, max(lit("")).alias(sc.name))
+        val mode = dfWithoutNa.groupBy(col(sc.name)).count().orderBy(F.desc("count")).first().get(0)
+        roundAtSingleCol(sc, max(lit(mode))).alias(sc.name)
       }
-    }).toArray.map(t => roundAtSingleCol(t._1, t._2).alias(t._1.name))
+    }).toArray
   }
 
   def countNonNullValue(schema: StructType): Array[Column] = {
@@ -141,6 +144,65 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }).toArray
   }
 
+  def calQuantileValue(lower_value: Double, upper_value: Double, pos: Int): Unit = {
+
+  }
+
+  /**
+   * compute percentile from an unsorted Spark RDD
+   *
+   * @param data : input data set of Double numbers
+   * @param tile : percentile to compute (eg. 85 percentile)
+   * @return value of input data at the specified percentile
+   */
+  def computePercentile(data: RDD[Double], tile: Double): Double = {
+    // NIST method; data to be sorted in ascending order
+    val r = data.sortBy(x => x)
+    val c = r.count()
+    if (c == 1) r.first()
+    else {
+      val n = (tile / 100d) * (c + 1d)
+      val k = math.floor(n).toLong
+      val d = n - k
+      if (k <= 0) r.first()
+      else {
+        val index = r.zipWithIndex().map(_.swap)
+        val last = c
+        if (k >= c) {
+          index.lookup(last - 1).head
+        } else {
+          index.lookup(k - 1).head + d * (index.lookup(k).head - index.lookup(k - 1).head)
+        }
+      }
+    }
+  }
+
+  def getQuantileNum(schema: StructType, df: DataFrame, numeric_columns: Array[String]): Array[Array[Double]] = {
+    schema.map(sc => {
+      if (numeric_columns.contains(sc.name)) {
+        val new_df = df.select(col(sc.name))
+        var res = Array(Double.NaN, Double.NaN, Double.NaN)
+        val data = new_df.rdd.map(x => {
+          val v = String.valueOf(x(0))
+          v match {
+            case "" => Double.NaN
+            case "null" => Double.NaN
+            case _ => v.toDouble
+          }
+        }).filter(!_.isNaN)
+        if (!data.isEmpty()) {
+          val q1 = computePercentile(data, 25)
+          val q2 = computePercentile(data, 50)
+          val q3 = computePercentile(data, 75)
+          res = Array(q1, q2, q3)
+        }
+        res
+      } else {
+        Array(Double.NaN, Double.NaN, Double.NaN)
+      }
+    }).toArray
+  }
+
   def getTypeLength(schema: StructType): Array[Column] = {
     schema.map(sc => {
       sc.dataType match {
@@ -150,7 +212,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
         case LongType => first(lit(8L)).alias(sc.name)
         case FloatType => first(lit(4L)).alias(sc.name)
         case DoubleType => first(lit(8L)).alias(sc.name)
-        case StringType => first(lit("")).alias(sc.name)
+        case StringType => max(length(col(sc.name))).alias(sc.name)
         case org.apache.spark.sql.types.DateType => first(lit(8L)).alias(sc.name)
         case TimestampType => first(lit(8L)).alias(sc.name)
         case BooleanType => first(lit(1L)).alias(sc.name)
@@ -194,9 +256,16 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }).map(sc => {
       sc.name
     }).toArray
+
+    val datatype_schema = ("DataType" +: df.schema.map(f => f.dataType.typeName)).map(t => {
+      StructField("col_" + t, StringType)
+    })
+
+
     // get the quantile number for the numeric columns
     val spark = df.sparkSession
     val total_count = df.count()
+
     var new_quantile_rows = df.select(df.schema.map(sc => sc.dataType match {
       case IntegerType => col(sc.name)
       case DoubleType => col(sc.name)
@@ -204,17 +273,23 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       case FloatType => col(sc.name)
       case LongType => col(sc.name)
       case _ => lit(0.0).as(sc.name)
-    }): _*).na.fill(0.0).stat.approxQuantile(df.columns, Array(0.25, 0.5, 0.75), 0.25).transpose.map(_.map(String.valueOf(_)).toSeq).map(row =>
+    }): _*).na.fill(0.0).stat.approxQuantile(df.columns, Array(0.25, 0.5, 0.75), 0.05).transpose.map(_.map(String.valueOf(_)).toSeq).map(row =>
+      "Q" +: row
+    )
+//    val quantile_num_rows = getQuantileNum(df.schema, df, numeric_columns)
+    new_quantile_rows = getQuantileNum(df.schema, df, numeric_columns).transpose.map(_.map(v =>
+      String.valueOf(v) match {
+        case "NaN" => ""
+        case _ => String.valueOf(v)
+      }
+    ).toSeq).map(row =>
       "Q" +: row
     )
     new_quantile_rows = new_quantile_rows.updated(0, new_quantile_rows(0).updated(0, "%25"))
     new_quantile_rows = new_quantile_rows.updated(1, new_quantile_rows(1).updated(0, "median"))
     new_quantile_rows = new_quantile_rows.updated(2, new_quantile_rows(2).updated(0, "%75"))
-    var new_quantile_df = new_quantile_rows.map(Row.fromSeq(_)).toSeq
-    var mode_df = df.select(getModeNum(df.schema, numeric_columns, df, round_at): _*).select(lit("mode").alias("metric"), col("*"))
-    val maxlength_df = df.select(getMaxLength(df.schema): _*).select(lit("maximumLength").alias("metric"), col("*"))
-    val minlength_df = df.select(getMinLength(df.schema): _*).select(lit("minimumLength").alias("metric"), col("*"))
-
+    var quantile_df_tmp = new_quantile_rows.map(Row.fromSeq(_)).toSeq
+    val quantile_df = spark.createDataFrame(spark.sparkContext.parallelize(quantile_df_tmp, 1), StructType(datatype_schema)).na.fill("")
     // If the approx switch is turn on, then calculate the distinct value by approx_count_distinct function,
     // otherwise count distinct by default.
     val distinctvalDF = approxSwitch match {
@@ -225,11 +300,17 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       case false => df.select(df.columns.map(c => countDistinct(col(c)).alias(c)): _*)
     }
 
+    var mode_df = df.select(getModeNum(df.schema, numeric_columns, df, round_at): _*).select(lit("mode").alias("metric"), col("*"))
+    val maxlength_df = df.select(getMaxLength(df.schema): _*).select(lit("maximumLength").alias("metric"), col("*"))
+    val minlength_df = df.select(getMinLength(df.schema): _*).select(lit("minimumLength").alias("metric"), col("*"))
+
+
     var distinct_proportion_df = distinctvalDF.select(distinctvalDF.columns.map(c => {
       round(col(c) / total_count, round_at)
     }): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
 
     val is_primary_key_df = df.select(isPrimaryKey(df.columns, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias("metric"), col("*"))
+    is_primary_key_df.show()
     var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count): _*).select(lit("nullValueRatio").alias("metric"), col("*"))
     var empty_value_proportion_df = df.select(countColsEmptyNumber(df.columns, total_count): _*).select(lit("blankValueRatio").alias("metric"), col("*"))
     var mean_df = df.select(getMeanValue(df.schema): _*).select(lit("mean").alias("metric"), col("*"))
@@ -240,9 +321,8 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     val minvalue_df = df.select(getMinNum(df.columns, numeric_columns): _*).select(lit("min").alias("metric"), col("*"))
     val datatypelen_df = df.select(getTypeLength(df.schema): _*).select(lit("dataLength").alias("metric"), col("*"))
     val datatype_sq = Seq("dataType" +: df.schema.map(f => f.dataType.typeName)).map(Row.fromSeq(_))
-    val datatype_schema = ("DataType" +: df.schema.map(f => f.dataType.typeName)).map(t => {
-      StructField("col_" + t, StringType)
-    })
+
+
     val colunm_idx = Seq("ordinalPosition" +: df.columns.map(col_name => String.valueOf(df.columns.indexOf(col_name) + 1))).map(Row.fromSeq(_))
     var numeric_metric_df = mode_df
       .union(distinct_proportion_df)
@@ -268,7 +348,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       .union(datatypelen_df)
       .union(spark.createDataFrame(spark.sparkContext.parallelize(datatype_sq, 1), StructType(datatype_schema)))
       .union(spark.createDataFrame(spark.sparkContext.parallelize(colunm_idx, 1), StructType(datatype_schema)))
-      .union(spark.createDataFrame(spark.sparkContext.parallelize(new_quantile_df, 1), StructType(datatype_schema)))
+      .union(quantile_df)
 
     if (metrics == null || metrics.length == 0) {
       res = res.select(col("*"))
