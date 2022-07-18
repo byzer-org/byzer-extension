@@ -25,17 +25,18 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   def countColsNullNumber(schema: StructType, total_count: Long): Array[Column] = {
     schema.map(sc => {
+      // For proportion calculation, we remain 2 more digits. Hence, we need set up round_at + 2
       sc.dataType match {
-        case DoubleType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at).alias(sc.name)
-        case FloatType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at).alias(sc.name)
-        case _ => round(count(when(col(sc.name).isNull, sc.name)) / total_count, round_at).alias(sc.name)
+        case DoubleType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at + 2).alias(sc.name)
+        case FloatType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at + 2).alias(sc.name)
+        case _ => round(count(when(col(sc.name).isNull, sc.name)) / total_count, round_at + 2).alias(sc.name)
       }
     }).toArray
   }
 
   def countColsEmptyNumber(columns: Array[String], total_count: Long): Array[Column] = {
     columns.map(c => {
-      round(count(when(col(c) === "", c)) / total_count, round_at).alias(c)
+      round(count(when(col(c) === "", c)) / total_count, round_at + 2).alias(c)
     })
   }
 
@@ -315,7 +316,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
 
     var distinct_proportion_df = distinctvalDF.select(distinctvalDF.columns.map(c => {
-      round(col(c) / total_count, round_at)
+      round(col(c) / total_count, round_at + 2)
     }): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
 
     val is_primary_key_df = df.select(isPrimaryKey(df.columns, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias("metric"), col("*"))

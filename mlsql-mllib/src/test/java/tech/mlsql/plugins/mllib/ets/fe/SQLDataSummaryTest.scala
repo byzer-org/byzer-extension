@@ -58,10 +58,10 @@ class SQLDataSummaryTest extends FlatSpec with SparkOperationUtil with Matchers 
       res1.show()
       val r0 = res.collectAsList().get(0).toSeq
       println(r0.mkString(","))
-      assert(r0.mkString(",") === "income1,433000.0,0.67,0.17,0.0,453000.0,5,44726.95,18259.7,533000.0,432000.0,0,0,0,8,double,1,432500.0,433000.0,483500.0")
+      assert(r0.mkString(",") === "income1,433000.0,0.6667,0.1667,0.0,453000.0,5,44726.95,18259.7,533000.0,432000.0,0,0,0,8,double,1,432500.0,433000.0,483500.0")
       val r1 = res.collectAsList().get(1).toSeq
       println(r1.mkString(","))
-      assert(r1.mkString(",") === "name,cc,1.0,0.0,0.17,,6,,,elena,,5,0,1,5,string,2,,,")
+      assert(r1.mkString(",") === "name,cc,1.0,0.0,0.1667,,6,,,elena,,5,0,1,5,string,2,,,")
       val r2 = res.collectAsList().get(2).toSeq
       println(r2.mkString(","))
       assert(r2.mkString(",") === "favoriteNumber,57,0.5,0.0,0.0,37.83,6,29.69,12.12,57,-1,0,0,0,4,integer,3,-0.25,57.0,57.0")
@@ -73,14 +73,13 @@ class SQLDataSummaryTest extends FlatSpec with SparkOperationUtil with Matchers 
       assert(r4.mkString(",") === "mock_col1,130,1.0,0.0,0.0,135.0,6,18.71,7.64,160,110,0,0,1,8,long,5,117.5,135.0,152.5")
       val r5 = res.collectAsList().get(5).toSeq
       println(r5.mkString(","))
-      assert(r5.mkString(",") === "income,433000,0.83,0.0,0.17,,6,,,533000,,6,0,0,6,string,6,,,")
+      assert(r5.mkString(",") === "income,433000,0.8333,0.0,0.1667,,6,,,533000,,6,0,0,6,string,6,,,")
       val r6 = res.collectAsList().get(6).toSeq
       println(r6.mkString(","))
-      assert(r6.mkString(",") === "date,2021-03-08 18:00:00,0.17,0.0,0.0,,6,,,2021-03-08 18:00:00,2021-03-08 18:00:00,0,0,0,8,timestamp,7,,,")
+      assert(r6.mkString(",") === "date,2021-03-08 18:00:00,0.1667,0.0,0.0,,6,,,2021-03-08 18:00:00,2021-03-08 18:00:00,0,0,0,8,timestamp,7,,,")
       val r7 = res.collectAsList().get(7).toSeq
       println(r7.mkString(","))
       assert(r7.mkString(",") === "mock_col2,110.0,1.0,0.0,0.0,135.0,6,18.71,7.64,160.0,110.0,0,0,1,4,float,8,117.5,135.0,152.5")
-
     }
   }
 }
