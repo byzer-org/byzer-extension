@@ -27,7 +27,7 @@ import scala.collection.mutable
 class SQLPatternDistribution(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
   def this() = this(BaseParams.randomUID())
 
-  var na_empty_filter = true
+  var exclude_empty_val = true
   var internal_ch_limit = 1000
 
   def find_patterns(src: String): String = {
@@ -130,19 +130,22 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
   }
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
-    val limit = params.getOrElse(limit_num.name, "100").toInt
+    val limit = params.getOrElse(limitNum.name, "100").toInt
+    exclude_empty_val = params.getOrElse(excludeEmptyVal.name, "true").toBoolean
+
     var pattern_func = udf(find_patterns(_))
     var pattern_func1 = udf(find_alternativePatterns(_))
-    val rows_num = df.count()
+
     val res = df.schema.map(sc => {
       var col_pattern_map = Map[String, String]()
       sc.dataType match {
         case StringType =>
-          val sub_df = na_empty_filter match {
+          val sub_df = exclude_empty_val match {
             case true => df.select(sc.name).where(col(sc.name).isNotNull).where(col(sc.name) =!= "")
             case _ => df.select(sc.name)
           }
           require(!sub_df.isEmpty, s"Please make sure the column ${sc.name} contains content except null or empty content!")
+          val rows_num = sub_df.count()
           val res = sub_df.withColumn("pattern", pattern_func(col(sc.name))).withColumn("alternativePattern", pattern_func1(col(sc.name)))
           val pattern_group_df = res.groupBy(col("pattern"), col("alternativePattern")).count().orderBy(desc("count")).withColumn("ratio", col("count") / rows_num.toDouble)
           val total_count = pattern_group_df.count()
@@ -171,7 +174,7 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
 
   override def auth(etMethod: ETMethod, path: String, params: Map[String, String]): List[TableAuthResult] = ???
 
-  final val limit_num: Param[String] = new Param[String](this, "limit",
+  final val limitNum: Param[String] = new Param[String](this, "limit",
     FormParams.toJson(Input(
       name = "limit",
       value = "",
@@ -185,6 +188,29 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
         options = Map(
           "valueType" -> "string",
           "defaultValue" -> "100",
+          "required" -> "false",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  final val excludeEmptyVal: Param[String] = new Param[String](this, "excludeEmptyVal",
+    FormParams.toJson(Input(
+      name = "excludeEmptyVal",
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | define whether exclude empty value
+            | e.g. excludeEmptyVal = "true
+          """,
+        label = "limit",
+        options = Map(
+          "valueType" -> "string",
+          "defaultValue" -> "true",
           "required" -> "false",
           "derivedType" -> "NONE"
         )), valueProvider = Option(() => {
@@ -212,5 +238,6 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
       |;
     """.stripMargin)
 
-  setDefault(limit_num, "100")
+  setDefault(limitNum, "100")
+  setDefault(excludeEmptyVal, "true")
 }
