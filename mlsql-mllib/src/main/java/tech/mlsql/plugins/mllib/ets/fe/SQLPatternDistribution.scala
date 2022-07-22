@@ -27,49 +27,86 @@ import scala.collection.mutable
 class SQLPatternDistribution(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
   def this() = this(BaseParams.randomUID())
 
-  var exclude_empty_val = true
-  var internal_ch_limit = 1000
+  val capitalLetterKey = "A"
+  val lowerCaseLetterKey = "a"
+  val symbolLetterKey = "#"
+  val numberKey = "9"
+
+  val patternColName = "pattern"
+
+  val alternativePatternColName = "alternativePattern"
+
+  var excludeEmpty = true
+  var internalChLimit = 1000
+
+  def isCapitalLetter(ch: Char): Boolean = {
+    if (ch >= 'A' && ch <= 'Z')
+      true
+    else
+      false
+  }
+
+  def isLowerLetter(ch: Char): Boolean = {
+    if (ch >= 'a' && ch <= 'z')
+      true
+    else
+      false
+  }
+
+  def isDigitNumber(ch: Char): Boolean = {
+    if (ch >= '0' && ch <= '9')
+      true
+    else
+      false
+  }
+
+  def isChineseChar(ch: Char): Boolean = {
+    if (ch >= 0x4E00 && ch <= 0x4E00)
+      true
+    else
+      false
+  }
 
   def find_patterns(src: String): String = {
     val res = src.toSeq.map(c => c match {
-      case p if c >= 'a' && c <= 'z' => 'a'
-      case p if c >= 'A' && c <= 'Z' => 'A'
-      case p if c >= '0' && c <= '9' => '9'
-      case p if c >= 0x4E00 && c <= 0x9FA5 => 'A' // If the character is a Chinese, then retuen 'A'
+      case p if isLowerLetter(c) => 'a'
+      case p if isCapitalLetter(c) => 'A'
+      case p if isDigitNumber(c) => '9'
+      case p if isChineseChar(c) => 'A' // If the character is a Chinese, then retuen 'A'
       case _ => c
     }).toSeq.mkString("")
     if (res.length > 1000)
-      res.substring(0, internal_ch_limit)
+      res.substring(0, internalChLimit)
     else
       res
   }
 
   def is_need_conclude(freq_map: mutable.Map[String, Int], num_ch_upper: Int, num_ch_lower: Int, num_digit: Int): Boolean = {
-    if (num_ch_lower == 0 && freq_map.get("a").get != 0)
+    if (num_ch_lower == 0 && freq_map.get(lowerCaseLetterKey).get != 0)
       return true
-    if (num_ch_upper == 0 && freq_map.get("A").get != 0)
+    if (num_ch_upper == 0 && freq_map.get(capitalLetterKey).get != 0)
       return true
-    if (num_digit == 0 && freq_map.get("9").get != 0)
+    if (num_digit == 0 && freq_map.get(numberKey).get != 0)
       return true
     false
   }
 
   def get_conclude_pattern(freq_map: mutable.Map[String, Int]): String = {
     var res = ""
-    if (freq_map.get("A").get != 0) {
-      res = freq_map.get("A").get match {
-        case 1 => "A"
-        case _ => s"A(${freq_map.get("A").get})"
+    if (freq_map.get(capitalLetterKey).get != 0) {
+      res = freq_map.get(capitalLetterKey).get match {
+        case 1 => capitalLetterKey
+        case _ => s"${capitalLetterKey}(${freq_map.get(capitalLetterKey).get})"
       }
-    } else if (freq_map.get("a").get != 0) {
-      res = freq_map.get("a").get match {
-        case 1 => "a"
-        case _ => s"a(${freq_map.get("a").get})"
+    } else if (freq_map.get(lowerCaseLetterKey).get != 0) {
+      res = freq_map.get(lowerCaseLetterKey).get match {
+        case 1 => lowerCaseLetterKey
+        case _ => s"${lowerCaseLetterKey}(${freq_map.get(lowerCaseLetterKey).get})"
       }
-    } else if (freq_map.get("9").get != 0) {
-      res = freq_map.get("9").get match {
-        case 1 => "9"
-        case _ => s"9(${freq_map.get("9").get})"
+    } else if (freq_map.get(numberKey).get != 0) {
+      res = freq_map.get(numberKey).get match {
+        case 1 => numberKey
+        case _ => s"${numberKey}(${freq_map.get(numberKey).get})"
       }
     }
     return res
@@ -83,20 +120,20 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
     var seq_flag = true // This flag is used for checking if current character is sequential from last one
     // the freq map record the frequency of each pattern
     // the value will be updated to zero when the new pattern is found
-    var freq_map = mutable.Map("A" -> 0, "a" -> 0, "9" -> 0, "#" -> 0)
+    var freq_map = mutable.Map(capitalLetterKey -> 0, lowerCaseLetterKey -> 0, numberKey -> 0, symbolLetterKey -> 0)
     val res = src.toSeq.map(c => {
       var res = ""
-      if (c >= 'a' && c <= 'z') {
+      if (isLowerLetter(c)) {
         num_ch_lower += 1
         num_ch_upper = 0
         num_digit = 0
         num_others = 0
-      } else if (c >= 'A' && c <= 'Z' || c >= 0x4E00 && c <= 0x9FA5) {
+      } else if (isCapitalLetter(c) || isChineseChar(c)) {
         num_ch_lower = 0
         num_ch_upper += 1
         num_digit = 0
         num_others = 0
-      } else if (c >= '0' && c <= '9') {
+      } else if (isDigitNumber(c)) {
         num_ch_lower = 0
         num_ch_upper = 0
         num_digit += 1
@@ -108,10 +145,6 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
         num_others += 1
       }
 
-      //      if (num_others != 0) {
-      //        res = get_conclude_pattern(freq_map) + String.valueOf(c)
-      //      }
-
       // if the it is condlusion needed, or there exists special symbols, we need to get the conclude pattern
       if (is_need_conclude(freq_map, num_ch_upper, num_ch_lower, num_digit) || num_others != 0) {
         // if there exist special symbols, we have to append the special symbols with the pattern
@@ -120,10 +153,10 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
           case _ => get_conclude_pattern(freq_map) + String.valueOf(c)
         }
       }
-      freq_map.update("A", num_ch_upper)
-      freq_map.update("a", num_ch_lower)
-      freq_map.update("9", num_digit)
-      freq_map.update("#", num_others)
+      freq_map.update(capitalLetterKey, num_ch_upper)
+      freq_map.update(lowerCaseLetterKey, num_ch_lower)
+      freq_map.update(numberKey, num_digit)
+      freq_map.update(symbolLetterKey, num_others)
       res
     }) ++ Seq(get_conclude_pattern(freq_map))
     res.mkString("")
@@ -131,24 +164,24 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val limit = params.getOrElse(limitNum.name, "100").toInt
-    exclude_empty_val = params.getOrElse(excludeEmptyVal.name, "true").toBoolean
-    internal_ch_limit = params.getOrElse(patternLimit.name, "1000").toInt
+    excludeEmpty = params.getOrElse(excludeEmptyVal.name, "true").toBoolean
+    internalChLimit = params.getOrElse(patternLimit.name, "1000").toInt
 
-    var pattern_func = udf(find_patterns(_))
-    var pattern_func1 = udf(find_alternativePatterns(_))
+    var find_patterns_udf = udf(find_patterns(_))
+    var find_alternative_pattern_udf = udf(find_alternativePatterns(_))
 
     val res = df.schema.map(sc => {
       var col_pattern_map = Map[String, String]()
       sc.dataType match {
         case StringType =>
-          val sub_df = exclude_empty_val match {
+          val sub_df = excludeEmpty match {
             case true => df.select(sc.name).where(col(sc.name).isNotNull).where(col(sc.name) =!= "")
             case _ => df.select(sc.name)
           }
           require(!sub_df.isEmpty, s"Please make sure the column ${sc.name} contains content except null or empty content!")
           val rows_num = sub_df.count()
-          val res = sub_df.withColumn("pattern", pattern_func(col(sc.name))).withColumn("alternativePattern", pattern_func1(col(sc.name)))
-          val pattern_group_df = res.groupBy(col("pattern"), col("alternativePattern")).count().orderBy(desc("count")).withColumn("ratio", col("count") / rows_num.toDouble)
+          val res = sub_df.withColumn(patternColName, find_patterns_udf(col(sc.name))).withColumn(alternativePatternColName, find_alternative_pattern_udf(col(sc.name)))
+          val pattern_group_df = res.groupBy(col(patternColName), col(alternativePatternColName)).count().orderBy(desc("count")).withColumn("ratio", col("count") / rows_num.toDouble)
           val total_count = pattern_group_df.count()
           val res_json_str = pattern_group_df.limit(limit).toJSON.collectAsList.toString
           col_pattern_map = col_pattern_map ++ Map("colPatternDistribution" -> res_json_str, "totalCount" -> String.valueOf(total_count), "limit" -> String.valueOf(limit))
