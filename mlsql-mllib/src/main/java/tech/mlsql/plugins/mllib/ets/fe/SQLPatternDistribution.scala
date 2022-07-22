@@ -132,6 +132,7 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val limit = params.getOrElse(limitNum.name, "100").toInt
     exclude_empty_val = params.getOrElse(excludeEmptyVal.name, "true").toBoolean
+    internal_ch_limit = params.getOrElse(patternLimit.name, "1000").toInt
 
     var pattern_func = udf(find_patterns(_))
     var pattern_func1 = udf(find_alternativePatterns(_))
@@ -208,6 +209,29 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
             | e.g. excludeEmptyVal = "true
           """,
         label = "limit",
+        options = Map(
+          "valueType" -> "string",
+          "defaultValue" -> "true",
+          "required" -> "false",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+
+  final val patternLimit: Param[String] = new Param[String](this, "patternLimit",
+    FormParams.toJson(Input(
+      name = "patternLimit",
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | define the limit number for a pattern
+            | e.g. patternLimit = 1000
+          """,
+        label = "patternLimit",
         options = Map(
           "valueType" -> "string",
           "defaultValue" -> "true",
