@@ -158,7 +158,9 @@ class SQLPatternSummaryTest extends FlatSpec with SparkOperationUtil with Matche
       var seq_df = spark.createDataFrame(sseq).toDF("name", "age", "mock_col1", "income", "mock_col2", "mock_col3")
       var res = et.train(seq_df, "", Map())
       res.show()
-      print(res.collectAsList().get(2).get(1).toString)
+      val r1 = res.collectAsList().get(2)
+      println(r1.mkString(","))
+      assert(r1.mkString(",") === "mock_col3,{\"colPatternDistribution\":\"[{\\\"pattern\\\":\\\"aaaa\\\",\\\"alternativePattern\\\":\\\"a(4)\\\",\\\"count\\\":1,\\\"ratio\\\":1.0}]\",\"totalCount\":\"1\",\"limit\":\"100\"}")
 
       val data_seq2 = Seq(
         (1, "aa", 13, null, "kkk"),
@@ -174,7 +176,9 @@ class SQLPatternSummaryTest extends FlatSpec with SparkOperationUtil with Matche
       var df2 = spark.createDataFrame(data_seq2).toDF("passangerId", "name", "age", "cabin", "embarked")
       var res2 = et.train(df2, "", Map())
       res2.show()
-      print(res2.collectAsList().get(2).get(1).toString)
+      val r2 = res2.collectAsList().get(2)
+      println(r2.mkString(","))
+      assert(r2.mkString(",")==="embarked,{\"colPatternDistribution\":\"[{\\\"pattern\\\":\\\"aa\\\",\\\"alternativePattern\\\":\\\"a(2)\\\",\\\"count\\\":2,\\\"ratio\\\":0.4}, {\\\"pattern\\\":\\\"aaa\\\",\\\"alternativePattern\\\":\\\"a(3)\\\",\\\"count\\\":2,\\\"ratio\\\":0.4}, {\\\"pattern\\\":\\\"aaaaa\\\",\\\"alternativePattern\\\":\\\"a(5)\\\",\\\"count\\\":1,\\\"ratio\\\":0.2}]\",\"totalCount\":\"3\",\"limit\":\"100\"}")
     }
   }
 
