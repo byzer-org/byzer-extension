@@ -93,20 +93,24 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
 
   def get_conclude_pattern(freq_map: mutable.Map[String, Int]): String = {
     var res = ""
-    if (freq_map.get(capitalLetterKey).get != 0) {
-      res = freq_map.get(capitalLetterKey).get match {
+    val capitalLetterFreq = freq_map.get(capitalLetterKey).get
+    val lowerCaseFreq = freq_map.get(lowerCaseLetterKey).get
+    val numFreq = freq_map.get(numberKey).get
+
+    if (capitalLetterFreq != 0) {
+      res = capitalLetterFreq match {
         case 1 => capitalLetterKey
-        case _ => s"${capitalLetterKey}(${freq_map.get(capitalLetterKey).get})"
+        case _ => s"${capitalLetterKey}(${capitalLetterFreq})"
       }
-    } else if (freq_map.get(lowerCaseLetterKey).get != 0) {
-      res = freq_map.get(lowerCaseLetterKey).get match {
+    } else if (lowerCaseFreq != 0) {
+      res = lowerCaseFreq match {
         case 1 => lowerCaseLetterKey
-        case _ => s"${lowerCaseLetterKey}(${freq_map.get(lowerCaseLetterKey).get})"
+        case _ => s"${lowerCaseLetterKey}(${lowerCaseFreq})"
       }
-    } else if (freq_map.get(numberKey).get != 0) {
-      res = freq_map.get(numberKey).get match {
+    } else if (numFreq != 0) {
+      res = numFreq match {
         case 1 => numberKey
-        case _ => s"${numberKey}(${freq_map.get(numberKey).get})"
+        case _ => s"${numberKey}(${numFreq})"
       }
     }
     return res
