@@ -3,7 +3,7 @@ package tech.mlsql.plugins.mllib.ets.fe
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession, functions => F}
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.{avg, col, count, countDistinct, expr, first, last, length, lit, map_zip_with, max, min, monotonically_increasing_id, round, row_number, spark_partition_id, stddev, when, window}
+import org.apache.spark.sql.functions.{avg, coalesce, col, count, countDistinct, expr, first, last, length, lit, map_zip_with, max, min, monotonically_increasing_id, round, row_number, spark_partition_id, sqrt, stddev, sum, when, window}
 import org.apache.spark.sql.types.{BooleanType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, StructField, StructType, TimestampType, VarcharType}
 import streaming.dsl.ScriptSQLExec
 
@@ -23,6 +23,16 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   var round_at = 2
 
+  def colWithFilterBlank(sc: StructField): Column = {
+    val col_name = sc.name
+    sc.dataType match {
+      case DoubleType => col(col_name).isNotNull && !col(col_name).isNaN
+      case FloatType => col(col_name).isNotNull && !col(col_name).isNaN
+      case StringType => col(col_name).isNotNull && col(col_name) =!= ""
+      case _ => col(col_name).isNotNull
+    }
+  }
+
   def countColsNullNumber(schema: StructType, total_count: Long): Array[Column] = {
     schema.map(sc => {
       // For proportion calculation, we remain 2 more digits. Hence, we need set up round_at + 2
@@ -40,51 +50,82 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     })
   }
 
-  def countColsStdDevNumber(columns: Array[String], numeric_columns: Array[String]): Array[Column] = {
-    columns.map(c => {
+  def countColsStdDevNumber(schema: StructType, numeric_columns: Array[String]): Array[Column] = {
+    schema.map(sc => {
+      val c = sc.name
       if (numeric_columns.contains(c)) {
-        round(stddev(col(c)), round_at).alias(c)
+        //        round(stddev(col(c)), round_at).alias(c)
+        val expr = round(stddev(when(colWithFilterBlank(sc), col(c))), round_at)
+        coalesce(expr, lit("")).alias(c)
       } else {
         max(lit("")).alias(c)
       }
-    })
+    }).toArray
   }
 
-  def countColsStdErrNumber(columns: Array[String], numeric_columns: Array[String], total_count: Long): Array[Column] = {
-    columns.map(c => {
+  def countColsStdErrNumber(schema: StructType, numeric_columns: Array[String]): Array[Column] = {
+    schema.map(sc => {
+      val c = sc.name
       if (numeric_columns.contains(c)) {
-        round(stddev(col(c)) / sqrt(total_count), round_at).alias(c)
+        val expr = round(stddev(when(colWithFilterBlank(sc), col(c))) /
+          sqrt(sum(when(colWithFilterBlank(sc), 1).otherwise(0))), round_at)
+        coalesce(expr, lit("")).alias(c)
+        //        round(stddev(col(c)) / sqrt(total_count), round_at).alias(c)
       } else {
         max(lit("")).alias(c)
       }
-    })
+    }).toArray
   }
 
-  def isPrimaryKey(columns: Array[String], numeric_columns: Array[String], total_count: Long): Array[Column] = {
-    columns.map(c => {
-      when(countDistinct(col(c)) / total_count === 1, 1).otherwise(0).alias(c)
-    })
+  def isPrimaryKey(schmea: StructType, numeric_columns: Array[String], total_count: Long): Array[Column] = {
+    schmea.map(sc => {
+      val c = sc.name
+      val exp1 = countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
+      when(exp1 === 1, 1).otherwise(0)
+      //            when(countDistinct(col(sc.name)) / sum(when(colWithFilterBlank(sc), 1).otherwise(0)) === 1, 1).otherwise(0)
+    }).toArray
   }
 
-  def getMaxNum(columns: Array[String], numeric_columns: Array[String]): Array[Column] = {
-    columns.map(c => {
+  def countUniqueValueRatio(schema: StructType): Array[Column] = {
+    schema.map(sc => {
+      //      sum(when(colWithFilterBlank(sc), 1).otherwise(0))
+      //      sum(when(colWithFilterBlank(sc),1.0).otherwise(0.0))
+      val sum_expr = sum(when(colWithFilterBlank(sc), 1).otherwise(0))
+      val divide_expr = countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
+      val ratio_expr = when(sum_expr === 0, 0.0).otherwise(divide_expr)
+      round(ratio_expr, round_at + 2)
+    }).toArray
+  }
+
+  def getMaxNum(schema: StructType, numeric_columns: Array[String]): Array[Column] = {
+    schema.map(sc => {
+      val c = sc.name
       if (numeric_columns.contains(c)) {
-        max(col(c)).cast(StringType).alias(c)
+        // if not consider the empty value
+        val max_expr = max(when(colWithFilterBlank(sc), col(c))).alias(c)
+        coalesce(max_expr.cast(StringType), lit("")).alias(c)
+        //        max(col(c)).cast(StringType).alias(c)
       } else {
-        //        max(lit("")).alias(c)
-        max(col(c)).cast(StringType).alias(c)
+        val filter_expr = when(colWithFilterBlank(sc), col(sc.name))
+        val max_expr = max(filter_expr)
+        coalesce(max_expr.cast(StringType), lit("")).alias(c)
       }
-    })
+    }).toArray
   }
 
-  def getMinNum(columns: Array[String], numeric_columns: Array[String]): Array[Column] = {
-    columns.map(c => {
+  def getMinNum(schema: StructType, numeric_columns: Array[String]): Array[Column] = {
+    schema.map(sc => {
+      val c = sc.name
       if (numeric_columns.contains(c)) {
-        min(col(c)).cast(StringType).alias(c)
+        coalesce(min(when(colWithFilterBlank(sc), col(c))), lit("")).alias(c)
+        //        min(col(c)).cast(StringType).alias(c)
       } else {
-        min(col(c)).cast(StringType).alias(c)
+        //        min(col(c)).cast(StringType).alias(c)
+        val filter_expr = when(colWithFilterBlank(sc), col(sc.name))
+        val min_expr = min(filter_expr)
+        coalesce(min_expr.cast(StringType), lit("")).alias(c)
       }
-    })
+    }).toArray
   }
 
   def roundAtSingleCol(sc: StructField, column: Column): Column = {
@@ -145,10 +186,6 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       }
       new_col
     }).toArray
-  }
-
-  def calQuantileValue(lower_value: Double, upper_value: Double, pos: Int): Unit = {
-
   }
 
   /**
@@ -315,21 +352,24 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     val minlength_df = df.select(getMinLength(df.schema): _*).select(lit("minimumLength").alias("metric"), col("*"))
 
 
-    var distinct_proportion_df = distinctvalDF.select(distinctvalDF.columns.map(c => {
-      round(col(c) / total_count, round_at + 2)
-    }): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
-
-    val is_primary_key_df = df.select(isPrimaryKey(df.columns, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias("metric"), col("*"))
+    //    var distinct_proportion_df = distinctvalDF.select(distinctvalDF.columns.map(c => {
+    //      round(col(c) / total_count, round_at + 2)
+    //    }): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
+    var distinct_proportion_df = df.select(countUniqueValueRatio(df.schema): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
+    val is_primary_key_df = df.select(isPrimaryKey(df.schema, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias("metric"), col("*"))
     var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count): _*).select(lit("nullValueRatio").alias("metric"), col("*"))
     var empty_value_proportion_df = df.select(countColsEmptyNumber(df.columns, total_count): _*).select(lit("blankValueRatio").alias("metric"), col("*"))
     var mean_df = df.select(getMeanValue(df.schema): _*).select(lit("mean").alias("metric"), col("*"))
-    var stddev_df = df.select(countColsStdDevNumber(df.columns, numeric_columns): _*).select(lit("standardDeviation").alias("metric"), col("*"))
-    var stderr_df = df.select(countColsStdErrNumber(df.columns, numeric_columns, total_count): _*).select(lit("standardError").alias("metric"), col("*"))
+    var stddev_df = df.select(countColsStdDevNumber(df.schema, numeric_columns): _*).select(lit("standardDeviation").alias("metric"), col("*"))
+    var stderr_df = df.select(countColsStdErrNumber(df.schema, numeric_columns): _*).select(lit("standardError").alias("metric"), col("*"))
     var non_null_df = df.select(countNonNullValue(df.schema): _*).select(lit("nonNullCount").alias("metric"), col("*"))
-    val maxvalue_df = df.select(getMaxNum(df.columns, numeric_columns): _*).select(lit("max").alias("metric"), col("*"))
-    val minvalue_df = df.select(getMinNum(df.columns, numeric_columns): _*).select(lit("min").alias("metric"), col("*"))
+    val maxvalue_df = df.select(getMaxNum(df.schema, numeric_columns): _*).select(lit("max").alias("metric"), col("*"))
+    val minvalue_df = df.select(getMinNum(df.schema, numeric_columns): _*).select(lit("min").alias("metric"), col("*"))
     val datatypelen_df = df.select(getTypeLength(df.schema): _*).select(lit("dataLength").alias("metric"), col("*"))
-    val datatype_sq = Seq("dataType" +: df.schema.map(f => f.dataType.typeName)).map(Row.fromSeq(_))
+    val datatype_sq = Seq("dataType" +: df.schema.map(f => f.dataType.typeName match {
+      case "null" => "unknown"
+      case _ => f.dataType.typeName
+    })).map(Row.fromSeq(_))
 
 
     val colunm_idx = Seq("ordinalPosition" +: df.columns.map(col_name => String.valueOf(df.columns.indexOf(col_name) + 1))).map(Row.fromSeq(_))
