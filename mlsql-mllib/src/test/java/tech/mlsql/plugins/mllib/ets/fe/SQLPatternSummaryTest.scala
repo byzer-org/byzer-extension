@@ -171,7 +171,7 @@ class SQLPatternSummaryTest extends FlatSpec with SparkOperationUtil with Matche
         (7, "ff", 10, "eqwewq", ""),
         (8, "dd", 19, null, "bdbds"),
         (9, "hh", 10, "4eweq", ""),
-        (6, "ff", 18, null, "bvd"),
+        (6, "ff", 18, null, "bvd")
       )
       var df2 = spark.createDataFrame(data_seq2).toDF("passangerId", "name", "age", "cabin", "embarked")
       var res2 = et.train(df2, "", Map())

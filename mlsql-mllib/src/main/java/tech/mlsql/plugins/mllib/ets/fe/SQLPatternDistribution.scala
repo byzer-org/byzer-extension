@@ -40,62 +40,44 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
   var internalChLimit = 1000
 
   def isCapitalLetter(ch: Char): Boolean = {
-    if (ch >= 'A' && ch <= 'Z')
-      true
-    else
-      false
+    if (ch >= 'A' && ch <= 'Z') true else false
   }
 
   def isLowerLetter(ch: Char): Boolean = {
-    if (ch >= 'a' && ch <= 'z')
-      true
-    else
-      false
+    if (ch >= 'a' && ch <= 'z') true else false
   }
 
   def isDigitNumber(ch: Char): Boolean = {
-    if (ch >= '0' && ch <= '9')
-      true
-    else
-      false
+    if (ch >= '0' && ch <= '9') true else false
   }
 
   def isChineseChar(ch: Char): Boolean = {
-    if (ch >= 0x4E00 && ch <= 0x4E00)
-      true
-    else
-      false
+    if (ch >= 0x4E00 && ch <= 0x4E00) true else false
   }
 
   def find_patterns(src: String): String = {
-    val res = src.toSeq.map(c => c match {
-      case p if isLowerLetter(c) => 'a'
-      case p if isCapitalLetter(c) => 'A'
-      case p if isDigitNumber(c) => '9'
-      case p if isChineseChar(c) => 'A' // If the character is a Chinese, then retuen 'A'
-      case _ => c
-    }).toSeq.mkString("")
-    if (res.length > 1000)
-      res.substring(0, internalChLimit)
-    else
-      res
+    val res = src.toSeq.map {
+      case c if isLowerLetter(c) => 'a'
+      case c if isCapitalLetter(c) => 'A'
+      case c if isDigitNumber(c) => '9'
+      case c if isChineseChar(c) => 'A' // If the character is a Chinese, then retuen 'A'
+      case c => c
+    }.mkString("")
+    if (res.length > 1000) res.substring(0, internalChLimit) else res
   }
 
   def is_need_conclude(freq_map: mutable.Map[String, Int], num_ch_upper: Int, num_ch_lower: Int, num_digit: Int): Boolean = {
-    if (num_ch_lower == 0 && freq_map.get(lowerCaseLetterKey).get != 0)
-      return true
-    if (num_ch_upper == 0 && freq_map.get(capitalLetterKey).get != 0)
-      return true
-    if (num_digit == 0 && freq_map.get(numberKey).get != 0)
-      return true
+    if (num_ch_lower == 0 && freq_map(lowerCaseLetterKey) != 0) return true
+    if (num_ch_upper == 0 && freq_map(capitalLetterKey) != 0) return true
+    if (num_digit == 0 && freq_map(numberKey) != 0) return true
     false
   }
 
   def get_conclude_pattern(freq_map: mutable.Map[String, Int]): String = {
     var res = ""
-    val capitalLetterFreq = freq_map.get(capitalLetterKey).get
-    val lowerCaseFreq = freq_map.get(lowerCaseLetterKey).get
-    val numFreq = freq_map.get(numberKey).get
+    val capitalLetterFreq = freq_map(capitalLetterKey)
+    val lowerCaseFreq = freq_map(lowerCaseLetterKey)
+    val numFreq = freq_map(numberKey)
 
     if (capitalLetterFreq != 0) {
       res = capitalLetterFreq match {
@@ -117,10 +99,8 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
   }
 
   def find_alternativePatterns(src: String): String = {
-    var num_ch_upper = 0
-    var num_ch_lower = 0
-    var num_digit = 0
-    var num_others = 0
+    var num_ch_upper@num_ch_lower = 0
+    var num_digit@num_others = 0
     var seq_flag = true // This flag is used for checking if current character is sequential from last one
     // the freq map record the frequency of each pattern
     // the value will be updated to zero when the new pattern is found
@@ -178,9 +158,10 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
       var col_pattern_map = Map[String, String]()
       sc.dataType match {
         case StringType =>
-          val sub_df = excludeEmpty match {
-            case true => df.select(sc.name).where(col(sc.name).isNotNull).where(col(sc.name) =!= "")
-            case _ => df.select(sc.name)
+          val sub_df = if (excludeEmpty) {
+            df.select(sc.name).where(col(sc.name).isNotNull).where(col(sc.name) =!= "")
+          } else {
+            df.select(sc.name)
           }
           require(!sub_df.isEmpty, s"Please make sure the column ${sc.name} contains content except null or empty content!")
           val rows_num = sub_df.count()
@@ -234,6 +215,7 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
     )
     )
   )
+  setDefault(limitNum, "100")
 
   final val excludeEmptyVal: Param[String] = new Param[String](this, "excludeEmptyVal",
     FormParams.toJson(Input(
@@ -257,6 +239,7 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
     )
     )
   )
+  setDefault(excludeEmptyVal, "true")
 
   final val patternLimit: Param[String] = new Param[String](this, "patternLimit",
     FormParams.toJson(Input(
@@ -280,6 +263,7 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
     )
     )
   )
+  setDefault(patternLimit, "true")
 
   override def codeExample: Code = Code(SQLCode,
     """
@@ -299,6 +283,4 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
       |;
     """.stripMargin)
 
-  setDefault(limitNum, "100")
-  setDefault(excludeEmptyVal, "true")
 }
