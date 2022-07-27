@@ -7,7 +7,6 @@ import org.apache.spark.sql.functions.{avg, coalesce, col, count, countDistinct,
 import org.apache.spark.sql.types.{BooleanType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, StructField, StructType, TimestampType, VarcharType}
 import streaming.dsl.ScriptSQLExec
 
-import scala.math._
 import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}
@@ -82,15 +81,13 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       val c = sc.name
       val exp1 = countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
       when(exp1 === 1, 1).otherwise(0)
-      //            when(countDistinct(col(sc.name)) / sum(when(colWithFilterBlank(sc), 1).otherwise(0)) === 1, 1).otherwise(0)
     }).toArray
   }
 
   def countUniqueValueRatio(schema: StructType): Array[Column] = {
     schema.map(sc => {
-      //      sum(when(colWithFilterBlank(sc), 1).otherwise(0))
-      //      sum(when(colWithFilterBlank(sc),1.0).otherwise(0.0))
       val sum_expr = sum(when(colWithFilterBlank(sc), 1).otherwise(0))
+
       val divide_expr = countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
       val ratio_expr = when(sum_expr === 0, 0.0).otherwise(divide_expr)
       round(ratio_expr, round_at + 2)
@@ -336,25 +333,9 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     var quantile_df_tmp = new_quantile_rows.map(Row.fromSeq(_)).toSeq
     val quantile_df = spark.createDataFrame(spark.sparkContext.parallelize(quantile_df_tmp, 1), StructType(datatype_schema)).na.fill("")
 
-    // If the approx switch is turn on, then calculate the distinct value by approx_count_distinct function,
-    // otherwise count distinct by default.
-
-    //    val distinctvalDF = approxSwitch match {
-    //      case true => {
-    //        val distinctValexprs = df.columns.map((_ -> "approx_count_distinct")).toMap
-    //        df.agg(distinctValexprs)
-    //      }
-    //      case false => df.select(df.columns.map(c => countDistinct(col(c)).alias(c)): _*)
-    //    }
-
     var mode_df = df.select(getModeNum(df.schema, numeric_columns, df, round_at): _*).select(lit("mode").alias("metric"), col("*"))
     val maxlength_df = df.select(getMaxLength(df.schema): _*).select(lit("maximumLength").alias("metric"), col("*"))
     val minlength_df = df.select(getMinLength(df.schema): _*).select(lit("minimumLength").alias("metric"), col("*"))
-
-
-    //    var distinct_proportion_df = distinctvalDF.select(distinctvalDF.columns.map(c => {
-    //      round(col(c) / total_count, round_at + 2)
-    //    }): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
     var distinct_proportion_df = df.select(countUniqueValueRatio(df.schema): _*).select(lit("uniqueValueRatio").alias(DataSummary.metricColumnName), col("*"))
     val is_primary_key_df = df.select(isPrimaryKey(df.schema, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias(DataSummary.metricColumnName), col("*"))
     var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count): _*).select(lit("nullValueRatio").alias(DataSummary.metricColumnName), col("*"))
