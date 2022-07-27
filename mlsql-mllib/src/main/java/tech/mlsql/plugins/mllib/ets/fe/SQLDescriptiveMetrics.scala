@@ -98,7 +98,7 @@ class SQLDescriptiveMetrics(override val uid: String) extends SQLAlg with MllibF
       import org.apache.spark.sql.functions
       val countRow: Dataset[Row] = df.groupBy(col(c)).count().toDF("word", "count")
         .sort(functions.desc("count")).limit(metricSize)
-      val countRes = countRow.sort(functions.desc("word")).collect
+      val countRes = countRow.sort(functions.asc("word")).collect
       (c, convertRowToJSON(countRes))
     })
   }
