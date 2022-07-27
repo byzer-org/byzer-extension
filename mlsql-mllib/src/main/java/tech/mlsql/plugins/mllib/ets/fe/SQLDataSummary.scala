@@ -339,13 +339,13 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     // If the approx switch is turn on, then calculate the distinct value by approx_count_distinct function,
     // otherwise count distinct by default.
 
-    val distinctvalDF = approxSwitch match {
-      case true => {
-        val distinctValexprs = df.columns.map((_ -> "approx_count_distinct")).toMap
-        df.agg(distinctValexprs)
-      }
-      case false => df.select(df.columns.map(c => countDistinct(col(c)).alias(c)): _*)
-    }
+    //    val distinctvalDF = approxSwitch match {
+    //      case true => {
+    //        val distinctValexprs = df.columns.map((_ -> "approx_count_distinct")).toMap
+    //        df.agg(distinctValexprs)
+    //      }
+    //      case false => df.select(df.columns.map(c => countDistinct(col(c)).alias(c)): _*)
+    //    }
 
     var mode_df = df.select(getModeNum(df.schema, numeric_columns, df, round_at): _*).select(lit("mode").alias("metric"), col("*"))
     val maxlength_df = df.select(getMaxLength(df.schema): _*).select(lit("maximumLength").alias("metric"), col("*"))
@@ -355,17 +355,17 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     //    var distinct_proportion_df = distinctvalDF.select(distinctvalDF.columns.map(c => {
     //      round(col(c) / total_count, round_at + 2)
     //    }): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
-    var distinct_proportion_df = df.select(countUniqueValueRatio(df.schema): _*).select(lit("uniqueValueRatio").alias("metric"), col("*"))
-    val is_primary_key_df = df.select(isPrimaryKey(df.schema, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias("metric"), col("*"))
-    var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count): _*).select(lit("nullValueRatio").alias("metric"), col("*"))
-    var empty_value_proportion_df = df.select(countColsEmptyNumber(df.columns, total_count): _*).select(lit("blankValueRatio").alias("metric"), col("*"))
+    var distinct_proportion_df = df.select(countUniqueValueRatio(df.schema): _*).select(lit("uniqueValueRatio").alias(DataSummary.metricColumnName), col("*"))
+    val is_primary_key_df = df.select(isPrimaryKey(df.schema, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias(DataSummary.metricColumnName), col("*"))
+    var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count): _*).select(lit("nullValueRatio").alias(DataSummary.metricColumnName), col("*"))
+    var empty_value_proportion_df = df.select(countColsEmptyNumber(df.columns, total_count): _*).select(lit("blankValueRatio").alias(DataSummary.metricColumnName), col("*"))
     var mean_df = df.select(getMeanValue(df.schema): _*).select(lit("mean").alias("metric"), col("*"))
-    var stddev_df = df.select(countColsStdDevNumber(df.schema, numeric_columns): _*).select(lit("standardDeviation").alias("metric"), col("*"))
-    var stderr_df = df.select(countColsStdErrNumber(df.schema, numeric_columns): _*).select(lit("standardError").alias("metric"), col("*"))
-    var non_null_df = df.select(countNonNullValue(df.schema): _*).select(lit("nonNullCount").alias("metric"), col("*"))
-    val maxvalue_df = df.select(getMaxNum(df.schema, numeric_columns): _*).select(lit("max").alias("metric"), col("*"))
-    val minvalue_df = df.select(getMinNum(df.schema, numeric_columns): _*).select(lit("min").alias("metric"), col("*"))
-    val datatypelen_df = df.select(getTypeLength(df.schema): _*).select(lit("dataLength").alias("metric"), col("*"))
+    var stddev_df = df.select(countColsStdDevNumber(df.schema, numeric_columns): _*).select(lit("standardDeviation").alias(DataSummary.metricColumnName), col("*"))
+    var stderr_df = df.select(countColsStdErrNumber(df.schema, numeric_columns): _*).select(lit("standardError").alias(DataSummary.metricColumnName), col("*"))
+    var non_null_df = df.select(countNonNullValue(df.schema): _*).select(lit("nonNullCount").alias(DataSummary.metricColumnName), col("*"))
+    val maxvalue_df = df.select(getMaxNum(df.schema, numeric_columns): _*).select(lit("max").alias(DataSummary.metricColumnName), col("*"))
+    val minvalue_df = df.select(getMinNum(df.schema, numeric_columns): _*).select(lit("min").alias(DataSummary.metricColumnName), col("*"))
+    val datatypelen_df = df.select(getTypeLength(df.schema): _*).select(lit("dataLength").alias(DataSummary.metricColumnName), col("*"))
     val datatype_sq = Seq("dataType" +: df.schema.map(f => f.dataType.typeName match {
       case "null" => "unknown"
       case _ => f.dataType.typeName
@@ -466,4 +466,5 @@ object DataSummary {
   val metrics = "metrics"
   val roundAt = "roundAt"
   val approxSwitch = "approxSwitch"
+  val metricColumnName = "metric"
 }
