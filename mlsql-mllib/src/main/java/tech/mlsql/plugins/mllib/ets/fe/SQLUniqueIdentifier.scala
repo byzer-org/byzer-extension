@@ -153,12 +153,10 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
             colNumber += 1
             if (sc.name.equals(columnNameCol)) {
               replaceColNumber = colNumber
-              println("ok! replaceColNumber=" + replaceColNumber)
             }
           })
           spark.createDataFrame(zipRdd.map {
             case (row, index) =>
-              println(s"replaceColNumber:$replaceColNumber,index:$index")
               Row.fromSeq(row.toSeq.updated(replaceColNumber, index))
           },
             StructType(df.schema.fields.toSeq))
