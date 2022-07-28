@@ -383,7 +383,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     if (metrics == null || metrics.length == 0) {
       res = res.select(col("*"))
     } else {
-      res.select(col("*")).where(s"${DataSummary.metrics} in (${metric_values})")
+      res = res.select(col("*")).where(s"${DataSummary.metrics} in (${metric_values})")
     }
     //    res.summary()
     // Transpose
