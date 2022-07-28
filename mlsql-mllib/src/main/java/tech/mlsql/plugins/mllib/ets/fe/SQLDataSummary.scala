@@ -385,6 +385,9 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   override def predict(sparkSession: SparkSession, _model: Any, name: String, params: Map[String, String]): UserDefinedFunction = ???
 
+  override def batchPredict(df: DataFrame, path: String, params: Map[String, String]): DataFrame =
+    train(df, path, params)
+
   override def codeExample: Code = Code(SQLCode, CodeExampleText.jsonStr +
     """
       |

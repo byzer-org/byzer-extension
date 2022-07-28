@@ -2,16 +2,15 @@ package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.ZippedWithGivenIndexRDD
 import org.apache.spark.ml.param.Param
-import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.types.{DoubleType, FloatType, IntegerType, LongType, ShortType, StructField, StructType}
+import org.apache.spark.sql.types.{LongType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import streaming.dsl.ScriptSQLExec
 import streaming.dsl.auth._
 import streaming.dsl.mmlib.algs.param.BaseParams
 import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
-import tech.mlsql.common.form.{Extra, FormParams, Input, KV, Select}
+import tech.mlsql.common.form._
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 
@@ -173,4 +172,6 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
     throw new RuntimeException(s"${getClass.getName} not support predict function.")
   }
 
+  override def batchPredict(df: DataFrame, path: String, params: Map[String, String]): DataFrame =
+    train(df, path, params)
 }

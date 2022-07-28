@@ -127,4 +127,7 @@ class SQLDescriptiveMetrics(override val uid: String) extends SQLAlg with MllibF
     throw new RuntimeException(s"${getClass.getName} not support predict function.")
   }
 
+  override def batchPredict(df: DataFrame, path: String, params: Map[String, String]): DataFrame =
+    train(df, path, params)
+
 }

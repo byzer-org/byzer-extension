@@ -191,6 +191,9 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
     throw new RuntimeException(s"${getClass.getName} not support predict function.")
   }
 
+  override def batchPredict(df: DataFrame, path: String, params: Map[String, String]): DataFrame =
+    train(df, path, params)
+
   override def auth(etMethod: ETMethod, path: String, params: Map[String, String]): List[TableAuthResult] = ???
 
   final val limitNum: Param[String] = new Param[String](this, "limit",
