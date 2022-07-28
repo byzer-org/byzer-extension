@@ -156,8 +156,7 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
             }
           })
           spark.createDataFrame(zipRdd.map {
-            case (row, index) =>
-              Row.fromSeq(row.toSeq.updated(replaceColNumber, index))
+            case (row, index) => Row.fromSeq(row.toSeq.updated(replaceColNumber, index))
           },
             StructType(df.schema.fields.toSeq))
         }
