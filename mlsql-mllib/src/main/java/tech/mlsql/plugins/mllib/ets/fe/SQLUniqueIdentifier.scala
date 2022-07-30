@@ -177,17 +177,19 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
     train(df, path, params)
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
-
-    var sourceCol = params.getOrElse(source.name, SOURCE_MODE_NEW).toLowerCase()
-    val columnNameCol = params.getOrElse(columnName.name, DEFAULT_COLUMN_NAME)
     val curMode = params.getOrElse(mode.name, if (params.getOrElse("onlyInferSchema", "false").toBoolean) INFER_MODE else DATA_MODE)
     val onlyInferSchema = if (INFER_MODE.equals(curMode)) true else false
-
     if (onlyInferSchema) {
-      return inferSchema(df, path, params)
+      inferSchema(df, params)
+    } else {
+      getZippedWithIndexDF(df, params)
     }
+  }
 
-    verifyParams(sourceCol)
+  def getZippedWithIndexDF(df: DataFrame, params: Map[String, String]): DataFrame = {
+    var sourceParam = params.getOrElse(source.name, SOURCE_MODE_NEW).toLowerCase()
+    val columnNameParam = params.getOrElse(columnName.name, DEFAULT_COLUMN_NAME)
+    verifyParams(sourceParam)
 
     val fieldNames = df.schema.map(sc => {
       sc.name
@@ -197,26 +199,26 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
     val zipRdd = new ZippedWithGivenIndexRDD(df.rdd, 1)
 
     @tailrec
-    def getRowRDD: DataFrame = sourceCol match {
+    def getRowRDD: DataFrame = sourceParam match {
       case SOURCE_MODE_NEW =>
-        if (fieldNames.contains(columnNameCol)) {
-          throw new IllegalArgumentException(s"The newly created column name `$columnNameCol` already exists.")
+        if (fieldNames.contains(columnNameParam)) {
+          throw new IllegalArgumentException(s"The newly created column name `$columnNameParam` already exists.")
         }
 
         spark.createDataFrame(zipRdd.map { case (row, index) => Row.fromSeq(index +: row.toSeq) },
-          StructType(StructField(columnNameCol, LongType, nullable = false) +: df.schema.fields.toSeq))
+          StructType(StructField(columnNameParam, LongType, nullable = false) +: df.schema.fields.toSeq))
       case SOURCE_MODE_REPLACE =>
         /* To avoid exceptions caused by incorrect parameter settings, if the column is not present when replacing the
            schema, a new column is created. */
-        if (!fieldNames.contains(columnNameCol)) {
-          sourceCol = SOURCE_MODE_NEW
+        if (!fieldNames.contains(columnNameParam)) {
+          sourceParam = SOURCE_MODE_NEW
           getRowRDD
         } else {
           var colNumber = -1
           var replaceColNumber = 0
           df.schema.foreach(sc => {
             colNumber += 1
-            if (sc.name.equals(columnNameCol)) {
+            if (sc.name.equals(columnNameParam)) {
               replaceColNumber = colNumber
             }
           })
@@ -229,8 +231,7 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
 
     getRowRDD
   }
-
-  def inferSchema(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
+  def inferSchema(df: DataFrame, params: Map[String, String]): DataFrame = {
     var sourceCol = String.valueOf(params.getOrElse(source.name, SOURCE_MODE_NEW)).toLowerCase()
     val columnNameCol = String.valueOf(params.getOrElse(columnName.name, DEFAULT_COLUMN_NAME))
     val jsonParser = new JsonParser()
@@ -246,7 +247,7 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
     val spark = df.sparkSession
 
     @tailrec
-    def getRowRDD: DataFrame = sourceCol match {
+    def getCurrentSchema: DataFrame = sourceCol match {
       case SOURCE_MODE_NEW =>
         spark.createDataFrame(hashMap2RDD(mutable.LinkedHashMap[String, String](columnNameCol -> "bigint") ++: inputSchema, spark),
           StructType(Seq(StructField("col_name", StringType, nullable = false), StructField("data_type", StringType, nullable = false))))
@@ -256,7 +257,7 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
         }).toSet
         if (!fieldNames.contains(columnNameCol)) {
           sourceCol = SOURCE_MODE_NEW
-          getRowRDD
+          getCurrentSchema
         } else {
           spark.createDataFrame(hashMap2RDD(inputSchema, spark),
             StructType(Seq(StructField("col_name", StringType, nullable = false),
@@ -264,7 +265,7 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
             )))
         }
     }
-    getRowRDD
+    getCurrentSchema
   }
 
   def verifyParams(sourceCol: String): Unit = {
