@@ -12,18 +12,19 @@ import org.apache.spark.sql.types._
 import scala.util.Try
 
 case class ExcelRelation(
-  dataLocator: DataLocator,
-  header: Boolean,
-  treatEmptyValuesAsNulls: Boolean,
-  usePlainNumberFormat: Boolean,
-  inferSheetSchema: Boolean,
-  addColorColumns: Boolean = true,
-  userSchema: Option[StructType] = None,
-  timestampFormat: Option[String] = None,
-  excerptSize: Int = 10,
-  workbookReader: WorkbookReader
-)(@transient val sqlContext: SQLContext)
-    extends BaseRelation
+                          dataLocator: DataLocator,
+                          header: Boolean,
+                          treatEmptyValuesAsNulls: Boolean,
+                          usePlainNumberFormat: Boolean,
+                          inferSheetSchema: Boolean,
+                          addColorColumns: Boolean = true,
+                          userSchema: Option[StructType] = None,
+                          timestampFormat: Option[String] = None,
+                          excerptSize: Int = 10,
+                          workbookReader: WorkbookReader,
+                          skipNLines: Option[String] = None
+                        )(@transient val sqlContext: SQLContext)
+  extends BaseRelation
     with TableScan
     with PrunedScan {
   type SheetRow = Seq[Cell]
@@ -47,6 +48,7 @@ case class ExcelRelation(
       .getOrElse((stringValue: String) => Timestamp.valueOf(stringValue))
 
   val columnNameRegex = s"(?s)^(.*?)(_color)?$$".r.unanchored
+
   private def columnExtractor(column: String): SheetRow => Any = {
     val columnNameRegex(columnName, isColor) = column
     val headerColumn = headerColumnForName(columnName)
@@ -61,7 +63,10 @@ case class ExcelRelation(
   override def buildScan(requiredColumns: Array[String]): RDD[Row] = {
     val lookups = requiredColumns.map(columnExtractor).toSeq
     workbookReader.withWorkbook { workbook =>
-      val allDataIterator = dataLocator.readFrom(workbook)
+      val allDataIterator = skipNLines match {
+        case None => dataLocator.readFrom(workbook)
+        case _ => dataLocator.readFrom(workbook).drop(skipNLines.get.toInt)
+      }
       val iter = if (header) allDataIterator.drop(1) else allDataIterator
       val rows: Iterator[Seq[Any]] = iter
         .flatMap(row =>
@@ -94,10 +99,10 @@ case class ExcelRelation(
     }
   }
 
-  private def parallelize[T : scala.reflect.ClassTag](seq: Seq[T]): RDD[T] = sqlContext.sparkContext.parallelize(seq)
+  private def parallelize[T: scala.reflect.ClassTag](seq: Seq[T]): RDD[T] = sqlContext.sparkContext.parallelize(seq)
 
   /** Generates a header from the given row which is null-safe and duplicate-safe.
-    */
+   */
   lazy val headerColumns: Seq[HeaderDataColumn] = {
     val firstRow = excerpt.head
     val nonHeaderRows = if (header) excerpt.tail else excerpt
