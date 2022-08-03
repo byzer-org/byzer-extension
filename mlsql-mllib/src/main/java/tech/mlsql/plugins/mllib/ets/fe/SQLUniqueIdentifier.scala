@@ -173,7 +173,7 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
       | select age, income from table1 as table2;
       | -- !desc  table2;
       | run table2 as UniqueIdentifier.`` where source="new" and columnName="income1" and mode="inferSchema" and
-      | inputSchema='''{"age":"bigint", "income":"bigint"}''' as uniqueIdentifier;
+      | inputSchema='''[{"col_name":"age", "data_type":"bigint"}]''' as uniqueIdentifier;
       |
       |;
     """.stripMargin)
