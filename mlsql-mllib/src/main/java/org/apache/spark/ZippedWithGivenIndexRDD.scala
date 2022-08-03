@@ -21,13 +21,14 @@ class ZippedWithGivenIndexRDD[T: ClassTag](prev: RDD[T], startIndex: Long = 0) e
     if (n == 0) {
       Array.empty
     } else if (n == 1) {
-      Array(0L)
+      Array(startIndex)
     } else {
-      prev.context.runJob(
+      val longs = prev.context.runJob(
         prev,
         Utils.getIteratorSize _,
         0 until n - 1 // do not need to count the last partition
       ).scanLeft(startIndex)(_ + _)
+      longs
     }
   }
 
