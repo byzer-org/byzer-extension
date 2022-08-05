@@ -275,17 +275,13 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
     getRowRDD
   }
 
-  def verifyParams(sourceCol: String): Unit = {
-    if (!sourceOptionalVal.contains(KV(Option(source.name), Option(sourceCol)))) {
-      throw new IllegalArgumentException(s"Illegal source parameter: $sourceCol")
-    }
-  }
-
   def inferSchema(df: DataFrame, params: Map[String, String]): DataFrame = {
     var sourceParam = String.valueOf(params.getOrElse(source.name, SOURCE_MODE_NEW)).toLowerCase()
     if (sourceParam == null || sourceParam.isEmpty) {
       sourceParam = SOURCE_MODE_NEW
     }
+    verifyParams(sourceParam)
+
     val jsonParser = new JsonParser()
     val inputSchemaStr = String.valueOf(params.getOrElse("inputSchema", "[]"))
     val jsonArr = jsonParser.parse(inputSchemaStr).asInstanceOf[JsonArray]
@@ -306,8 +302,6 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
       }
     }
 
-    verifyParams(sourceParam)
-
     val spark = df.sparkSession
     var columnNameParam = String.valueOf(params.getOrElse(columnName.name, DEFAULT_COLUMN_NAME))
     if (columnNameParam == null || columnNameParam.isEmpty) {
@@ -317,6 +311,9 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
     @tailrec
     def getCurrentSchema: DataFrame = sourceParam match {
       case SOURCE_MODE_NEW =>
+        if (inputSchema.contains(columnNameParam)){
+          throw new IllegalArgumentException(s"The newly created column name `$columnNameParam` already exists.")
+        }
         spark.createDataFrame(hashMap2RDD(mutable.LinkedHashMap[String, String](columnNameParam -> "bigint") ++: inputSchema, spark),
           StructType(Seq(StructField("col_name", StringType, nullable = true), StructField("data_type", StringType, nullable = true))))
       case SOURCE_MODE_REPLACE =>
@@ -333,6 +330,12 @@ class SQLUniqueIdentifier(override val uid: String) extends SQLAlg with MllibFun
     }
 
     getCurrentSchema
+  }
+
+  def verifyParams(sourceCol: String): Unit = {
+    if (!sourceOptionalVal.contains(KV(Option(source.name), Option(sourceCol)))) {
+      throw new IllegalArgumentException(s"Illegal source parameter: $sourceCol")
+    }
   }
 
   private def hashMap2RDD(map: mutable.Map[String, String], spark: SparkSession): RDD[Row] = {
