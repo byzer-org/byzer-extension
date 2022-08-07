@@ -22,7 +22,7 @@ case class ExcelRelation(
                           timestampFormat: Option[String] = None,
                           excerptSize: Int = 10,
                           workbookReader: WorkbookReader,
-                          skipNLines: Option[String] = None
+                          skipFirstNLines: Option[String] = None
                         )(@transient val sqlContext: SQLContext)
   extends BaseRelation
     with TableScan
@@ -63,9 +63,9 @@ case class ExcelRelation(
   override def buildScan(requiredColumns: Array[String]): RDD[Row] = {
     val lookups = requiredColumns.map(columnExtractor).toSeq
     workbookReader.withWorkbook { workbook =>
-      val allDataIterator = skipNLines match {
+      val allDataIterator = skipFirstNLines match {
         case None => dataLocator.readFrom(workbook)
-        case _ => dataLocator.readFrom(workbook).drop(skipNLines.get.toInt)
+        case _ => dataLocator.readFrom(workbook).drop(skipFirstNLines.get.toInt)
       }
       val iter = if (header) allDataIterator.drop(1) else allDataIterator
       val rows: Iterator[Seq[Any]] = iter

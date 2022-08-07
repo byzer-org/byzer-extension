@@ -32,7 +32,7 @@ class DefaultSource extends RelationProvider with SchemaRelationProvider with Cr
       excerptSize = parameters.get("excerptSize").fold(10)(_.toInt),
       dataLocator = dataLocator,
       workbookReader = wbReader,
-      skipNLines = parameters.get("skipNLines")
+      skipFirstNLines = parameters.get("skipFirstNLines")
     )(sqlContext)
   }
 
