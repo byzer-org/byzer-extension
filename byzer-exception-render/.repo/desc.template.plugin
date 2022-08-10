@@ -1,0 +1,9 @@
+moduleName=byzer-exception-render-{{spark_binary_version}}_{{scala_binary_version}}
+mainClass=tech.mlsql.plugins.render.ExceptionReplaceRenderApp
+version=0.1.0-SNAPSHOT
+author=jiachuan.zhu
+mlsqlVersions=">=2.0.0"
+githubUrl=https://github.com/byzer-org/byzer-extension/tree/master/byzer-exception-render
+scala_version=2.11
+mlsqlPluginType=script
+desc=Renders Byzer-lang /run/script api's exception
