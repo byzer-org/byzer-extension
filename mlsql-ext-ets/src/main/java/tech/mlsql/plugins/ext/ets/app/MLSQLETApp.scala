@@ -1,6 +1,7 @@
 package tech.mlsql.plugins.ext.ets.app
 
 import tech.mlsql.common.utils.log.Logging
+import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.version.VersionCompatibility
 
@@ -11,7 +12,6 @@ class MLSQLETApp extends tech.mlsql.app.App with VersionCompatibility with Loggi
   override def run(args: Seq[String]): Unit = {
     ETRegister.register("AthenaExt", classOf[AthenaExt].getName)
     ETRegister.register("AthenaSchemaExt", classOf[AthenaSchemaExt].getName)
-    ETRegister.register("FeatureStoreExt", classOf[FeatureStoreExt].getName)
   }
 
 

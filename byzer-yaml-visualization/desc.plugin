@@ -1,0 +1,15 @@
+moduleName=byzer-yaml-visualization-3.0
+mainClass=tech.mlsql.plugins.visualization.ByzerVisualizationApp
+scala_version=2.12
+spark_version=3.0
+version=0.1.0-SNAPSHOT
+author=allwefantasy
+mlsqlVersions=""
+githubUrl=https://github.com/allwefantasy/mlsql-plugins/tree/master/byzer-yaml-visualization
+mlsqlPluginType=app
+desc=byzer-yaml-visualization
+
+
+
+
+

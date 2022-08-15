@@ -63,3 +63,7 @@ class MLSQLExcel(override val uid: String)
     Seq(">1.6.0")
   }
 }
+
+object MLSQLExcel {
+  val sheetName = "sheetName"
+}
