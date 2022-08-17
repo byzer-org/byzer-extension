@@ -2,16 +2,15 @@ package tech.mlsql.plugins.mllib.ets.fe
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import net.liftweb.json.{DefaultFormats, Extraction}
 import org.apache.spark.ml.param.Param
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.{col, desc, udf}
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import streaming.dsl.auth.TableAuthResult
-import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
-import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}
 import streaming.dsl.mmlib.algs.param.BaseParams
+import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}
+import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import tech.mlsql.common.form.{Extra, FormParams, Input}
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
@@ -56,14 +55,26 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
   }
 
   def find_patterns(src: String): String = {
-    val res = src.toSeq.map {
-      case c if isLowerLetter(c) => 'a'
-      case c if isCapitalLetter(c) => 'A'
-      case c if isDigitNumber(c) => '9'
-      case c if isChineseChar(c) => 'A' // If the character is a Chinese, then retuen 'A'
-      case c => c
-    }.mkString("")
-    if (res.length > 1000) res.substring(0, internalChLimit) else res
+    val srcArray = src.toArray
+    val len = if (srcArray.length <= internalChLimit) srcArray.length else internalChLimit
+    val str = new mutable.StringBuilder
+    for (i <- 0 until len) {
+      val c = srcArray(i)
+      if (isLowerLetter(c)) {
+        str.append('a')
+      }
+      else if (isCapitalLetter(c) || isChineseChar(c)) {
+        // If the character is a Chinese, then return 'A'
+        str.append('A')
+      }
+      else if (isDigitNumber(c)) {
+        str.append('9')
+      }
+      else {
+        str.append(c)
+      }
+    }
+    str.result
   }
 
   def is_need_conclude(freq_map: mutable.Map[String, Int], num_ch_upper: Int, num_ch_lower: Int, num_digit: Int): Boolean = {
@@ -101,10 +112,9 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
   def find_alternativePatterns(src: String): String = {
     var num_ch_upper@num_ch_lower = 0
     var num_digit@num_others = 0
-    var seq_flag = true // This flag is used for checking if current character is sequential from last one
     // the freq map record the frequency of each pattern
     // the value will be updated to zero when the new pattern is found
-    var freq_map = mutable.Map(capitalLetterKey -> 0, lowerCaseLetterKey -> 0, numberKey -> 0, symbolLetterKey -> 0)
+    val freq_map = mutable.Map(capitalLetterKey -> 0, lowerCaseLetterKey -> 0, numberKey -> 0, symbolLetterKey -> 0)
     val res = src.toSeq.map(c => {
       var res = ""
       if (isLowerLetter(c)) {
@@ -151,8 +161,8 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
     excludeEmpty = params.getOrElse(excludeEmptyVal.name, "true").toBoolean
     internalChLimit = params.getOrElse(patternLimit.name, "1000").toInt
 
-    var find_patterns_udf = udf(find_patterns(_))
-    var find_alternative_pattern_udf = udf(find_alternativePatterns(_))
+    val find_patterns_udf = udf(find_patterns(_))
+    val find_alternative_pattern_udf = udf(find_alternativePatterns(_))
 
     val res = df.schema.map(sc => {
       var col_pattern_map = Map[String, String]()
@@ -167,9 +177,14 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
           val rows_num = sub_df.count()
           val res = sub_df.withColumn(patternColName, find_patterns_udf(col(sc.name))).withColumn(alternativePatternColName, find_alternative_pattern_udf(col(sc.name)))
           val pattern_group_df = res.groupBy(col(patternColName), col(alternativePatternColName)).count().orderBy(desc("count")).withColumn("ratio", col("count") / rows_num.toDouble)
-          val total_count = pattern_group_df.count()
-          val res_json_str = pattern_group_df.limit(limit).toJSON.collectAsList.toString
-          col_pattern_map = col_pattern_map ++ Map("colPatternDistribution" -> res_json_str, "totalCount" -> String.valueOf(total_count), "limit" -> String.valueOf(limit))
+          val pattern_group_df_cached = pattern_group_df.cache()
+          try {
+            val total_count = pattern_group_df_cached.count()
+            val res_json_str = pattern_group_df_cached.limit(limit).toJSON.collectAsList.toString
+            col_pattern_map = col_pattern_map ++ Map("colPatternDistribution" -> res_json_str, "totalCount" -> String.valueOf(total_count), "limit" -> String.valueOf(limit))
+          } finally {
+            pattern_group_df.unpersist
+          }
           val mapper = new ObjectMapper()
           mapper.registerModule(DefaultScalaModule)
           val json_str = mapper.writeValueAsString(col_pattern_map)
@@ -179,7 +194,6 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
       }
     }).filter(_ != null).map(Row.fromSeq(_))
     val spark = df.sparkSession
-    import spark.implicits._
     spark.createDataFrame(spark.sparkContext.parallelize(res, 1), StructType(Seq(StructField("columnName", StringType), StructField("patternDistribution", StringType))))
   }
 
