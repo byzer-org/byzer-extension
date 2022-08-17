@@ -178,13 +178,16 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
           val res = sub_df.withColumn(patternColName, find_patterns_udf(col(sc.name))).withColumn(alternativePatternColName, find_alternative_pattern_udf(col(sc.name)))
           val pattern_group_df = res.groupBy(col(patternColName), col(alternativePatternColName)).count().orderBy(desc("count")).withColumn("ratio", col("count") / rows_num.toDouble)
           val pattern_group_df_cached = pattern_group_df.cache()
-          val total_count = pattern_group_df_cached.count()
-          val res_json_str = pattern_group_df_cached.limit(limit).toJSON.collectAsList.toString
-          col_pattern_map = col_pattern_map ++ Map("colPatternDistribution" -> res_json_str, "totalCount" -> String.valueOf(total_count), "limit" -> String.valueOf(limit))
+          try {
+            val total_count = pattern_group_df_cached.count()
+            val res_json_str = pattern_group_df_cached.limit(limit).toJSON.collectAsList.toString
+            col_pattern_map = col_pattern_map ++ Map("colPatternDistribution" -> res_json_str, "totalCount" -> String.valueOf(total_count), "limit" -> String.valueOf(limit))
+          } finally {
+            pattern_group_df.unpersist
+          }
           val mapper = new ObjectMapper()
           mapper.registerModule(DefaultScalaModule)
           val json_str = mapper.writeValueAsString(col_pattern_map)
-          pattern_group_df.unpersist
           Seq(sc.name, json_str)
         case _ =>
           null
