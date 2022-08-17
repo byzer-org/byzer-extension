@@ -55,11 +55,11 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
   }
 
   def find_patterns(src: String): String = {
-    val seq = src.toArray
-    val len = if (seq.length <= internalChLimit) seq.length else internalChLimit
+    val srcArray = src.toArray
+    val len = if (srcArray.length <= internalChLimit) srcArray.length else internalChLimit
     val str = new mutable.StringBuilder
     for (i <- 0 until len) {
-      val c = seq(i)
+      val c = srcArray(i)
       if (isLowerLetter(c)) {
         str.append('a')
       }
