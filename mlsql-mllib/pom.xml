@@ -15,6 +15,7 @@
             <artifactId>byzer-extension-tests-3.0_2.12</artifactId>
             <groupId>tech.mlsql</groupId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
