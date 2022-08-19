@@ -2,11 +2,11 @@ package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession, functions => F}
-import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.{avg, coalesce, col, count, countDistinct, expr, first, last, length, lit, map_zip_with, max, min, monotonically_increasing_id, round, row_number, spark_partition_id, sqrt, stddev, sum, when, window}
-import org.apache.spark.sql.types.{BooleanType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, StructField, StructType, TimestampType, VarcharType}
+import org.apache.spark.sql.{functions => f}
+import org.apache.spark.sql.expressions.{UserDefinedFunction, Window}
+import org.apache.spark.sql.functions.{avg, coalesce, col, count, countDistinct, expr, first, last, length, lit, map_zip_with, max, min, monotonically_increasing_id, round, row_number, spark_partition_id, sqrt, stddev, sum, udf, when, window}
+import org.apache.spark.sql.types.{BooleanType, DecimalType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, StructField, StructType, TimestampType, VarcharType}
 import streaming.dsl.ScriptSQLExec
-
 import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}
@@ -22,6 +22,8 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   var round_at = 2
 
+  var numericCols: Array[String] = null
+
   def colWithFilterBlank(sc: StructField): Column = {
     val col_name = sc.name
     sc.dataType match {
@@ -32,22 +34,6 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }
   }
 
-  def countColsNullNumber(schema: StructType, total_count: Long): Array[Column] = {
-    schema.map(sc => {
-      // For proportion calculation, we remain 2 more digits. Hence, we need set up round_at + 2
-      sc.dataType match {
-        case DoubleType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at + 2).alias(sc.name)
-        case FloatType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at + 2).alias(sc.name)
-        case _ => round(count(when(col(sc.name).isNull, sc.name)) / total_count, round_at + 2).alias(sc.name)
-      }
-    }).toArray
-  }
-
-  def countColsEmptyNumber(columns: Array[String], total_count: Long): Array[Column] = {
-    columns.map(c => {
-      round(count(when(col(c) === "", c)) / total_count, round_at + 2).alias(c)
-    })
-  }
 
   def countColsStdDevNumber(schema: StructType, numeric_columns: Array[String]): Array[Column] = {
     schema.map(sc => {
@@ -90,7 +76,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
       val divide_expr = countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
       val ratio_expr = when(sum_expr === 0, 0.0).otherwise(divide_expr)
-      round(ratio_expr, round_at + 2)
+      round(ratio_expr, round_at + 2).alias(sc.name)
     }).toArray
   }
 
@@ -99,7 +85,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
       val c = sc.name
       if (numeric_columns.contains(c)) {
         // if not consider the empty value
-        val max_expr = max(when(colWithFilterBlank(sc), col(c))).alias(c)
+        val max_expr = round(max(when(colWithFilterBlank(sc), col(c))), round_at).alias(c)
         coalesce(max_expr.cast(StringType), lit("")).alias(c)
         //        max(col(c)).cast(StringType).alias(c)
       } else {
@@ -114,7 +100,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     schema.map(sc => {
       val c = sc.name
       if (numeric_columns.contains(c)) {
-        coalesce(min(when(colWithFilterBlank(sc), col(c))), lit("")).alias(c)
+        coalesce(round(min(when(colWithFilterBlank(sc), col(c))), round_at).cast(StringType), lit("")).alias(c)
         //        min(col(c)).cast(StringType).alias(c)
       } else {
         //        min(col(c)).cast(StringType).alias(c)
@@ -126,23 +112,64 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
   }
 
   def roundAtSingleCol(sc: StructField, column: Column): Column = {
-    sc.dataType match {
-      case DoubleType => round(column, round_at).cast(StringType)
-      case FloatType => round(column, round_at).cast(StringType)
-      case _ => column.cast(StringType)
+    if (numericCols.contains(sc.name)) {
+      return round(column, round_at).cast(StringType)
     }
+    column.cast(StringType)
   }
 
-  def getModeNum(schema: StructType, numeric_columns: Array[String], df: DataFrame, round_at: Integer): Array[Column] = {
+  def maxUdf = udf((arr: Seq[Int]) => {
+    val filtered = arr.filterNot(_ == "")
+    if (filtered.isEmpty) 0
+    else filtered.map(_.toInt).max
+  })
+
+  def processModeValue(modeCandidates: Array[Row], modeFormat: String): Any = {
+    //    val mode = modeCandidates.length match {
+    //      case p: Int if p >= 2 => {
+    //        modeFormat match {
+    //          case ModeValueFormat.empty => ""
+    //          case ModeValueFormat.all => "[" + modeCandidates.map(_.get(0).toString).mkString(",") + "]"
+    //          case ModeValueFormat.auto => modeCandidates(0).get(0)
+    //        }
+    //      }
+    //      case _ => modeCandidates(0).get(0)
+    //    }
+    val mode = if (modeCandidates.lengthCompare(2) >= 0) {
+      modeFormat match {
+        case ModeValueFormat.empty => ""
+        case ModeValueFormat.all => "[" + modeCandidates.map(_.get(0).toString).mkString(",") + "]"
+        case ModeValueFormat.auto => modeCandidates.head.get(0)
+      }
+    } else {
+      modeCandidates.head.get(0)
+    }
+    mode
+  }
+
+  def isArrayString(mode: Any): Boolean = {
+    mode.toString.startsWith("[") && mode.toString.endsWith("]")
+  }
+
+  def getModeNum(schema: StructType, numeric_columns: Array[String], df: DataFrame, modeFormat: String): Array[Column] = {
+
     schema.map(sc => {
-      val dfWithoutNa = df.select(col(sc.name)).na.drop()
+      val dfWithoutNa = df.repartition(col(sc.name)).select(col(sc.name)).na.drop()
       if (dfWithoutNa.isEmpty) {
         /* If no alias is set, multiple columns with null indicators will result in the following error:
         org.apache.spark.sql.AnalysisException: Reference 'first()' is ambiguous, could be: first(), first(). */
         first(lit("")).alias(sc.name)
       } else {
-        val mode = dfWithoutNa.groupBy(col(sc.name)).count().orderBy(F.desc("count")).first().get(0)
-        roundAtSingleCol(sc, max(lit(mode))).alias(sc.name)
+        val newDF = dfWithoutNa.groupBy(col(sc.name)).count().orderBy(F.desc("count"))
+        val largestCount = newDF.collect().head.get(1)
+        val modeCandidates = newDF.select(col(sc.name), col("count")).where(col("count") === largestCount).collect()
+        val mode = processModeValue(modeCandidates, modeFormat)
+        var modeCol = first(lit(mode)).cast(StringType).alias(sc.name)
+        // Here to round the mode value
+        if (numeric_columns.contains(sc.name) && mode != "" && !isArrayString(mode)) {
+          modeCol = roundAtSingleCol(sc, max(lit(mode))).alias(sc.name)
+        }
+        modeCol
       }
     }).toArray
   }
@@ -153,11 +180,56 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }).toArray
   }
 
+  def countColsNullNumber(schema: StructType, total_count: Long): Array[Column] = {
+    //    schema.map(sc => {
+    //      // For proportion calculation, we remain 2 more digits. Hence, we need set up round_at + 2
+    //      sc.dataType match {
+    //        case DoubleType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at + 2).alias(sc.name)
+    //        case FloatType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at + 2).alias(sc.name)
+    //        case _ => round(count(when(col(sc.name).isNull, sc.name)) / total_count, round_at + 2).alias(sc.name)
+    //      }
+    //    }).toArray
+    schema.map(sc => {
+      // For proportion calculation, we remain 2 more digits. Hence, we need set up round_at + 2
+      //      sc.dataType match {
+      //        case DoubleType => round(col(sc.name) / total_count, round_at + 2).alias(sc.name)
+      //        case FloatType => round(count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)) / total_count, round_at + 2).alias(sc.name)
+      //        case _ => round(count(when(col(sc.name).isNull, sc.name)) / total_count, round_at + 2).alias(sc.name)
+      //      }
+      round(col(sc.name) / total_count, round_at + 2).alias(sc.name)
+    }).toArray
+  }
+
+  def countColsEmptyNumber(columns: Array[String], total_count: Long): Array[Column] = {
+    //    columns.map(c => {
+    //      count(when(col(c) === "", c)).alias(c)
+    //    })
+    columns.map(c => {
+      round(col(c) / total_count, round_at + 2).alias(c)
+    }).toArray
+  }
+
+  def nullValueCount(schema: StructType): Array[Column] = {
+    schema.map(sc => {
+      sc.dataType match {
+        case DoubleType => count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)).alias("left_" + sc.name)
+        case FloatType => count(when(col(sc.name).isNull || col(sc.name).isNaN, sc.name)).alias("left_" + sc.name)
+        case _ => count(when(col(sc.name).isNull, sc.name)).alias("left_" + sc.name)
+      }
+    }).toArray
+  }
+
+  def emptyCount(schema: StructType): Array[Column] = {
+    schema.map(sc => {
+      count(when(col(sc.name) === "", sc.name)).alias("right_" + sc.name)
+    }).toArray
+  }
+
   def getMaxLength(schema: StructType): Array[Column] = {
     schema.map(sc => {
       sc.dataType match {
         case StringType => max(length(col(sc.name)))
-        case _ => max(lit(0)).alias(sc.name)
+        case _ => max(lit("")).alias(sc.name)
       }
     }).toArray
   }
@@ -166,7 +238,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     schema.map(sc => {
       sc.dataType match {
         case StringType => min(length(col(sc.name)))
-        case _ => min(lit(0)).alias(sc.name)
+        case _ => min(lit("")).alias(sc.name)
       }
     }).toArray
   }
@@ -174,12 +246,12 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   def getMeanValue(schema: StructType): Array[Column] = {
     schema.map(sc => {
-      val new_col = sc.dataType match {
-        case IntegerType => round(avg(col(sc.name)).cast(DoubleType), round_at)
-        case DoubleType => round(avg(col(sc.name)).cast(DoubleType), round_at)
-        case FloatType => round(avg(col(sc.name)).cast(DoubleType), round_at)
-        case LongType => round(avg(col(sc.name)).cast(DoubleType), round_at)
-        case _ => last(lit("")).alias(sc.name)
+      val new_col = if (numericCols.contains(sc.name)) {
+        val avgExp = avg(when(colWithFilterBlank(sc), col(sc.name)))
+        val roundExp = round(avgExp, round_at)
+        when(roundExp.isNull, lit("")).otherwise(roundExp).alias(sc.name)
+      } else {
+        last(lit("")).alias(sc.name)
       }
       new_col
     }).toArray
@@ -196,7 +268,7 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     // NIST method; data to be sorted in ascending order
     val r = data.sortBy(x => x)
     val c = r.count()
-    if (c == 1) r.first()
+    val res = if (c == 1) r.first()
     else {
       val n = (tile / 100d) * (c + 1d)
       val k = math.floor(n).toLong
@@ -208,10 +280,13 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
         if (k >= c) {
           index.lookup(last - 1).head
         } else {
-          index.lookup(k - 1).head + d * (index.lookup(k).head - index.lookup(k - 1).head)
+          val topRow = index.lookup(k - 1)
+          topRow.head + d * (index.lookup(k).head - topRow.head)
         }
       }
     }
+    r.unpersist()
+    res
   }
 
   def getQuantileNum(schema: StructType, df: DataFrame, numeric_columns: Array[String]): Array[Array[Double]] = {
@@ -227,7 +302,9 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
             case _ => v.toDouble
           }
         }).filter(!_.isNaN)
-        if (!data.isEmpty()) {
+        if (data.isEmpty()) {
+
+        } else {
           val q1 = computePercentile(data, 25)
           val q2 = computePercentile(data, 50)
           val q3 = computePercentile(data, 75)
@@ -242,17 +319,18 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
 
   def getTypeLength(schema: StructType): Array[Column] = {
     schema.map(sc => {
-      sc.dataType match {
-        case org.apache.spark.sql.types.ByteType => first(lit(1L)).alias(sc.name)
-        case ShortType => first(lit(2L)).alias(sc.name)
-        case IntegerType => first(lit(4L)).alias(sc.name)
-        case LongType => first(lit(8L)).alias(sc.name)
-        case FloatType => first(lit(4L)).alias(sc.name)
-        case DoubleType => first(lit(8L)).alias(sc.name)
-        case StringType => max(length(col(sc.name))).alias(sc.name)
-        case org.apache.spark.sql.types.DateType => first(lit(8L)).alias(sc.name)
-        case TimestampType => first(lit(8L)).alias(sc.name)
-        case BooleanType => first(lit(1L)).alias(sc.name)
+      sc.dataType.typeName match {
+        case "byte" => first(lit(1L)).alias(sc.name)
+        case "short" => first(lit(2L)).alias(sc.name)
+        case "integer" => first(lit(4L)).alias(sc.name)
+        case "long" => first(lit(8L)).alias(sc.name)
+        case "float" => first(lit(4L)).alias(sc.name)
+        case "double" => first(lit(8L)).alias(sc.name)
+        case "string" => max(length(col(sc.name))).alias(sc.name)
+        case "date" => first(lit(8L)).alias(sc.name)
+        case "timestamp" => first(lit(8L)).alias(sc.name)
+        case "boolean" => first(lit(1L)).alias(sc.name)
+        case name: String if name.contains("decimal") => first(lit(16L)).alias(sc.name)
         case _ => first(lit("")).alias(sc.name)
       }
     }).toArray
@@ -268,137 +346,166 @@ class SQLDataSummary(override val uid: String) extends SQLAlg with MllibFunction
     }): _*)
   }
 
+
   def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
 
     round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
+
     val approxSwitch = Try(params.getOrElse("approxSwitch", "false").toBoolean).getOrElse(false)
+    val modeFormat = Try(params.getOrElse(DataSummary.modeFormat, ModeValueFormat.empty)).getOrElse(ModeValueFormat.empty)
     var metrics = params.getOrElse(DataSummary.metrics, "").split(",").filter(!_.equalsIgnoreCase(""))
+    val repartitionDF = df.repartition(df.schema.map(sc => col(sc.name)).toArray: _*).cache()
+    val columns = repartitionDF.columns
+    try {
+      columns.map(col => {
+        if (col.contains(".") || col.contains("`")) {
+          throw new RuntimeException(s"The column name : ${col} contains special symbols, like . or `, please rename it first!! ")
+        }
+      })
 
-    val columns = df.columns
-    columns.map(col => {
-      if (col.contains(".") || col.contains("`")) {
-        throw new RuntimeException(s"The column name : ${col} contains special symbols, like . or `, please rename it first!! ")
-      }
-    })
+      numericCols = repartitionDF.schema.filter(sc => {
+        sc.dataType.typeName match {
+          case datatype: String => Array("integer", "short", "double", "float", "long").contains(datatype) || datatype.contains("decimal")
+          case _ => false
+        }
+      }).map(sc => {
+        sc.name
+      }).toArray
 
-    val numeric_columns = df.schema.filter(sc => {
-      sc.dataType match {
-        case IntegerType => true
-        case ShortType => true
-        case DoubleType => true
-        case FloatType => true
-        case LongType => true
-        case _ => false
-      }
-    }).map(sc => {
-      sc.name
-    }).toArray
-
-    val datatype_schema = ("DataType" +: df.schema.map(f => f.dataType.typeName)).map(t => {
-      StructField("col_" + t, StringType)
-    })
+      val datatype_schema = ("DataType" +: repartitionDF.schema.map(f => f.name)).map(t => {
+        StructField(t, StringType)
+      })
 
 
-    // get the quantile number for the numeric columns
-    val spark = df.sparkSession
-    val total_count = df.count()
+      // get the quantile number for the numeric columns
+      val spark = repartitionDF.sparkSession
+      val total_count = repartitionDF.count()
 
-    var new_quantile_rows = approxSwitch match {
-      case true => {
-        df.select(df.schema.map(sc => sc.dataType match {
-          case IntegerType => col(sc.name)
-          case DoubleType => col(sc.name)
-          case ShortType => col(sc.name)
-          case FloatType => col(sc.name)
-          case LongType => col(sc.name)
-          case _ => lit(0.0).as(sc.name)
-        }): _*).na.fill(0.0).stat.approxQuantile(df.columns, Array(0.25, 0.5, 0.75), 0.05).transpose.map(_.map(String.valueOf(_)).toSeq).map(row =>
-          "Q" +: row
-        )
-      }
-      case false => {
-        getQuantileNum(df.schema, df, numeric_columns).transpose.map(_.map(v =>
-          String.valueOf(v) match {
-            case "NaN" => ""
-            case _ => String.valueOf(v)
+      var new_quantile_rows = approxSwitch match {
+        case true => {
+          repartitionDF.select(repartitionDF.schema.map(sc => {
+            if (numericCols.contains(sc.name)) {
+              col(sc.name)
+            } else {
+              lit(0.0).as(sc.name)
+            }
           }
-        ).toSeq).map(row =>
-          "Q" +: row
-        )
+          ): _*).na.fill(0.0).stat.approxQuantile(repartitionDF.columns, Array(0.25, 0.5, 0.75), 0.05).transpose.map(_.map(String.valueOf(_)).toSeq).map(row =>
+            "Q" +: row
+          )
+        }
+        case false => {
+          getQuantileNum(repartitionDF.schema, repartitionDF, numericCols).transpose.map(_.map(v =>
+            String.valueOf(v) match {
+              case "NaN" => ""
+              case _ => v.formatted(s"%.${round_at}f")
+            }
+          ).toSeq).map(row =>
+            "Q" +: row
+          )
+        }
       }
-    }
-    new_quantile_rows = new_quantile_rows.updated(0, new_quantile_rows(0).updated(0, "%25"))
-    new_quantile_rows = new_quantile_rows.updated(1, new_quantile_rows(1).updated(0, "median"))
-    new_quantile_rows = new_quantile_rows.updated(2, new_quantile_rows(2).updated(0, "%75"))
-    var quantile_df_tmp = new_quantile_rows.map(Row.fromSeq(_)).toSeq
-    val quantile_df = spark.createDataFrame(spark.sparkContext.parallelize(quantile_df_tmp, 1), StructType(datatype_schema)).na.fill("")
+      new_quantile_rows = new_quantile_rows.updated(0, new_quantile_rows.head.updated(0, "%25"))
+      new_quantile_rows = new_quantile_rows.updated(1, new_quantile_rows(1).updated(0, "median"))
+      new_quantile_rows = new_quantile_rows.updated(2, new_quantile_rows(2).updated(0, "%75"))
+      val quantile_df_tmp = new_quantile_rows.map(Row.fromSeq(_)).toSeq
+      val quantile_df = spark.createDataFrame(spark.sparkContext.parallelize(quantile_df_tmp, 1), StructType(datatype_schema)).na.fill("")
+      val new_quantile_df = quantile_df.select(quantile_df.schema.map(sc => {
+        if (!numericCols.contains(sc.name) && !sc.name.equals("DataType")) {
+          lit("").as(sc.name)
+        } else {
+          col(sc.name)
+        }
+      }): _*)
 
-    var mode_df = df.select(getModeNum(df.schema, numeric_columns, df, round_at): _*).select(lit("mode").alias("metric"), col("*"))
-    val maxlength_df = df.select(getMaxLength(df.schema): _*).select(lit("maximumLength").alias("metric"), col("*"))
-    val minlength_df = df.select(getMinLength(df.schema): _*).select(lit("minimumLength").alias("metric"), col("*"))
-    var distinct_proportion_df = df.select(countUniqueValueRatio(df.schema): _*).select(lit("uniqueValueRatio").alias(DataSummary.metricColumnName), col("*"))
-    val is_primary_key_df = df.select(isPrimaryKey(df.schema, numeric_columns, total_count): _*).select(lit("primaryKeyCandidate").alias(DataSummary.metricColumnName), col("*"))
-    var null_value_proportion_df = df.select(countColsNullNumber(df.schema, total_count): _*).select(lit("nullValueRatio").alias(DataSummary.metricColumnName), col("*"))
-    var empty_value_proportion_df = df.select(countColsEmptyNumber(df.columns, total_count): _*).select(lit("blankValueRatio").alias(DataSummary.metricColumnName), col("*"))
-    var mean_df = df.select(getMeanValue(df.schema): _*).select(lit("mean").alias("metric"), col("*"))
-    var stddev_df = df.select(countColsStdDevNumber(df.schema, numeric_columns): _*).select(lit("standardDeviation").alias(DataSummary.metricColumnName), col("*"))
-    var stderr_df = df.select(countColsStdErrNumber(df.schema, numeric_columns): _*).select(lit("standardError").alias(DataSummary.metricColumnName), col("*"))
-    var non_null_df = df.select(countNonNullValue(df.schema): _*).select(lit("nonNullCount").alias(DataSummary.metricColumnName), col("*"))
-    val maxvalue_df = df.select(getMaxNum(df.schema, numeric_columns): _*).select(lit("max").alias(DataSummary.metricColumnName), col("*"))
-    val minvalue_df = df.select(getMinNum(df.schema, numeric_columns): _*).select(lit("min").alias(DataSummary.metricColumnName), col("*"))
-    val datatypelen_df = df.select(getTypeLength(df.schema): _*).select(lit("dataLength").alias(DataSummary.metricColumnName), col("*"))
-    val datatype_sq = Seq("dataType" +: df.schema.map(f => f.dataType.typeName match {
-      case "null" => "unknown"
-      case _ => f.dataType.typeName
-    })).map(Row.fromSeq(_))
+      val mode_df = repartitionDF.select(getModeNum(repartitionDF.schema, numericCols, repartitionDF, modeFormat): _*).select(lit("mode").alias("metric"), col("*"))
+      val maxlength_df = repartitionDF.select(getMaxLength(repartitionDF.schema): _*).select(lit("maximumLength").alias("metric"), col("*"))
+      val minlength_df = repartitionDF.select(getMinLength(repartitionDF.schema): _*).select(lit("minimumLength").alias("metric"), col("*"))
+
+      val dfWithUniqueRatio = repartitionDF.select(countUniqueValueRatio(repartitionDF.schema): _*)
+      val distinct_proportion_df = dfWithUniqueRatio.select(lit("uniqueValueRatio").alias(DataSummary.metricColumnName), col("*"))
+
+      val is_primary_key_df = dfWithUniqueRatio.select(dfWithUniqueRatio.schema.map(sc => {
+        when(col(sc.name).cast(DoubleType) >= 1, "1").otherwise("0  ").alias(sc.name)
+      }).toArray: _*).select(lit("primaryKeyCandidate").alias(DataSummary.metricColumnName), col("*"))
+
+      val nullCountDf = repartitionDF.select(nullValueCount(repartitionDF.schema): _*)
+      val emptyCountDF = repartitionDF.select(emptyCount(repartitionDF.schema): _*)
+
+      val null_value_proportion_df = nullCountDf.select(countColsNullNumber(nullCountDf.schema, total_count): _*).select(lit("nullValueRatio").alias(DataSummary.metricColumnName), col("*"))
+      val empty_value_proportion_df = emptyCountDF.select(countColsEmptyNumber(emptyCountDF.columns, total_count): _*).select(lit("blankValueRatio").alias(DataSummary.metricColumnName), col("*"))
+      val non_null_df = nullCountDf.join(emptyCountDF).select(repartitionDF.schema.map(sc => {
+        lit(total_count) - col("left_" + sc.name) - col("right_" + sc.name)
+      }).toArray: _*).select(lit("nonNullCount").alias(DataSummary.metricColumnName), col("*"))
+
+      //    val non_null_df = repartitionDF.select(countNonNullValue(repartitionDF.schema): _*).select(lit("nonNullCount").alias(DataSummary.metricColumnName), col("*"))
 
 
-    val colunm_idx = Seq("ordinalPosition" +: df.columns.map(col_name => String.valueOf(df.columns.indexOf(col_name) + 1))).map(Row.fromSeq(_))
-    var numeric_metric_df = mode_df
-      .union(distinct_proportion_df)
-      .union(null_value_proportion_df)
-      .union(empty_value_proportion_df)
-      .union(mean_df)
-      .union(non_null_df)
-      .union(stddev_df)
-      .union(stderr_df)
-      .union(maxvalue_df)
-      .union(minvalue_df)
-      .union(maxlength_df)
-      .union(minlength_df)
-    numeric_metric_df = roundNumericCols(numeric_metric_df, round_at)
+      val mean_df = repartitionDF.select(getMeanValue(repartitionDF.schema): _*).select(lit("mean").alias("metric"), col("*"))
+      val stddev_df = repartitionDF.select(countColsStdDevNumber(repartitionDF.schema, numericCols): _*).select(lit("standardDeviation").alias(DataSummary.metricColumnName), col("*"))
+      val stderr_df = repartitionDF.select(countColsStdErrNumber(repartitionDF.schema, numericCols): _*).select(lit("standardError").alias(DataSummary.metricColumnName), col("*"))
 
-    val schema = StructType(StructField("metrics", StringType, true) +: df.columns.map(StructField(_, StringType, true)).toSeq)
-    val sc = spark.sparkContext.emptyRDD[Row]
-    var res = spark.createDataFrame(sc, schema)
-    val metric_values = metrics.map("'" + _.stripMargin + "'").mkString(",")
 
-    res = res.union(numeric_metric_df)
-      .union(is_primary_key_df)
-      .union(datatypelen_df)
-      .union(spark.createDataFrame(spark.sparkContext.parallelize(datatype_sq, 1), StructType(datatype_schema)))
-      .union(spark.createDataFrame(spark.sparkContext.parallelize(colunm_idx, 1), StructType(datatype_schema)))
-      .union(quantile_df)
+      val maxvalue_df = repartitionDF.select(getMaxNum(repartitionDF.schema, numericCols): _*).select(lit("max").alias(DataSummary.metricColumnName), col("*"))
+      val minvalue_df = repartitionDF.select(getMinNum(repartitionDF.schema, numericCols): _*).select(lit("min").alias(DataSummary.metricColumnName), col("*"))
+      val datatypelen_df = repartitionDF.select(getTypeLength(repartitionDF.schema): _*).select(lit("dataLength").alias(DataSummary.metricColumnName), col("*"))
+      val datatype_sq = Seq("dataType" +: repartitionDF.schema.map(f => f.dataType.typeName match {
+        case "null" => "unknown"
+        case _ => f.dataType.typeName
+      })).map(Row.fromSeq(_))
 
-    if (metrics == null || metrics.length == 0) {
-      res = res.select(col("*"))
-    } else {
-      res = res.select(col("*")).where(s"${DataSummary.metrics} in (${metric_values})")
-    }
-    //    res.summary()
-    // Transpose
-    import spark.implicits._
-    val (header, data) = res.collect.map(_.toSeq.toArray).transpose match {
-      case Array(h, t@_*) => {
-        (h.map(_.toString), t.map(_.map(String.valueOf(_))))
+
+      val colunm_idx = Seq("ordinalPosition" +: repartitionDF.columns.map(col_name => String.valueOf(repartitionDF.columns.indexOf(col_name) + 1))).map(Row.fromSeq(_))
+      var numeric_metric_df = mode_df
+        .union(distinct_proportion_df)
+        .union(null_value_proportion_df)
+        .union(empty_value_proportion_df)
+        .union(mean_df)
+        .union(non_null_df)
+        .union(stddev_df)
+        .union(stderr_df)
+        .union(maxvalue_df)
+        .union(minvalue_df)
+        .union(maxlength_df)
+        .union(minlength_df)
+      numeric_metric_df = roundNumericCols(numeric_metric_df, round_at)
+
+      val schema = StructType(StructField("metrics", StringType, true) +: df.columns.map(StructField(_, StringType, true)).toSeq)
+      val sc = spark.sparkContext.emptyRDD[Row]
+      var res = spark.createDataFrame(sc, schema)
+      val metric_values = metrics.map("'" + _.stripMargin + "'").mkString(",")
+
+      res = res.union(numeric_metric_df)
+        .union(is_primary_key_df)
+        .union(datatypelen_df)
+        .union(spark.createDataFrame(spark.sparkContext.parallelize(datatype_sq, 1), StructType(datatype_schema)))
+        .union(spark.createDataFrame(spark.sparkContext.parallelize(colunm_idx, 1), StructType(datatype_schema)))
+        .union(new_quantile_df)
+
+      if (metrics == null || metrics.lengthCompare(0) == 0) {
+        res = res.select(col("*"))
+      } else {
+        res = res.select(col("*")).where(s"${DataSummary.metrics} in (${metric_values})")
       }
+      //    res.summary()
+      // Transpose
+      import spark.implicits._
+      val (header, data) = res.collect.map(_.toSeq.toArray).transpose match {
+        case Array(h, t@_*) => {
+          (h.map(_.toString), t.map(_.map(String.valueOf(_))))
+        }
+      }
+      val rows = res.columns.tail.zip(data).map { case (x, ys) => Row.fromSeq(x +: ys) }
+      val transposeSchema = StructType(
+        StructField("columnName", StringType) +: header.map(StructField(_, StringType))
+      )
+      res = spark.createDataFrame(spark.sparkContext.parallelize(rows), transposeSchema)
+      res
+    } catch {
+      case e: Exception => throw e
+    } finally {
+      repartitionDF.unpersist()
     }
-    val rows = res.columns.tail.zip(data).map { case (x, ys) => Row.fromSeq(x +: ys) }
-    val transposeSchema = StructType(
-      StructField("columnName", StringType) +: header.map(StructField(_, StringType))
-    )
-    res = spark.createDataFrame(spark.sparkContext.parallelize(rows), transposeSchema)
-    res
   }
 
   override def load(sparkSession: SparkSession, path: String, params: Map[String, String]): Any = {
@@ -451,4 +558,11 @@ object DataSummary {
   val roundAt = "roundAt"
   val approxSwitch = "approxSwitch"
   val metricColumnName = "metric"
+  val modeFormat = "modeFormat"
+}
+
+object ModeValueFormat {
+  val all = "all"
+  val empty = "empty"
+  val auto = "auto"
 }
