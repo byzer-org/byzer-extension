@@ -559,6 +559,7 @@ object DataSummary {
   val approxSwitch = "approxSwitch"
   val metricColumnName = "metric"
   val modeFormat = "modeFormat"
+  val lang = "lang"
 }
 
 object ModeValueFormat {

@@ -1,7 +1,7 @@
 package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{lit, _}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession, functions => F}
 import streaming.dsl.ScriptSQLExec
@@ -256,7 +256,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
   }
 
   def processSelectedMetrics(metrics: Array[String]): Array[String] = {
-    val normalMetrics = "maximumLength,minimumLength,uniqueValueRatio,nullValueRatio,blankValueRatio,mean,standardDeviation,standardError,max,min,dataLength,primaryKeyCandidate".split(",")
+    val normalMetrics = "maximumLength,minimumLength,uniqueValueRatio,nullValueRatio,blankValueRatio,mean,standardDeviation,standardError,max,min,dataLength,primaryKeyCandidate,dataType".split(",")
     val computedMetrics = "%25,median,%75".split(",")
     val modeMetric = "mode".split(",")
     var leftMetrics: Array[String] = Array()
@@ -291,11 +291,42 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     mode
   }
 
+  def getChineseMetricName(columnsNames: Array[String]): Array[String] = {
+    val translateMap = Map(
+      "dataLength" -> "数据长度",
+      "max" -> "最大值",
+      "min" -> "最小值",
+      "maximumLength" -> "最大长度",
+      "minimumLength" -> "最小长度",
+      "mean" -> "均值",
+      "standardDeviation" -> "标准差",
+      "standardError" -> "标准误差",
+      "nullValueRatio" -> "空值比例",
+      "blankValueRatio" -> "空字符串比例",
+      "uniqueValueRatio" -> "唯一值比例",
+      "primaryKeyCandidate" -> "是否主键候选列",
+      "median" -> "中位数",
+      "ColumnName" -> "列名",
+      "ordinaryPosition" -> "列位置",
+      "dataType"->"数据类型"
+    )
+    columnsNames.map(name => translateMap.getOrElse(name, null)).filter(_ != null).toArray
+  }
+
+  def getDataTypeColumns(schema: StructType): Array[Column] = {
+    schema.map(sc => {
+      sc.dataType.typeName match {
+        case "null" => lit("unknown")
+        case _ => lit(sc.dataType.typeName)
+      }
+    }).toArray
+  }
+
   def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
 
     round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
 
-    val metrics = params.getOrElse(DataSummary.metrics, "dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,uniqueValueRatio,primaryKeyCandidate,median,mode").split(",").filter(!_.equalsIgnoreCase(""))
+    val metrics = params.getOrElse(DataSummary.metrics, "dataType,dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,uniqueValueRatio,primaryKeyCandidate,median,mode").split(",").filter(!_.equalsIgnoreCase(""))
     val relativeError = params.getOrElse("relativeError", "0.01").toDouble
     val approxCountDistinct = params.getOrElse("approxCountDistinct", "false").toBoolean
     val repartitionDF = df
@@ -331,6 +362,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       "blankValueRatio" -> emptyCount(schema),
       "uniqueValueRatio" -> countUniqueValueRatio(schema, approxCountDistinct),
       "primaryKeyCandidate" -> isPrimaryKey(schema, approxCountDistinct),
+      "dataType" -> getDataTypeColumns(schema)
     )
     val processedSelectedMetrics = processSelectedMetrics(metrics)
     val newCols = processedSelectedMetrics.map(name => default_metrics.getOrElse(name, null)).filter(_ != null).flatMap(arr => arr).toArray
@@ -365,7 +397,12 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
           Seq(schema(i).name) ++ normalMetricsRow(i) ++ quantileRows(i).toSeq
         }).toArray
     }
-    datatype_schema = ("ColumnName" +: "ordinaryPosition" +: processedSelectedMetrics).map(t => {
+    val resCols = params.getOrElse(DataSummary.lang, "EN") match {
+      case "Ch" | "CH" | "Chinese" => getChineseMetricName(("ColumnName" +: "ordinaryPosition" +: processedSelectedMetrics))
+      case _ => ("ColumnName" +: "ordinaryPosition" +: processedSelectedMetrics)
+    }
+
+    datatype_schema = resCols.map(t => {
       StructField(t, StringType)
     })
 
@@ -433,10 +470,4 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
         List(TableAuthResult(granted = true, ""))
     }
   }
-}
-
-object ModeValueFormat {
-  val all = "all"
-  val empty = "empty"
-  val auto = "auto"
 }

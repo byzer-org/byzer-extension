@@ -84,6 +84,9 @@ class SQLDataSummaryV2Test extends FlatSpec with SparkOperationUtil with Matcher
       res3DF.show()
       assert(res3DF.collect()(0).mkString(",") === "col1,1.0,,,,,,,,,1.0,0.0,0.0,0.0,0.0,")
       assert(res3DF.collect()(1).mkString(",") === "col2,2.0,,,,,,,,,1.0,0.0,0.0,0.0,0.0,")
+
+      val res4DF = et.train(seq_df2, "", Map("atRound" -> "2", "metrics" -> "dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,dataType,uniqueValueRatio,primaryKeyCandidate,median,mode", "lang" -> "CH"))
+      res4DF.show()
       //      val paquetDF1 = spark.sqlContext.read.format("parquet").load("/Users/yonghui.huang/Data/benchmarkZL1")
       //      val paquetDF2 = paquetDF1.sample(true, 1)
       //      println(paquetDF2.count())
@@ -91,6 +94,7 @@ class SQLDataSummaryV2Test extends FlatSpec with SparkOperationUtil with Matcher
       //      df1.show()
       //      val df2 = et.train(paquetDF2, "", Map("atRound" -> "2", "approxCountDistinct" -> "true"))
       //      df2.show()
+      et.train(seq_df, "", Map()).show()
     }
   }
 }
