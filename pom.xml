@@ -31,8 +31,11 @@
         <module>mlsql-language-server</module>
         <module>mlsql-ext-ets</module>
         <module>mlsql-cli</module>
+        <module>byzer-extension-tests</module>
+        <module>byzer-exception-render</module>
         <module>byzer-yaml-visualization</module>
         <module>byzer-openmldb</module>
+
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>
