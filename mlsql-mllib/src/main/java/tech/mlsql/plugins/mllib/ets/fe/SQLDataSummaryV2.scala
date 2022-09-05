@@ -434,9 +434,3 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }
   }
 }
-
-object ModeValueFormat {
-  val all = "all"
-  val empty = "empty"
-  val auto = "auto"
-}
