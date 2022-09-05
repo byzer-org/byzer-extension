@@ -382,7 +382,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
 
 
     resRows = dataFormat(resRows, metricsIdx, round_at)
-    val resAfterTransformed = resRows.filter(_!=null).map(row => {
+    val resAfterTransformed = resRows.map(row => {
       val t = row.map(e => String.valueOf(e))
       t
     })
