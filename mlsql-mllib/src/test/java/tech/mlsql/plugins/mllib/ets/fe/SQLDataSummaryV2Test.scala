@@ -1,7 +1,8 @@
 package tech.mlsql.plugins.mllib.ets.fe
 
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, explode, struct, desc}
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.functions.{col, desc, explode, struct}
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.streaming.SparkOperationUtil
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 import streaming.core.strategy.platform.SparkRuntime
@@ -84,6 +85,11 @@ class SQLDataSummaryV2Test extends FlatSpec with SparkOperationUtil with Matcher
       res3DF.show()
       assert(res3DF.collect()(0).mkString(",") === "col1,1.0,,,,,,,,,1.0,0.0,0.0,0.0,0.0,")
       assert(res3DF.collect()(1).mkString(",") === "col2,2.0,,,,,,,,,1.0,0.0,0.0,0.0,0.0,")
+      val colNames = Array("id", "name", "age", "birth")
+      val schema = StructType(colNames.map(fieldName => StructField(fieldName, StringType, true)))
+      //主要是利用了spark.sparkContext.emptyRDD
+      val emptyDf = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], schema)
+      et.train(emptyDf, "", Map("atRound" -> "2")).show()
       //      val paquetDF1 = spark.sqlContext.read.format("parquet").load("/Users/yonghui.huang/Data/benchmarkZL1")
       //      val paquetDF2 = paquetDF1.sample(true, 1)
       //      println(paquetDF2.count())

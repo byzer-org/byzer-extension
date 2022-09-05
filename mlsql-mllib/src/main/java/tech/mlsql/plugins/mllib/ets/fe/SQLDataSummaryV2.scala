@@ -218,6 +218,9 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
         }
         var newE = e
         try {
+          if(String.valueOf(e).equals("null")){
+            newE = ""
+          }
           val v = e.toString.toDouble
           newE = BigDecimal(v).setScale(round_at, BigDecimal.RoundingMode.HALF_UP).toDouble
         } catch {
@@ -228,7 +231,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     })
   }
 
-  def getPercentileRows(metrics: Array[String], schema: StructType, df: DataFrame, relativeError: Double): (Array[Array[Double]], Array[String]) = {
+  def getPercentileRows(metrics: Array[String], schema: StructType, df: DataFrame, relativeError: Double): (Array[Array[String]], Array[String]) = {
     var percentilePoints: Array[Double] = Array()
     var percentileCols: Array[String] = Array()
     if (metrics.contains("%25")) {
@@ -252,7 +255,13 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       res
     }).toArray
     val quantileRows: Array[Array[Double]] = df.select(cols: _*).na.fill(0.0).stat.approxQuantile(df.columns, percentilePoints, relativeError)
-    (quantileRows, percentileCols)
+    val quantileRowsAfterTrans = quantileRows.map(qr=>{
+      qr.length match {
+        case 0=> Seq("").toArray
+        case _=>qr.map(e=>String.valueOf(e))
+      }
+    })
+    (quantileRowsAfterTrans, percentileCols)
   }
 
   def processSelectedMetrics(metrics: Array[String]): Array[String] = {
@@ -433,10 +442,4 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
         List(TableAuthResult(granted = true, ""))
     }
   }
-}
-
-object ModeValueFormat {
-  val all = "all"
-  val empty = "empty"
-  val auto = "auto"
 }
