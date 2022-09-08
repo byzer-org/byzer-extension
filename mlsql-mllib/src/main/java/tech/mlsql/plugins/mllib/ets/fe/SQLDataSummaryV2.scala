@@ -14,6 +14,8 @@ import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 
 import java.util.Date
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth with Logging {
@@ -62,7 +64,10 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
   def isPrimaryKey(schmea: StructType, approx: Boolean): Array[Column] = {
     schmea.map(sc => {
       val c = sc.name
+      //      val approxExpr = approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
+      //      val accurateExpr = countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
       val exp1 = if (approx) {
+        //        when(approxExpr >= 0.6, accurateExpr).otherwise(approxExpr)
         approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
       } else {
         countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
@@ -212,14 +217,20 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     resRow.map(row => {
       row.zipWithIndex.map(el => {
         val e = el._1
-        val round_at = metricsIdx.getOrElse(el._2 - 1, "") match {
+        val metricName = metricsIdx.getOrElse(el._2 - 2, "")
+        val round_at = metricsIdx.getOrElse(el._2 - 2, "") match {
           case t if t.endsWith("Ratio") => roundAt + 2
           case _ => roundAt
         }
         var newE = e
         try {
-          val v = e.toString.toDouble
-          newE = BigDecimal(v).setScale(round_at, BigDecimal.RoundingMode.HALF_UP).toDouble
+          if (metricName.equals("primaryKeyCandidate")) {
+            val v = e.toString.toInt
+            newE = v
+          } else {
+            val v = e.toString.toDouble
+            newE = BigDecimal(v).setScale(round_at, BigDecimal.RoundingMode.HALF_UP).toDouble
+          }
         } catch {
           case e: Exception => logInfo(e.toString)
         }
@@ -291,6 +302,46 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     mode
   }
 
+  def calculateCountMetrics(df: DataFrame, approxCountDistinct: Boolean): (Seq[Any], Seq[Any]) = {
+    val schema = df.schema
+    val idxToCol = df.columns.zipWithIndex.map(t => {
+      (t._2, t._1)
+    }).toMap
+
+    var recalCols: Array[StructField] = Array()
+    // calculate uniqueValue Ratio
+    var uniqueValueRatio = df.select(countUniqueValueRatio(df.schema, approxCountDistinct): _*).collect()(0).toSeq
+    var isPrimaryKeyRow: Array[Int] = Array()
+    uniqueValueRatio.zipWithIndex.map(e => {
+      val pos = e._2
+      val colName = idxToCol.getOrElse(pos, null)
+      val colType = schema.filter(sc => sc.name == colName)(0)
+      var isPrimaryKeyE = 0
+      if (String.valueOf(e._1).toDouble > 0.6) {
+        if (String.valueOf(e._1).toDouble == 1) {
+          isPrimaryKeyE = 1
+        }
+        recalCols = recalCols :+ (colType)
+      }
+      isPrimaryKeyRow = isPrimaryKeyRow :+ isPrimaryKeyE
+    })
+
+    val replacedRatioDF = df.select(countUniqueValueRatio(StructType(recalCols), false): _*)
+    val replaceURrow = replacedRatioDF.collect().take(0)
+    if (replaceURrow.length == 0) {
+      return (uniqueValueRatio, isPrimaryKeyRow.toSeq)
+    }
+    replacedRatioDF.schema.zipWithIndex.map(ele => {
+      val idx = ele._2
+      val sc = ele._1
+      val colName = sc.name.split("_")(0)
+      val originIdx = schema.indexOf(colName)
+      val newValue = replaceURrow(idx)
+      uniqueValueRatio = uniqueValueRatio.updated(originIdx, newValue)
+    })
+    (uniqueValueRatio, isPrimaryKeyRow.toSeq)
+  }
+
   def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
 
     round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
@@ -329,8 +380,8 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       "standardError" -> countColsStdErrNumber(schema, numericCols),
       "nullValueRatio" -> nullValueCount(schema),
       "blankValueRatio" -> emptyCount(schema),
-      "uniqueValueRatio" -> countUniqueValueRatio(schema, approxCountDistinct),
-      "primaryKeyCandidate" -> isPrimaryKey(schema, approxCountDistinct),
+      //      "uniqueValueRatio" -> countUniqueValueRatio(schema, approxCountDistinct),
+      //      "primaryKeyCandidate" -> isPrimaryKey(schema, approxCountDistinct),
     )
     val processedSelectedMetrics = processSelectedMetrics(metrics)
     val newCols = processedSelectedMetrics.map(name => default_metrics.getOrElse(name, null)).filter(_ != null).flatMap(arr => arr).toArray
@@ -342,7 +393,18 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     val rows = resDF.collect()
     val rowN = schema.length
     val ordinaryPosRow = df.columns.map(col_name => String.valueOf(df.columns.indexOf(col_name) + 1)).toSeq
-    val normalMetricsRow = (ordinaryPosRow ++ rows(0).toSeq).grouped(rowN).map(_.toSeq).toArray.toSeq.transpose
+    var statsticMetricsSeq = (ordinaryPosRow ++ rows(0).toSeq)
+    if (processedSelectedMetrics.contains("uniqueValueRatio") || processedSelectedMetrics.contains("primaryKeyCandidate")) {
+      val (uniqueValueRatioRow, isPrimaryKeyRow) = calculateCountMetrics(df, approxCountDistinct)
+      if (processedSelectedMetrics.contains("uniqueValueRatio")) {
+        statsticMetricsSeq = statsticMetricsSeq ++ uniqueValueRatioRow
+      }
+      if (processedSelectedMetrics.contains("primaryKeyCandidate")) {
+        statsticMetricsSeq = statsticMetricsSeq ++ isPrimaryKeyRow
+      }
+    }
+
+    val normalMetricsRow = statsticMetricsSeq.grouped(rowN).map(_.toSeq).toArray.toSeq.transpose
     var end_time = new Date().getTime
 
     logInfo("The elapsed time for normal metrics is : " + (end_time - start_time))
