@@ -273,7 +273,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
   }
 
   def processSelectedMetrics(metrics: Array[String]): Array[String] = {
-    val normalMetrics = "maximumLength,minimumLength,uniqueValueRatio,nullValueRatio,blankValueRatio,mean,standardDeviation,standardError,max,min,dataLength,primaryKeyCandidate".split(",")
+    val normalMetrics = "dataType,maximumLength,minimumLength,uniqueValueRatio,nullValueRatio,blankValueRatio,mean,standardDeviation,standardError,max,min,dataLength,primaryKeyCandidate,nonNullCount".split(",")
     val computedMetrics = "%25,median,%75".split(",")
     val modeMetric = "mode".split(",")
     var leftMetrics: Array[String] = Array()
@@ -357,11 +357,18 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     (uniqueValueRatio, isPrimaryKeyRow.toSeq)
   }
 
+  def getDataType(schema: StructType): Array[Column] = {
+    schema.map(f => f.dataType.typeName match {
+      case "null" => lit("unknown")
+      case _ => lit(f.dataType.typeName)
+    }).toArray
+  }
+
   def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
 
     round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
 
-    val metrics = params.getOrElse(DataSummary.metrics, "dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,uniqueValueRatio,primaryKeyCandidate,median,mode").split(",").filter(!_.equalsIgnoreCase(""))
+    val metrics = params.getOrElse(DataSummary.metrics, "dataType,dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,nonNullCount,uniqueValueRatio,primaryKeyCandidate,median,mode").split(",").filter(!_.equalsIgnoreCase(""))
     val relativeError = params.getOrElse("relativeError", "0.01").toDouble
     val approxCountDistinct = params.getOrElse("approxCountDistinct", "false").toBoolean
     val repartitionDF = df
@@ -395,6 +402,8 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       "standardError" -> countColsStdErrNumber(schema, numericCols),
       "nullValueRatio" -> nullValueCount(schema),
       "blankValueRatio" -> emptyCount(schema),
+      "nonNullCount" -> countNonNullValue(schema),
+      "dataType" -> getDataType(schema),
       //      "uniqueValueRatio" -> countUniqueValueRatio(schema, approxCountDistinct),
       //      "primaryKeyCandidate" -> isPrimaryKey(schema, approxCountDistinct),
     )
@@ -443,7 +452,8 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
           Seq(schema(i).name) ++ normalMetricsRow(i) ++ quantileRows(i).toSeq
         }).toArray
     }
-    datatype_schema = ("ColumnName" +: "ordinaryPosition" +: processedSelectedMetrics).map(t => {
+
+    datatype_schema = ("columnName" +: "ordinalPosition" +: processedSelectedMetrics).map(t => {
       StructField(t, StringType)
     })
 
