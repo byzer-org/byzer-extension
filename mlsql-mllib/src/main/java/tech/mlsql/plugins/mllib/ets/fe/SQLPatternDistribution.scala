@@ -25,8 +25,6 @@ import scala.collection.mutable
  */
 class SQLPatternDistribution(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
   def this() = this(BaseParams.randomUID())
-
-
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     logInfo("v2")
     val limit = params.getOrElse(limitNum.name, "100").toInt
@@ -37,7 +35,6 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
 
     val find_patterns_udf = udf(SQLPatternDistribution.find_patterns(_, internalChLimit))
     val find_alternative_pattern_udf = udf(SQLPatternDistribution.find_alternativePatterns(_, internalChLimit))
-
     val strColumns = df.schema.filter(_.dataType == StringType).map(s => col(s.name))
     val fDf = df.select(strColumns: _*)
     val res = fDf.schema.par.map(sc => {
@@ -47,45 +44,48 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
       } else {
         fDf.select(sc.name)
       }
+      val isEmpty = sub_df == null || sub_df.limit(1).collect().size == 0
+      isEmpty match {
+        case true => Seq(sc.name, "")
+        case false => {
+          val startTime = System.currentTimeMillis()
+          val rows_num = sub_df.count()
+          val countTime = System.currentTimeMillis()
+          logInfo(s"${sc.name}: count time: ${(countTime - startTime) / 1000d}")
 
-      val startTime = System.currentTimeMillis()
-      val rows_num = sub_df.count()
-      val countTime = System.currentTimeMillis()
-      logInfo(s"${sc.name}: count time: ${(countTime - startTime) / 1000d}")
+          require(rows_num != 0, s"Please make sure the column ${sc.name} contains content except null or empty content!")
 
-      require(rows_num != 0, s"Please make sure the column ${sc.name} contains content except null or empty content!")
+          val res = sub_df.
+            withColumn(SQLPatternDistribution.patternColName, find_patterns_udf(col(sc.name))).
+            withColumn(SQLPatternDistribution.alternativePatternColName, find_alternative_pattern_udf(col(sc.name)))
 
-      val res = sub_df.
-        withColumn(SQLPatternDistribution.patternColName, find_patterns_udf(col(sc.name))).
-        withColumn(SQLPatternDistribution.alternativePatternColName, find_alternative_pattern_udf(col(sc.name)))
+          val pattern_group_df = res.groupBy(col(SQLPatternDistribution.patternColName),
+            col(SQLPatternDistribution.alternativePatternColName)).count().
+            orderBy(desc("count")).
+            withColumn("ratio", col("count") / rows_num.toDouble)
 
-      val pattern_group_df = res.groupBy(col(SQLPatternDistribution.patternColName),
-        col(SQLPatternDistribution.alternativePatternColName)).count().
-        orderBy(desc("count")).
-        withColumn("ratio", col("count") / rows_num.toDouble)
+          val items = pattern_group_df.limit(limit).collect()
+          logInfo(s"${sc.name}: pattern match time ${(System.currentTimeMillis() - countTime) / 1000d}")
 
-      val items = pattern_group_df.limit(limit).collect()
-      logInfo(s"${sc.name}: pattern match time ${(System.currentTimeMillis() - countTime) / 1000d}")
+          val total_count = items.head.getAs[Long]("count")
 
-      val total_count = items.head.getAs[Long]("count")
+          val jsonItems = items.map { item =>
+            val patternColNameV = item.getAs[String](SQLPatternDistribution.patternColName)
+            val alternativePatternColNameV = item.getAs[String](SQLPatternDistribution.alternativePatternColName)
+            val count = item.getAs[Long]("count")
+            val ratio = item.getAs[Double]("ratio")
+            Map("count" -> count, "ratio" -> ratio, SQLPatternDistribution.patternColName -> patternColNameV, SQLPatternDistribution.alternativePatternColName -> alternativePatternColNameV)
+          }
 
-      val jsonItems = items.map { item =>
-        val patternColNameV = item.getAs[String](SQLPatternDistribution.patternColName)
-        val alternativePatternColNameV = item.getAs[String](SQLPatternDistribution.alternativePatternColName)
-        val count = item.getAs[Long]("count")
-        val ratio = item.getAs[Double]("ratio")
-        Map("count" -> count, "ratio" -> ratio, SQLPatternDistribution.patternColName -> patternColNameV, SQLPatternDistribution.alternativePatternColName -> alternativePatternColNameV)
+          val jsonStrItems = JSONTool.toJsonStr(jsonItems)
+          col_pattern_map = col_pattern_map ++ Map("colPatternDistribution" -> jsonStrItems, "totalCount" -> String.valueOf(total_count), "limit" -> String.valueOf(limit))
+          Seq(sc.name, JSONTool.toJsonStr(col_pattern_map))
+        }
       }
-
-      val jsonStrItems = JSONTool.toJsonStr(jsonItems)
-      col_pattern_map = col_pattern_map ++ Map("colPatternDistribution" -> jsonStrItems, "totalCount" -> String.valueOf(total_count), "limit" -> String.valueOf(limit))
-
-      Seq(sc.name, JSONTool.toJsonStr(col_pattern_map))
     }).map(Row.fromSeq(_)).toList
     //    } finally {
     //      fDf.unpersist()
     //    }
-
     val spark = df.sparkSession
     spark.createDataFrame(spark.sparkContext.parallelize(res, 1), StructType(Seq(StructField("columnName", StringType), StructField("patternDistribution", StringType))))
   }
@@ -220,7 +220,6 @@ object SQLPatternDistribution {
   val lowerCaseLetterKey_index = 1
   val numberKey_index = 2
   val symbolLetterKey_index = 3
-
   val patternColName = "pattern"
 
   val alternativePatternColName = "alternativePattern"
@@ -241,7 +240,7 @@ object SQLPatternDistribution {
   }
 
   def isChineseChar(ch: Char): Boolean = {
-    if (ch >= 0x4E00 && ch <= 0x4E00) true else false
+    if (ch >= 0x4E00 && ch <= 0x9fbb) true else false
   }
 
   def find_patterns(src: String, _internalChLimit: Int): String = {
@@ -298,7 +297,6 @@ object SQLPatternDistribution {
     }
     return res
   }
-
   def find_alternativePatterns(src: String, _internalChLimit: Int): String = {
     var num_ch_upper@num_ch_lower = 0
     var num_digit@num_others = 0
