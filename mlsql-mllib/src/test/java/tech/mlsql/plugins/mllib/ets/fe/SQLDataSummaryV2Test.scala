@@ -46,13 +46,13 @@ class SQLDataSummaryV2Test extends FlatSpec with SparkOperationUtil with Matcher
         ("bb", 21, "533000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)))
       )
       val seq_df1 = spark.createDataFrame(sseq1).toDF("name", "age", "income", "date")
-      val res1DF = et.train(seq_df1, "", Map("atRound" -> "2", "metrics" -> "dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,uniqueValueRatio,primaryKeyCandidate,median,mode"))
+      val res1DF = et.train(seq_df1, "", Map("atRound" -> "2"))
       res1DF.show()
 
-      assert(res1DF.collect()(0).mkString(",") === "name,1.0,5.0,elena,AA,5.0,0.0,,,,0.0,0.1667,1.0,1,0.0,")
-      assert(res1DF.collect()(1).mkString(",") === "age,2.0,4.0,57.0,10.0,,,34.67,17.77,7.26,0.0,0.0,1.0,1,30.0,")
-      assert(res1DF.collect()(2).mkString(",") === "income,3.0,6.0,533000.0,432000.0,6.0,6.0,,,,0.0,0.0,0.6667,0,0.0,433000.0")
-      assert(res1DF.collect()(3).mkString(",") === "date,4.0,8.0,2021-03-08 18:00:00,2021-03-08 18:00:00,,,,,,0.0,0.0,0.1667,0,0.0,2021-03-08 18:00:00.0")
+      assert(res1DF.collect()(0).mkString(",") === "name,1.0,string,5.0,elena,AA,5.0,0.0,,,,0.0,0.1667,6.0,1.0,1,0.0,")
+      assert(res1DF.collect()(1).mkString(",") === "age,2.0,integer,4.0,57.0,10.0,,,34.67,17.77,7.26,0.0,0.0,6.0,1.0,1,30.0,")
+      assert(res1DF.collect()(2).mkString(",") === "income,3.0,string,6.0,533000.0,432000.0,6.0,6.0,,,,0.0,0.0,6.0,0.6667,0,0.0,433000.0")
+      assert(res1DF.collect()(3).mkString(",") === "date,4.0,timestamp,8.0,2021-03-08 18:00:00,2021-03-08 18:00:00,,,,,,0.0,0.0,6.0,0.1667,0,0.0,2021-03-08 18:00:00.0")
       val sseq = Seq(
         ("elena", 57, 57, 110L, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)), 110F, true, null, null, BigDecimal.valueOf(12), 1.123D),
         ("abe", 57, 50, 120L, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)), 120F, true, null, null, BigDecimal.valueOf(2), 1.123D),
