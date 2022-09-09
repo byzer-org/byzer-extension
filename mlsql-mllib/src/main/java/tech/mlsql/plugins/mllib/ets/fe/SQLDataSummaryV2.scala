@@ -239,7 +239,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     })
   }
 
-  def getPercentileRows(metrics: Array[String], schema: StructType, df: DataFrame, relativeError: Double): (Array[Array[Double]], Array[String]) = {
+  def getPercentileRows(metrics: Array[String], schema: StructType, df: DataFrame, relativeError: Double): (Array[Array[String]], Array[String]) = {
     var percentilePoints: Array[Double] = Array()
     var percentileCols: Array[String] = Array()
     if (metrics.contains("%25")) {
@@ -263,7 +263,13 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       res
     }).toArray
     val quantileRows: Array[Array[Double]] = df.select(cols: _*).na.fill(0.0).stat.approxQuantile(df.columns, percentilePoints, relativeError)
-    (quantileRows, percentileCols)
+    val quantileRowsAfterTrans = quantileRows.map(qr => {
+      qr.length match {
+        case 0 => Seq("").toArray
+        case _ => qr.map(e => String.valueOf(e))
+      }
+    })
+    (quantileRowsAfterTrans, percentileCols)
   }
 
   def processSelectedMetrics(metrics: Array[String]): Array[String] = {
@@ -302,8 +308,9 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     mode
   }
 
-  def calculateCountMetrics(df: DataFrame, approxCountDistinct: Boolean): (Seq[Any], Seq[Any]) = {
+  def calculateCountMetrics(df: DataFrame, approxCountDistinct: Boolean, threshold: Double = 0.9): (Seq[Any], Seq[Any]) = {
     val schema = df.schema
+    val columns = df.schema.map(sc => sc.name).toArray
     val idxToCol = df.columns.zipWithIndex.map(t => {
       (t._2, t._1)
     }).toMap
@@ -317,28 +324,36 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       val colName = idxToCol.getOrElse(pos, null)
       val colType = schema.filter(sc => sc.name == colName)(0)
       var isPrimaryKeyE = 0
-      if (String.valueOf(e._1).toDouble > 0.6) {
-        if (String.valueOf(e._1).toDouble == 1) {
-          isPrimaryKeyE = 1
-        }
+      if (String.valueOf(e._1).toDouble != 1 && (String.valueOf(e._1).toDouble >= threshold)) {
         recalCols = recalCols :+ (colType)
+      }
+      if (String.valueOf(e._1).toDouble == 1) {
+        isPrimaryKeyE = 1
       }
       isPrimaryKeyRow = isPrimaryKeyRow :+ isPrimaryKeyE
     })
+    if (approxCountDistinct) {
+      val replacedRatioDF = df.select(countUniqueValueRatio(StructType(recalCols), false): _*)
+      val replaceURrow = replacedRatioDF.collect().take(1)
+      if (replaceURrow.length == 0) {
+        return (uniqueValueRatio, isPrimaryKeyRow.toSeq)
+      }
+      replacedRatioDF.schema.zipWithIndex.map(ele => {
+        val idx = ele._2
+        val sc = ele._1
+        val colName = sc.name.split("_")(0)
+        val originIdx = columns.indexOf(colName)
+        val newValue = replaceURrow(0)(idx)
+        uniqueValueRatio = uniqueValueRatio.updated(originIdx, newValue)
+      })
 
-    val replacedRatioDF = df.select(countUniqueValueRatio(StructType(recalCols), false): _*)
-    val replaceURrow = replacedRatioDF.collect().take(0)
-    if (replaceURrow.length == 0) {
-      return (uniqueValueRatio, isPrimaryKeyRow.toSeq)
+      uniqueValueRatio.zipWithIndex.map(e => {
+        if (String.valueOf(e._1).toDouble == 1) {
+          isPrimaryKeyRow = isPrimaryKeyRow.updated(e._2, 1)
+        }
+      })
     }
-    replacedRatioDF.schema.zipWithIndex.map(ele => {
-      val idx = ele._2
-      val sc = ele._1
-      val colName = sc.name.split("_")(0)
-      val originIdx = schema.indexOf(colName)
-      val newValue = replaceURrow(idx)
-      uniqueValueRatio = uniqueValueRatio.updated(originIdx, newValue)
-    })
+
     (uniqueValueRatio, isPrimaryKeyRow.toSeq)
   }
 
@@ -395,7 +410,8 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     val ordinaryPosRow = df.columns.map(col_name => String.valueOf(df.columns.indexOf(col_name) + 1)).toSeq
     var statsticMetricsSeq = (ordinaryPosRow ++ rows(0).toSeq)
     if (processedSelectedMetrics.contains("uniqueValueRatio") || processedSelectedMetrics.contains("primaryKeyCandidate")) {
-      val (uniqueValueRatioRow, isPrimaryKeyRow) = calculateCountMetrics(df, approxCountDistinct)
+      val threshold = params.getOrElse("threshold", "0.9").toDouble
+      val (uniqueValueRatioRow, isPrimaryKeyRow) = calculateCountMetrics(df, approxCountDistinct, threshold)
       if (processedSelectedMetrics.contains("uniqueValueRatio")) {
         statsticMetricsSeq = statsticMetricsSeq ++ uniqueValueRatioRow
       }
