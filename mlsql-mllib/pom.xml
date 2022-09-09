@@ -11,12 +11,8 @@
 
     <artifactId>mlsql-mllib-3.0_2.12</artifactId>
     <dependencies>
-        <dependency>
-            <artifactId>byzer-extension-tests-3.0_2.12</artifactId>
-            <groupId>tech.mlsql</groupId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+       
+
     </dependencies>
 
     <profiles>
@@ -24,16 +20,6 @@
             <id>shade</id>
             <build>
                 <plugins>
-
-                    <!-- maven 打包时跳过测试 -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </plugin>
-
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
