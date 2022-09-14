@@ -9,8 +9,8 @@ import streaming.dsl.auth._
 import streaming.dsl.mmlib.algs.param.BaseParams
 import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
-import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.common.utils.log.Logging
+import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 
 import java.util
@@ -344,8 +344,33 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
   def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
     val selectedMetrics = params.getOrElse(DataSummary.metrics, "dataType,dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,nonNullCount,uniqueValueRatio,primaryKeyCandidate,median,mode").split(",").filter(!_.equals(""))
-    val relativeError = params.getOrElse("relativeError", "0.01").toDouble
-    val approxCountDistinct = params.getOrElse("approxCountDistinct", "false").toBoolean
+    var relativeError = params.getOrElse("relativeError", "0.01").toDouble
+    var approxCountDistinct = params.getOrElse("approxCountDistinct", "false").toBoolean
+
+    val approxThreshold = params.getOrElse("approxThreshold", "1000000").toLong
+
+    var smallDatasetAccurately = true
+    var isSmallData = false
+    var total = -1l
+    if (approxThreshold == -1) {
+      logInfo(format("Small Dataset calculate accurately is disabled"))
+      smallDatasetAccurately = false
+    }
+
+    if (smallDatasetAccurately) {
+      total = df.count()
+      logInfo(format(s"The whole dataset is [${total}] and the approxThreshold is ${approxThreshold}"))
+      if (total <= approxThreshold) {
+        isSmallData = true
+      }
+    }
+
+    if (smallDatasetAccurately && isSmallData) {
+      logInfo(format("To calculate all metrics accurately; reset relativeError to 0.0 ,approxCountDistinct to false."))
+      relativeError = 0.0
+      approxCountDistinct = false
+    }
+
     val df_columns = df.columns
 
     df_columns.foreach(col => {
