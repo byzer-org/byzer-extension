@@ -13,16 +13,12 @@ import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 
+import java.util
 import java.util.Date
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
-import scala.util.{Failure, Success, Try}
 
 class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth with Logging {
 
   def this() = this(BaseParams.randomUID())
-
-  var round_at = 2
 
   var numericCols: Array[String] = null
 
@@ -63,7 +59,6 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
 
   def isPrimaryKey(schmea: StructType, approx: Boolean): Array[Column] = {
     schmea.map(sc => {
-      val c = sc.name
       //      val approxExpr = approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
       //      val accurateExpr = countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
       val exp1 = if (approx) {
@@ -91,7 +86,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }).toArray
   }
 
-  def getMaxNum(schema: StructType, numeric_columns: Array[String]): Array[Column] = {
+  def getMaxNum(schema: StructType): Array[Column] = {
     schema.map(sc => {
       val c = sc.name
       val max_expr = max(when(colWithFilterBlank(sc), col(c)))
@@ -99,19 +94,12 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }).toArray
   }
 
-  def getMinNum(schema: StructType, numeric_columns: Array[String]): Array[Column] = {
+  def getMinNum(schema: StructType): Array[Column] = {
     schema.map(sc => {
       val c = sc.name
       val min_expr = min(when(colWithFilterBlank(sc), col(c)))
       when(min_expr.isNull, "").otherwise(min_expr.cast(StringType)).alias(c + "_min")
     }).toArray
-  }
-
-  def roundAtSingleCol(sc: StructField, column: Column): Column = {
-    if (numericCols.contains(sc.name)) {
-      return round(column, round_at).cast(StringType)
-    }
-    column.cast(StringType)
   }
 
   def processModeValue(modeCandidates: Array[Row], modeFormat: String): Any = {
@@ -203,7 +191,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }).toArray
   }
 
-  def roundNumericCols(df: DataFrame, round_at: Integer): DataFrame = {
+  def roundNumericCols(df: DataFrame): DataFrame = {
     df.select(df.schema.map(sc => {
       sc.dataType match {
         case DoubleType => expr(s"cast (${sc.name} as decimal(38,2)) as ${sc.name}")
@@ -273,21 +261,11 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
   }
 
   def processSelectedMetrics(metrics: Array[String]): Array[String] = {
-    val normalMetrics = "dataType,maximumLength,minimumLength,uniqueValueRatio,nullValueRatio,blankValueRatio,mean,standardDeviation,standardError,max,min,dataLength,primaryKeyCandidate,nonNullCount".split(",")
-    val computedMetrics = "%25,median,%75".split(",")
-    val modeMetric = "mode".split(",")
-    var leftMetrics: Array[String] = Array()
-    var rightMetrics: Array[String] = Array()
-    var appendMetrics: Array[String] = Array()
-    metrics.map(m => {
-      m match {
-        case metric if normalMetrics.contains(metric) => leftMetrics = leftMetrics :+ metric
-        case metric if computedMetrics.contains(metric) => rightMetrics = rightMetrics :+ metric
-        case metric if modeMetric.contains(metric) => appendMetrics = appendMetrics :+ metric
-        case _ => require(false, "The selected metrics contains unkonwn calculation! " + m)
-      }
-    })
-    leftMetrics ++ rightMetrics ++ appendMetrics
+    val allMetrics = new util.HashSet[String]()
+    ("dataType,maximumLength,minimumLength,uniqueValueRatio,nullValueRatio,blankValueRatio,mean,standardDeviation," +
+      "standardError,max,min,dataLength,primaryKeyCandidate,nonNullCount,%25,median,%75,mode").split(",")
+      .foreach(allMetrics.add)
+    metrics.filter(allMetrics.contains(_))
   }
 
   def getModeValue(schema: StructType, df: DataFrame): Array[Any] = {
@@ -308,37 +286,36 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     mode
   }
 
-  def calculateCountMetrics(df: DataFrame, approxCountDistinct: Boolean, threshold: Double = 0.9): (Seq[Any], Seq[Any]) = {
+  def calculateCountMetrics(df: DataFrame, approxCountDistinct: Boolean, threshold: Double = 0.8): (Seq[Any], Seq[Any]) = {
     val schema = df.schema
-    val columns = df.schema.map(sc => sc.name).toArray
-    val idxToCol = df.columns.zipWithIndex.map(t => {
-      (t._2, t._1)
-    }).toMap
+    val columns = schema.map(sc => sc.name).toArray
+    val idxToCol = df.columns.zipWithIndex.map(t => (t._2, t._1)).toMap
 
     var recalCols: Array[StructField] = Array()
     // calculate uniqueValue Ratio
     var uniqueValueRatio = df.select(countUniqueValueRatio(df.schema, approxCountDistinct): _*).collect()(0).toSeq
     var isPrimaryKeyRow: Array[Int] = Array()
-    uniqueValueRatio.zipWithIndex.map(e => {
+    uniqueValueRatio.zipWithIndex.foreach(e => {
+      val ratio = String.valueOf(e._1).toDouble
       val pos = e._2
-      val colName = idxToCol.getOrElse(pos, null)
-      val colType = schema.filter(sc => sc.name == colName)(0)
       var isPrimaryKeyE = 0
-      if (String.valueOf(e._1).toDouble != 1 && (String.valueOf(e._1).toDouble >= threshold)) {
-        recalCols = recalCols :+ (colType)
+      if (ratio != 1 && (ratio >= threshold)) {
+        val colName = idxToCol.getOrElse(pos, null)
+        val colType = schema.filter(sc => sc.name == colName).head
+        recalCols = recalCols :+ colType
       }
-      if (String.valueOf(e._1).toDouble == 1) {
+      if (ratio == 1) {
         isPrimaryKeyE = 1
       }
       isPrimaryKeyRow = isPrimaryKeyRow :+ isPrimaryKeyE
     })
-    if (approxCountDistinct) {
-      val replacedRatioDF = df.select(countUniqueValueRatio(StructType(recalCols), false): _*)
+    if (approxCountDistinct && recalCols.length > 0) {
+      val replacedRatioDF = df.select(countUniqueValueRatio(StructType(recalCols), approx = false): _*)
       val replaceURrow = replacedRatioDF.collect().take(1)
       if (replaceURrow.length == 0) {
         return (uniqueValueRatio, isPrimaryKeyRow.toSeq)
       }
-      replacedRatioDF.schema.zipWithIndex.map(ele => {
+      replacedRatioDF.schema.zipWithIndex.foreach(ele => {
         val idx = ele._2
         val sc = ele._1
         val colName = sc.name.split("_")(0)
@@ -347,7 +324,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
         uniqueValueRatio = uniqueValueRatio.updated(originIdx, newValue)
       })
 
-      uniqueValueRatio.zipWithIndex.map(e => {
+      uniqueValueRatio.zipWithIndex.foreach(e => {
         if (String.valueOf(e._1).toDouble == 1) {
           isPrimaryKeyRow = isPrimaryKeyRow.updated(e._2, 1)
         }
@@ -365,23 +342,20 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
   }
 
   def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
-
-    round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
-
-    val metrics = params.getOrElse(DataSummary.metrics, "dataType,dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,nonNullCount,uniqueValueRatio,primaryKeyCandidate,median,mode").split(",").filter(!_.equalsIgnoreCase(""))
+    val round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
+    val selectedMetrics = params.getOrElse(DataSummary.metrics, "dataType,dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,nonNullCount,uniqueValueRatio,primaryKeyCandidate,median,mode").split(",").filter(!_.equals(""))
     val relativeError = params.getOrElse("relativeError", "0.01").toDouble
     val approxCountDistinct = params.getOrElse("approxCountDistinct", "false").toBoolean
-    val repartitionDF = df
-    val columns = repartitionDF.columns
+    val df_columns = df.columns
 
-    columns.map(col => {
+    df_columns.foreach(col => {
       if (col.contains(".") || col.contains("`")) {
-        throw new RuntimeException(s"The column name : ${col} contains special symbols, like . or `, please rename it first!! ")
+        throw new RuntimeException(s"The column name : $col contains special symbols, like . or `, please rename it first!! ")
       }
     })
 
     var start_time = new Date().getTime
-    numericCols = repartitionDF.schema.filter(sc => {
+    numericCols = df.schema.filter(sc => {
       sc.dataType.typeName match {
         case datatype: String => Array("integer", "short", "double", "float", "long").contains(datatype) || datatype.contains("decimal")
         case _ => false
@@ -389,12 +363,12 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }).map(sc => {
       sc.name
     }).toArray
-    val schema = repartitionDF.schema
+    val schema = df.schema
 
     val default_metrics = Map(
       "dataLength" -> getTypeLength(schema),
-      "max" -> getMaxNum(schema, numericCols),
-      "min" -> getMinNum(schema, numericCols),
+      "max" -> getMaxNum(schema),
+      "min" -> getMinNum(schema),
       "maximumLength" -> getMaxLength(schema),
       "minimumLength" -> getMinLength(schema),
       "mean" -> getMeanValue(schema),
@@ -407,36 +381,36 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       //      "uniqueValueRatio" -> countUniqueValueRatio(schema, approxCountDistinct),
       //      "primaryKeyCandidate" -> isPrimaryKey(schema, approxCountDistinct),
     )
-    val processedSelectedMetrics = processSelectedMetrics(metrics)
-    val newCols = processedSelectedMetrics.map(name => default_metrics.getOrElse(name, null)).filter(_ != null).flatMap(arr => arr).toArray
+
+    val processedSelectedMetrics = processSelectedMetrics(selectedMetrics)
+
+    val newCols = processedSelectedMetrics.map(name => default_metrics.getOrElse(name, null)).filter(_ != null).flatten
     val metricsIdx = processedSelectedMetrics.zipWithIndex.map(t => {
       (t._2, t._1)
     }).toMap
-    var resDF = repartitionDF.select(newCols: _*)
-    logInfo(s"normal metrics plan:\n${resDF.explain(true)}")
-    val rows = resDF.collect()
+    val rows = df.select(newCols: _*).collect()
     val rowN = schema.length
-    val ordinaryPosRow = df.columns.map(col_name => String.valueOf(df.columns.indexOf(col_name) + 1)).toSeq
-    var statsticMetricsSeq = (ordinaryPosRow ++ rows(0).toSeq)
+    val ordinaryPosRow = df_columns.map(col_name => String.valueOf(df_columns.indexOf(col_name) + 1)).toSeq
+    var statisticMetricsSeq = ordinaryPosRow ++ rows(0).toSeq
     if (processedSelectedMetrics.contains("uniqueValueRatio") || processedSelectedMetrics.contains("primaryKeyCandidate")) {
-      val threshold = params.getOrElse("threshold", "0.9").toDouble
+      val threshold = params.getOrElse("threshold", "0.8").toDouble
       val (uniqueValueRatioRow, isPrimaryKeyRow) = calculateCountMetrics(df, approxCountDistinct, threshold)
       if (processedSelectedMetrics.contains("uniqueValueRatio")) {
-        statsticMetricsSeq = statsticMetricsSeq ++ uniqueValueRatioRow
+        statisticMetricsSeq = statisticMetricsSeq ++ uniqueValueRatioRow
       }
       if (processedSelectedMetrics.contains("primaryKeyCandidate")) {
-        statsticMetricsSeq = statsticMetricsSeq ++ isPrimaryKeyRow
+        statisticMetricsSeq = statisticMetricsSeq ++ isPrimaryKeyRow
       }
     }
 
-    val normalMetricsRow = statsticMetricsSeq.grouped(rowN).map(_.toSeq).toArray.toSeq.transpose
+    val normalMetricsRow = statisticMetricsSeq.grouped(rowN).map(_.toSeq).toArray.toSeq.transpose
     var end_time = new Date().getTime
 
     logInfo("The elapsed time for normal metrics is : " + (end_time - start_time))
 
     // Calculate Percentile
     start_time = new Date().getTime
-    val (quantileRows, quantileCols) = getPercentileRows(processedSelectedMetrics, schema, df, relativeError)
+    val (quantileRows, quantileCols) = getPercentileRows(selectedMetrics, schema, df, relativeError)
     end_time = new Date().getTime
     logInfo("The elapsed time for percentile metrics is: " + (end_time - start_time))
 
@@ -444,24 +418,24 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     var resRows: Array[Seq[Any]] = null
     quantileCols.length match {
       case 0 =>
-        resRows = Range(0, schema.length).map(i => {
+        resRows = Range(0, rowN).map(i => {
           Seq(schema(i).name) ++ normalMetricsRow(i)
         }).toArray
       case _ =>
-        resRows = Range(0, schema.length).map(i => {
+        resRows = Range(0, rowN).map(i => {
           Seq(schema(i).name) ++ normalMetricsRow(i) ++ quantileRows(i).toSeq
         }).toArray
     }
 
-    datatype_schema = ("columnName" +: "ordinalPosition" +: processedSelectedMetrics).map(t => {
+    datatype_schema = ("columnName" +: "ordinalPosition" +: selectedMetrics).map(t => {
       StructField(t, StringType)
     })
 
     start_time = new Date().getTime
     // Calculate Mode
-    if (processedSelectedMetrics.contains("mode")) {
+    if (selectedMetrics.contains("mode")) {
       val modeRows = getModeValue(schema, df)
-      resRows = Range(0, schema.length).map(i => {
+      resRows = Range(0, rowN).map(i => {
         resRows(i) :+ modeRows(i)
       }).toArray
       end_time = new Date().getTime
