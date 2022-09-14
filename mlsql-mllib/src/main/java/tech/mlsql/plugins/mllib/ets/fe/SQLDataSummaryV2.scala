@@ -286,7 +286,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     mode
   }
 
-  def calculateCountMetrics(df: DataFrame, approxCountDistinct: Boolean, threshold: Double = 0.9): (Seq[Any], Seq[Any]) = {
+  def calculateCountMetrics(df: DataFrame, approxCountDistinct: Boolean, threshold: Double = 0.8): (Seq[Any], Seq[Any]) = {
     val schema = df.schema
     val columns = schema.map(sc => sc.name).toArray
     val idxToCol = df.columns.zipWithIndex.map(t => (t._2, t._1)).toMap
@@ -393,7 +393,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     val ordinaryPosRow = df_columns.map(col_name => String.valueOf(df_columns.indexOf(col_name) + 1)).toSeq
     var statisticMetricsSeq = ordinaryPosRow ++ rows(0).toSeq
     if (processedSelectedMetrics.contains("uniqueValueRatio") || processedSelectedMetrics.contains("primaryKeyCandidate")) {
-      val threshold = params.getOrElse("threshold", "0.9").toDouble
+      val threshold = params.getOrElse("threshold", "0.8").toDouble
       val (uniqueValueRatioRow, isPrimaryKeyRow) = calculateCountMetrics(df, approxCountDistinct, threshold)
       if (processedSelectedMetrics.contains("uniqueValueRatio")) {
         statisticMetricsSeq = statisticMetricsSeq ++ uniqueValueRatioRow
