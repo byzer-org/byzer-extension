@@ -72,20 +72,17 @@
         <scala.version>{{scala_version}}</scala.version>
         <scala.binary.version>{{scala_binary_version}}</scala.binary.version>
         <spark.version>{{spark_version}}</spark.version>
-        <spark.bigversion>{{spark_binary_version}}</spark.bigversion>
         <spark.binary.version>{{spark_binary_version}}</spark.binary.version>
-
+        <scalatest.version>3.2.13</scalatest.version>
+        <mlsql.version>2.4.0-SNAPSHOT</mlsql.version>
+        <delta-plus.version>0.4.0</delta-plus.version>
         <guava.version>16.0</guava.version>
         <httpclient.version>4.5.3</httpclient.version>
-
         <common-utils-version>0.3.9.4</common-utils-version>
         <serviceframework.version>2.0.5</serviceframework.version>
         <scope>provided</scope>
         <hadoop-client-version>2.6.5</hadoop-client-version>
-        <mlsql.version>2.3.0-SNAPSHOT</mlsql.version>
-        <delta-plus.version>0.2.0</delta-plus.version>
         <bigdl.version>0.8.0</bigdl.version>
-        <scalatest.version>3.0.3</scalatest.version>
     </properties>
 
     <dependencies>
@@ -204,24 +201,6 @@
             <properties>
                 <scala.version>2.12.12</scala.version>
                 <scala.binary.version>2.12</scala.binary.version>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>spark-2.4</id>
-            <properties>
-                <spark.version>2.4.3</spark.version>
-                <spark.bigversion>2.4</spark.bigversion>
-                <spark.binary.version>2.4</spark.binary.version>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>spark-3.0</id>
-            <properties>
-                <spark.version>3.0.0-preview2</spark.version>
-                <spark.bigversion>3.0</spark.bigversion>
-                <spark.binary.version>3.0</spark.binary.version>
             </properties>
         </profile>
 

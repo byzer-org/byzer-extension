@@ -3,7 +3,8 @@ package tech.mlsql.plugins.mllib.ets.fe
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.DoubleType
 import org.apache.spark.streaming.SparkOperationUtil
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import streaming.core.strategy.platform.SparkRuntime
 import tech.mlsql.test.BasicMLSQLConfig
 
@@ -14,7 +15,7 @@ import java.util.UUID
 /**
  * 12/07/2022 hellozepp(lisheng.zhanglin@163.com)
  */
-class SQLDescriptiveMetricsTest extends FlatSpec with SparkOperationUtil with Matchers with BasicMLSQLConfig with BeforeAndAfterAll {
+class SQLDescriptiveMetricsTest extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig with BeforeAndAfterAll with BeforeAndAfterEach {
   def startParams = Array(
     "-streaming.master", "local[2]",
     "-streaming.name", "unit-test",
@@ -26,7 +27,7 @@ class SQLDescriptiveMetricsTest extends FlatSpec with SparkOperationUtil with Ma
     "-streaming.unittest", "true"
   )
 
-  "DescriptiveMetrics" should "Returns the frequency of a field in a table" in {
+  test("DescriptiveMetrics should Returns the frequency of a field in a table") {
     withBatchContext(setupBatchContext(startParams)) { runtime: SparkRuntime =>
       implicit val spark = runtime.sparkSession
       val et = new SQLDescriptiveMetrics()
