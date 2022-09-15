@@ -1,9 +1,9 @@
 package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.streaming.SparkOperationUtil
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import tech.mlsql.test.BasicMLSQLConfig
-import org.apache.spark.ml.fpm.FPGrowth
+import org.scalatest.funsuite.AnyFunSuite
 import streaming.core.strategy.platform.SparkRuntime
 
 import java.util.UUID
@@ -14,7 +14,7 @@ import java.util.UUID
  * @Date: 2022/7/13 12:48
  *
  */
-class SQLPatternSummaryTest extends FlatSpec with SparkOperationUtil with Matchers with BasicMLSQLConfig with BeforeAndAfterAll {
+class SQLPatternSummaryTest extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig with BeforeAndAfterAll with BeforeAndAfterEach {
 
   def startParams = Array(
     "-streaming.master", "local[2]",
@@ -27,7 +27,7 @@ class SQLPatternSummaryTest extends FlatSpec with SparkOperationUtil with Matche
     "-streaming.unittest", "true"
   )
 
-  "DataSummary" should "Summarize the Dataset" in {
+  test("PatternSummary should Summarize the Dataset") {
     withBatchContext(setupBatchContext(startParams)) { runtime: SparkRuntime =>
       implicit val spark = runtime.sparkSession
       val et = new SQLPatternDistribution()

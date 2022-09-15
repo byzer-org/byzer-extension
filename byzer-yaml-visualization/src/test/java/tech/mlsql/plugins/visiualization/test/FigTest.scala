@@ -1,12 +1,11 @@
 package tech.mlsql.plugins.visiualization.test
-
-import org.scalatest.FlatSpec
+import org.scalatest.funsuite.AnyFunSuite
 import tech.mlsql.plugins.visualization.{PlotlyRuntime, PythonHint}
 
 /**
  * 2/7/2022 WilliamZhu(allwefantasy@gmail.com)
  */
-class FigTest extends FlatSpec {
+class FigTest  extends AnyFunSuite {
 
   def printCode(v: String) = {
     val pr = new PlotlyRuntime()
@@ -36,11 +35,11 @@ class FigTest extends FlatSpec {
       |           uv: "uv"""".stripMargin
 
 
-  "yaml" should "to python code" in {
+  test("yaml should to python code") {
     printCode(template)
   }
 
-  "yaml" should "parse Boolean" in {
+  test("yaml should parse Boolean") {
 
     printCode(
       """
@@ -59,7 +58,7 @@ class FigTest extends FlatSpec {
         |      size_max: 60 """.stripMargin)
   }
 
-  "yaml" should "with vvtype" in {
+  test("yaml should with vvtype") {
     printCode(
       """
         |confFrom: counties

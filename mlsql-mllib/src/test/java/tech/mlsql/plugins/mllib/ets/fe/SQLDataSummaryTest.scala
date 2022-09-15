@@ -4,7 +4,8 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.DoubleType
 import org.apache.spark.streaming.SparkOperationUtil
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import streaming.core.strategy.platform.SparkRuntime
 import tech.mlsql.test.BasicMLSQLConfig
 
@@ -18,7 +19,7 @@ import java.util.UUID
  * @Date: 2022/6/27 19:07
  *
  */
-class SQLDataSummaryTest extends FlatSpec with SparkOperationUtil with Matchers with BasicMLSQLConfig  with BeforeAndAfterAll {
+class SQLDataSummaryTest extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig with BeforeAndAfterAll with BeforeAndAfterEach {
   def startParams = Array(
     "-streaming.master", "local[2]",
     "-streaming.name", "unit-test",
@@ -30,7 +31,7 @@ class SQLDataSummaryTest extends FlatSpec with SparkOperationUtil with Matchers 
     "-streaming.unittest", "true"
   )
 
-  "DataSummary" should "Summarize the Dataset" in {
+  test("DataSummary should summarize the Dataset") {
     withBatchContext(setupBatchContext(startParams)) { runtime: SparkRuntime =>
       implicit val spark: SparkSession = runtime.sparkSession
       val et = new SQLDataSummary()

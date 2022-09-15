@@ -3,7 +3,8 @@ package tech.mlsql.plugins.mllib.ets.fe
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.DoubleType
 import org.apache.spark.streaming.SparkOperationUtil
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import streaming.core.strategy.platform.SparkRuntime
 import tech.mlsql.test.BasicMLSQLConfig
 
@@ -14,7 +15,7 @@ import java.util.UUID
 /**
  * 12/07/2022 hellozepp(lisheng.zhanglin@163.com)
  */
-class SQLUniqueIdentifierTest extends FlatSpec with SparkOperationUtil with Matchers with BasicMLSQLConfig with BeforeAndAfterAll {
+class SQLUniqueIdentifierTest extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig with BeforeAndAfterAll with BeforeAndAfterEach {
   def startParams = Array(
     "-streaming.master", "local[2]",
     "-streaming.name", "unit-test",
@@ -26,7 +27,7 @@ class SQLUniqueIdentifierTest extends FlatSpec with SparkOperationUtil with Matc
     "-streaming.unittest", "true"
   )
 
-  "SQLUniqueIdentifier" should "Returns the unique id of a field in a table" in {
+  test("SQLUniqueIdentifier should Returns the unique id of a field in a table") {
     withBatchContext(setupBatchContext(startParams)) { runtime: SparkRuntime =>
       implicit val spark = runtime.sparkSession
       val et = new SQLUniqueIdentifier()
@@ -63,7 +64,7 @@ class SQLUniqueIdentifierTest extends FlatSpec with SparkOperationUtil with Matc
     }
   }
 
-  "param of startIndex" should "Returns the column starting at the specified index" in {
+  test("param of startIndex should Returns the column starting at the specified index") {
     withBatchContext(setupBatchContext(startParams)) { runtime: SparkRuntime =>
       implicit val spark = runtime.sparkSession
       val et = new SQLUniqueIdentifier()

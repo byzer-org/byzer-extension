@@ -1,9 +1,10 @@
 package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, explode, struct, desc}
+import org.apache.spark.sql.functions.{col, desc, explode, struct}
 import org.apache.spark.streaming.SparkOperationUtil
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.{BeforeAndAfterAll}
 import streaming.core.strategy.platform.SparkRuntime
 import tech.mlsql.test.BasicMLSQLConfig
 
@@ -17,7 +18,7 @@ import java.util.{Date, UUID}
  * @Date: 2022/6/27 19:07
  *
  */
-class SQLDataSummaryV2Test extends FlatSpec with SparkOperationUtil with Matchers with BasicMLSQLConfig with BeforeAndAfterAll {
+class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig with BeforeAndAfterAll {
   def startParams = Array(
     "-streaming.master", "local[*]",
     "-streaming.name", "unit-test",
@@ -32,8 +33,7 @@ class SQLDataSummaryV2Test extends FlatSpec with SparkOperationUtil with Matcher
     "-spark.executor.memoryOverheadFactor", "0.2",
     "-spark.dirver.maxResultSize", "2g"
   )
-
-  "DataSummary" should "Summarize the Dataset" in {
+  test("DataSummary should summarize the Dataset") {
     withBatchContext(setupBatchContext(startParams)) { runtime: SparkRuntime =>
       implicit val spark: SparkSession = runtime.sparkSession
       val et = new SQLDataSummaryV2()
