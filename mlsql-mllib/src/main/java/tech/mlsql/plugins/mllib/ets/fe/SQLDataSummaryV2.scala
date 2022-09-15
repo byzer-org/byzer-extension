@@ -345,7 +345,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     val round_at = Integer.valueOf(params.getOrElse("roundAt", "2"))
     val selectedMetrics = params.getOrElse(DataSummary.metrics, "dataType,dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,nonNullCount,uniqueValueRatio,primaryKeyCandidate,median,mode").split(",").filter(!_.equals(""))
     var relativeError = params.getOrElse("relativeError", "0.01").toDouble
-    var approxCountDistinct = params.getOrElse("approxCountDistinct", "false").toBoolean
+    var approxCountDistinct = params.getOrElse("approxCountDistinct", "true").toBoolean
 
     val approxThreshold = params.getOrElse("approxThreshold", "1000000").toLong
 
