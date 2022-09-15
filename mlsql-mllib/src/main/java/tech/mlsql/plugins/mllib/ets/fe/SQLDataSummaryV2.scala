@@ -205,14 +205,15 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     resRow.map(row => {
       row.zipWithIndex.map(el => {
         val e = el._1
-        val metricName = metricsIdx.getOrElse(el._2 - 2, "")
-        val round_at = metricsIdx.getOrElse(el._2 - 2, "") match {
+        val metricName = metricsIdx.getOrElse(el._2, "")
+        val round_at = metricsIdx.getOrElse(el._2, "") match {
           case t if t.endsWith("Ratio") => roundAt + 2
           case _ => roundAt
         }
         var newE = e
         try {
-          if (metricName.equals("primaryKeyCandidate")) {
+          val intTypeList = Array("primaryKeyCandidate", "ordinalPosition", "dataLength", "maximumLength", "minimumLength", "nonNullCount")
+          if (intTypeList.contains(metricName)) {
             val v = e.toString.toInt
             newE = v
           } else {
@@ -271,7 +272,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
   def getModeValue(schema: StructType, df: DataFrame): Array[Any] = {
     val mode = schema.toList.par.map(sc => {
       val dfWithoutNa = df.select(col(sc.name)).na.drop()
-      val modeDF = dfWithoutNa.groupBy(col(sc.name)).count().orderBy(F.desc("count")).limit(2)
+      val modeDF = dfWithoutNa.groupBy(col(sc.name).cast(StringType)).count().orderBy(F.desc("count")).limit(2)
       val modeList = modeDF.collect()
       if (modeList.length != 0) {
         modeList match {
@@ -410,9 +411,6 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     val processedSelectedMetrics = processSelectedMetrics(selectedMetrics)
 
     val newCols = processedSelectedMetrics.map(name => default_metrics.getOrElse(name, null)).filter(_ != null).flatten
-    val metricsIdx = processedSelectedMetrics.zipWithIndex.map(t => {
-      (t._2, t._1)
-    }).toMap
     val rows = df.select(newCols: _*).collect()
     val rowN = schema.length
     val ordinaryPosRow = df_columns.map(col_name => String.valueOf(df_columns.indexOf(col_name) + 1)).toSeq
@@ -467,7 +465,9 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       logInfo("The elapsed time for mode metric is: " + (end_time - start_time))
     }
 
-
+    val metricsIdx = datatype_schema.zipWithIndex.map(t => {
+      (t._2, t._1.name)
+    }).toMap
     resRows = dataFormat(resRows, metricsIdx, round_at)
     val resAfterTransformed = resRows.map(row => {
       val t = row.map(e => String.valueOf(e))
