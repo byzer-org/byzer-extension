@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mlsql-assert-${spark.binary.version}_${scala.binary.version}</artifactId>
+    <artifactId>mlsql-assert-3.3_2.12</artifactId>
     <dependencies>
        
 

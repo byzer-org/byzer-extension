@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mlsql-ke-${spark.binary.version}_${scala.binary.version}</artifactId>
+    <artifactId>mlsql-ke-3.3_2.12</artifactId>
     <properties>
         <fastjson.version>1.2.32</fastjson.version>
     </properties>

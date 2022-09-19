@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mlsql-ext-ets-${spark.binary.version}_${scala.binary.version}</artifactId>
+    <artifactId>mlsql-ext-ets-3.3_2.12</artifactId>
     <properties>
         <fastjson.version>1.2.32</fastjson.version>
     </properties>
@@ -19,6 +19,12 @@
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>tech.mlsql</groupId>-->
+<!--            <artifactId>byzer-extension-tests-3.3_2.12</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
     <profiles>

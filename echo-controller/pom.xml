@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>echo-controller-${spark.binary.version}_${scala.binary.version}</artifactId>
+    <artifactId>echo-controller-3.3_2.12</artifactId>
 
 
 </project>
