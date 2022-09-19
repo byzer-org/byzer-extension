@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ALL_MODUELS="mlsql-shell mlsql-assert mlsql-mllib mlsql-excel byzer-yaml-visualization connect-persist last-command run-script save-then-load stream-persist table-repartition"
+ALL_MODUELS="mlsql-shell mlsql-assert mlsql-mllib mlsql-excel byzer-yaml-visualization connect-persist mlsql-ds last-command table-repartition"
 
 MODUELS=${1:-""}
 

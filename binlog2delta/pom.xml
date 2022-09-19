@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>binlog2delta-{{spark_binary_version}}_{{scala_binary_version}}</artifactId>
+    <artifactId>binlog2delta-3.3_2.12</artifactId>
 
 
 </project>
