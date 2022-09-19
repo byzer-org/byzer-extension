@@ -8,7 +8,7 @@ if [[ "${MODUELS}" == "" ]];then
    MODUELS=${ALL_MODUELS}
 fi
 
-for spark_version in spark243 spark311
+for spark_version in spark330
 do
   for module in ${MODUELS}
   do

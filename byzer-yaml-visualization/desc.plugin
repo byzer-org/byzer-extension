@@ -1,7 +1,7 @@
-moduleName=byzer-yaml-visualization-3.0
+moduleName=byzer-yaml-visualization-3.3
 mainClass=tech.mlsql.plugins.visualization.ByzerVisualizationApp
 scala_version=2.12
-spark_version=3.0
+spark_version=3.3
 version=0.1.0-SNAPSHOT
 author=allwefantasy
 mlsqlVersions=""

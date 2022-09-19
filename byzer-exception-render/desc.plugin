@@ -1,4 +1,4 @@
-moduleName=byzer-exception-render-3.0_2.12
+moduleName=byzer-exception-render-3.3_2.12
 mainClass=tech.mlsql.plugins.render.ExceptionReplaceRenderApp
 version=0.1.0-SNAPSHOT
 author=jiachuan.zhu
