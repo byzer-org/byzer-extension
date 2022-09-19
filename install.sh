@@ -10,9 +10,14 @@ SPARK="spark330"
 if [[ "${V}" == "2.4" ]]
 then
    SPARK=spark243
+elif [ "${V}" == "3.0" ]; then
+   SPARK=spark311
+elif [ "${V}" == "3.3" ]; then
+   SPARK=spark330
 fi
 
-if [[ "${SPARK}" == "spark330" ]]
+
+if [[ "${SPARK}" == "spark330" || "${SPARK}" == "spark311" ]]
 then
    MIDDLE="${V}_2.12"
 fi

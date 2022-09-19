@@ -8,11 +8,11 @@ if [[ "${MODUELS}" == "" ]];then
    MODUELS=${ALL_MODUELS}
 fi
 
-for spark_version in spark330
+for spark_version in 2.4 3.0 3.3
 do
   for module in ${MODUELS}
   do
-     ./install.sh ${module} 3.3
+     ./install.sh ${module} ${spark_version}
   done
 done
 
