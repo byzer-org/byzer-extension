@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ALL_MODUELS="mlsql-shell mlsql-assert mlsql-mllib mlsql-excel connect-persist last-command run-script save-then-load stream-persist table-repartition"
+ALL_MODUELS="mlsql-shell mlsql-assert mlsql-mllib mlsql-excel byzer-yaml-visualization connect-persist last-command run-script save-then-load stream-persist table-repartition"
 
 MODUELS=${1:-""}
 
@@ -12,7 +12,7 @@ for spark_version in spark330
 do
   for module in ${MODUELS}
   do
-     ./install.sh ${module} ${spark_version}
+     ./install.sh ${module} 3.3
   done
 done
 
