@@ -124,7 +124,7 @@
 
         <dependency>
             <groupId>tech.mlsql</groupId>
-            <artifactId>streamingpro-spark-3.0.0-adaptor_${scala.binary.version}</artifactId>
+            <artifactId>streamingpro-spark-${spark.version}-adaptor_${scala.binary.version}</artifactId>
             <version>${mlsql.version}</version>
             <scope>${scope}</scope>
         </dependency>
