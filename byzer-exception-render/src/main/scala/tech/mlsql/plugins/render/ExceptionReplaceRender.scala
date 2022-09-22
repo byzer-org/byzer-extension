@@ -5,7 +5,7 @@ import org.apache.spark.streaming.SparkOperationUtil
 import streaming.core.strategy.platform.PlatformManager
 import streaming.dsl.ScriptSQLExec
 import tech.mlsql.app.ExceptionRender
-import tech.mlsql.common.JsonUtils
+import tech.mlsql.common.utils.serder.json.JsonUtils
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.log.LogUtils
 import tech.mlsql.plugins.render.ExceptionReplaceTemplate.getMsgTemplate
