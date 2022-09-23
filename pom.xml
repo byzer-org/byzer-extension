@@ -35,10 +35,9 @@
         <module>byzer-openmldb</module>
         <module>byzer-objectstore-cos</module>
         <module>byzer-objectstore-obs</module>
-        <module>byzer-objectstore-s3</module>
         <module>byzer-objectstore-oss</module>
         <module>byzer-objectstore-blob</module>
-        <module>byzer-hive312</module>
+        <module>byzer-objectstore-s3</module>
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>
@@ -74,8 +73,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <scala.binary.version>2.12</scala.binary.version>
+
         <scala.version>2.12.15</scala.version>
+        <scala.binary.version>2.12</scala.binary.version>
         <spark.version>3.3.0</spark.version>
         <spark.binary.version>3.3</spark.binary.version>
         <scalatest.version>3.2.13</scalatest.version>
@@ -97,19 +97,6 @@
             <artifactId>scalatest_${scala.binary.version}</artifactId>
             <version>${scalatest.version}</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>scala-library</artifactId>
-                    <groupId>org.scala-lang</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>${scala.version}</version>
-            <scope>${scope}</scope>
         </dependency>
 
         <dependency>
@@ -121,21 +108,21 @@
 
         <dependency>
             <groupId>tech.mlsql</groupId>
-            <artifactId>streamingpro-mlsql-spark_${spark.binary.version}_${scala.binary.version}</artifactId>
+            <artifactId>streamingpro-mlsql-spark_${spark.bigversion}_${scala.binary.version}</artifactId>
             <version>${mlsql.version}</version>
             <scope>${scope}</scope>
         </dependency>
 
         <dependency>
             <groupId>tech.mlsql</groupId>
-            <artifactId>streamingpro-core-${spark.binary.version}_${scala.binary.version}</artifactId>
+            <artifactId>streamingpro-core-${spark.bigversion}_${scala.binary.version}</artifactId>
             <version>${mlsql.version}</version>
             <scope>${scope}</scope>
         </dependency>
 
         <dependency>
             <groupId>tech.mlsql</groupId>
-            <artifactId>streamingpro-common-${spark.binary.version}_${scala.binary.version}</artifactId>
+            <artifactId>streamingpro-common-${spark.bigversion}_${scala.binary.version}</artifactId>
             <version>${mlsql.version}</version>
             <scope>${scope}</scope>
         </dependency>
