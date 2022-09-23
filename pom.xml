@@ -34,6 +34,10 @@
         <module>byzer-yaml-visualization</module>
         <module>byzer-openmldb</module>
         <module>byzer-objectstore-cos</module>
+        <module>byzer-objectstore-obs</module>
+        <module>byzer-objectstore-s3</module>
+        <module>byzer-objectstore-oss</module>
+        <module>byzer-objectstore-blob</module>
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>
