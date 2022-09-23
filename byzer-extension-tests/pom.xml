@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>byzer-extension-tests-${spark.binary.version}_${scala.binary.version}</artifactId>
+    <artifactId>byzer-extension-tests-3.3_2.12</artifactId>
     <properties>
         <fastjson.version>1.2.32</fastjson.version>
     </properties>
