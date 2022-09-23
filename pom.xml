@@ -38,6 +38,7 @@
         <module>byzer-objectstore-s3</module>
         <module>byzer-objectstore-oss</module>
         <module>byzer-objectstore-blob</module>
+        <module>byzer-hive312</module>
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>
