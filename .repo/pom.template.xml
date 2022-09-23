@@ -73,7 +73,6 @@
         <scala.binary.version>{{scala_binary_version}}</scala.binary.version>
         <spark.version>{{spark_version}}</spark.version>
         <spark.binary.version>{{spark_binary_version}}</spark.binary.version>
-        <spark.bigversion>{{spark_binary_version}}</spark.bigversion>
         <scalatest.version>3.2.13</scalatest.version>
         <mlsql.version>2.4.0-SNAPSHOT</mlsql.version>
         <delta-plus.version>0.4.0</delta-plus.version>

@@ -19,7 +19,7 @@
 
         <dependency>
             <groupId>tech.mlsql</groupId>
-            <artifactId>byzer-extension-tests-3.0_2.12</artifactId>
+            <artifactId>byzer-extension-tests-3.3_2.12</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>

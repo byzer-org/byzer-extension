@@ -19,12 +19,6 @@
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>tech.mlsql</groupId>-->
-<!--            <artifactId>byzer-extension-tests-3.3_2.12</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
     </dependencies>
 
     <profiles>
