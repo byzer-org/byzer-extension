@@ -11,11 +11,11 @@
 
     <artifactId>byzer-objectstore-obs-{{spark_binary_version}}_{{scala_binary_version}}</artifactId>
     <dependencies>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-huaweicloud</artifactId>
-            <version>3.1.1.29</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.hadoop</groupId>-->
+<!--            <artifactId>hadoop-huaweicloud</artifactId>-->
+<!--            <version>3.1.1.29</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <profiles>

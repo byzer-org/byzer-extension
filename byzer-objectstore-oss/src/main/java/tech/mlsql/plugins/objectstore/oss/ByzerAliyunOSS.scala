@@ -10,7 +10,8 @@ class ByzerAliyunOSS extends tech.mlsql.app.App with VersionCompatibility with L
   override def run(args: Seq[String]): Unit = {
     try {
       Class.forName("org.apache.hadoop.fs.aliyun.oss.AliyunOSSFileSystem")
-      logInfo("Success to load jar for Aliyun OSS FileSystem ")
+      logInfo("V3:Success to load jar for Aliyun OSS FileSystem ")
+
     } catch {
       case e: Exception =>
         logError("Fail to load jar for Aliyun OSS FileSystem")
