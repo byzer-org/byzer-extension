@@ -154,6 +154,8 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     pyLang.raw.code("import plotly.graph_objects as go")
     pyLang.raw.code("import base64").end
     pyLang.raw.code("import json").end
+    pyLang.raw.code("import matplotlib.pyplot as plt").end
+    pyLang.raw.code("import seaborn as sns").end
 
     //default variables
     pyLang.raw.code("context:PythonContext = context").end
@@ -166,9 +168,44 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
       builderTemp.end.namedVariableName("df").end
     }
 
+    // 使用matplotlib绘图，默认不开启
+    var plt = false
+
     val builder = getFigType match {
       //      case "sankey" =>
       //        pyLang.let("go").invokeFunc("Figure").params.addKV("data","data",None)
+      case "matrix" =>
+        plt = true
+        pyLang.raw.code(
+          """
+            |from sklearn.metrics import confusion_matrix
+            |cm = confusion_matrix(df['label'], df['prediction'])
+            |""".stripMargin).end
+        pyLang.let("sns").invokeFunc("heatmap").params.add("cm", None)
+      case "auc" =>
+        plt = true
+        pyLang.raw.code(
+          """
+            |import sklearn.metrics as metrics
+            |fpr, tpr, threshold = metrics.roc_curve(df['label'], df['probability'])
+            |roc_auc = metrics.auc(fpr, tpr)
+            |_, ax = plt.subplots()
+            |""".stripMargin).end
+        val auc = pyLang.let("ax").invokeFunc("plot").params
+          .add("fpr", None)
+          .add("tpr", None)
+          .add("'b'", None)
+          .addKV("label", "'AUC = %0.2f' % roc_auc", None)
+        pyLang.raw.code(
+          """
+            |plt.legend(loc = 'lower right')
+            |ax.plot([0, 1], [0, 1],'r--')
+            |plt.xlim([0, 1])
+            |plt.ylim([0, 1])
+            |plt.ylabel('True Positive Rate')
+            |plt.xlabel('False Positive Rate')
+            |""".stripMargin).end
+        auc
       case _ =>
         pyLang.let("px").invokeFunc(getFigType).params.add("df", None)
     }
@@ -182,13 +219,24 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     }
 
     builder.end.namedVariableName("fig").end
-    val format = control.get("format", "html")
-    format match {
-      case "html" =>
-        pyLang.raw.code("content = fig.to_html()").end
-      case "image" =>
-        pyLang.raw.code("""content = base64.b64encode(fig.to_image(format="png")).decode()""").end
+    var format = control.get("format", "html")
+
+    if (plt) {
+      format = "image"
+      pyLang.raw.code("content = Utils.gen_img(plt)").end
+    } else {
+      format match {
+        case "html" =>
+          pyLang.raw.code("content = fig.to_html()").end
+        case "image" =>
+          pyLang.raw.code("""content = base64.b64encode(fig.to_image(format="png")).decode()""").end
+        case _ => {
+          format = "html"
+          pyLang.raw.code("content = '<h1>format格式错误</h1>'").end
+        }
+      }
     }
+
     pyLang.raw.code(s"""context.build_result([{"content":content,"mime":"${format}"}])""").end
     pyLang.toScript
   }
