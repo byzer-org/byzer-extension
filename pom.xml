@@ -33,6 +33,7 @@
         <module>mlsql-cli</module>
         <module>byzer-yaml-visualization</module>
         <module>byzer-openmldb</module>
+        <module>byzer-xgboost</module>
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>
@@ -95,19 +96,6 @@
             <artifactId>scalatest_${scala.binary.version}</artifactId>
             <version>${scalatest.version}</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>scala-library</artifactId>
-                    <groupId>org.scala-lang</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>${scala.version}</version>
-            <scope>${scope}</scope>
         </dependency>
 
         <dependency>
