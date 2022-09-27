@@ -96,7 +96,6 @@ class FigTest extends FlatSpec {
         |   cache: false
         |control:
         |   ignoreSort: True
-        |   format: image_plt
         |fig:
         |   matrix:
         |      annot: True
@@ -114,7 +113,6 @@ class FigTest extends FlatSpec {
         |   cache: false
         |control:
         |   ignoreSort: True
-        |   format: image_plt
         |fig:
         |   auc:
         |     linewidth: 2
