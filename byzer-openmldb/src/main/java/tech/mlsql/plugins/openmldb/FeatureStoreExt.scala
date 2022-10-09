@@ -1,10 +1,9 @@
 package tech.mlsql.plugins.openmldb
 
-import com._4paradigm.openmldb.DataType
 import com._4paradigm.openmldb.jdbc.SQLResultSet
 import com._4paradigm.openmldb.sdk.SdkOption
-import com._4paradigm.openmldb.{Schema => RsSchema}
 import com._4paradigm.openmldb.sdk.impl.SqlClusterExecutor
+import com._4paradigm.openmldb.{DataType, Schema => RsSchema}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -165,7 +164,8 @@ class FeatureStoreExt(override val uid: String) extends SQLAlg with VersionCompa
   }
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
-    val _zkAddress = params(zkAddress.name)
+
+    val _zkAddress = params.getOrElse(zkAddress.name, "")
     val _zkPath = params.getOrElse(zkPath.name, "/openmldb")
 
     val statements = params.filter(f => """sql\-[0-9]+""".r.findFirstMatchIn(f._1).nonEmpty).
@@ -181,8 +181,15 @@ class FeatureStoreExt(override val uid: String) extends SQLAlg with VersionCompa
 
     try {
       val option = new SdkOption
-      option.setZkCluster(_zkAddress)
-      option.setZkPath(_zkPath)
+      
+      if (_zkAddress.isEmpty) {
+        option.setHost(params.getOrElse("host", "127.0.0.0"))
+        option.setPort(params.getOrElse("port", "6527").toInt)
+      } else {
+        option.setZkCluster(_zkAddress)
+        option.setZkPath(_zkPath)
+      }
+
       option.setSessionTimeout(100000000)
       option.setRequestTimeout(600000000)
       sqlExecutor = new SqlClusterExecutor(option)
