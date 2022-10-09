@@ -183,9 +183,11 @@ class FeatureStoreExt(override val uid: String) extends SQLAlg with VersionCompa
       val option = new SdkOption
       
       if (_zkAddress.isEmpty) {
+        option.setClusterMode(false)
         option.setHost(params.getOrElse("host", "127.0.0.0"))
         option.setPort(params.getOrElse("port", "6527").toInt)
       } else {
+        option.setClusterMode(true)
         option.setZkCluster(_zkAddress)
         option.setZkPath(_zkPath)
       }
