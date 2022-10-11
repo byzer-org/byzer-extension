@@ -3,7 +3,7 @@ package tech.mlsql.plugins.xgboost.app
 
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.ets.register.ETRegister
-import tech.mlsql.plugins.xgboost.ets.SQLXGBoostClassifier
+import tech.mlsql.plugins.xgboost.ets.{SQLXGBoostClassifier, SQLXGBoostRegressor}
 import tech.mlsql.version.VersionCompatibility
 
 /**
@@ -13,7 +13,7 @@ import tech.mlsql.version.VersionCompatibility
 class XGBoostETApp extends tech.mlsql.app.App with VersionCompatibility with Logging {
   override def run(args: Seq[String]): Unit = {
     ETRegister.register("XGBoostClassifier", classOf[SQLXGBoostClassifier].getName)
-
+    ETRegister.register("XGBoostRegressor", classOf[SQLXGBoostRegressor].getName)
   }
 
 
