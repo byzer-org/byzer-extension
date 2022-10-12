@@ -1,6 +1,7 @@
 package tech.mlsql.plugins.visualization
 
 import net.csdn.common.settings.{ImmutableSettings, Settings}
+import org.apache.commons.lang3.StringUtils
 import tech.mlsql.plugins.visualization.pylang.{Options, PyLang}
 
 import scala.collection.JavaConverters._
@@ -147,15 +148,31 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
       pyLang.raw.code(s"""#%confTable=${confFrom.get}""").end
     }
 
+    var imageType = control.get("backend")
+    if (StringUtils.isEmpty(imageType)) {
+      getFigType match {
+        case "matrix" | "auc" => imageType = "sklearn"
+        case _ => imageType = "plotly"
+      }
+    }
+
     //default imports
     pyLang.raw.code("from pyjava.api.mlsql import RayContext,PythonContext").end
     pyLang.raw.code("from pyjava.api import Utils").end
-    pyLang.raw.code("import plotly.express as px").end
-    pyLang.raw.code("import plotly.graph_objects as go")
     pyLang.raw.code("import base64").end
     pyLang.raw.code("import json").end
-    pyLang.raw.code("import matplotlib.pyplot as plt").end
-    pyLang.raw.code("import seaborn as sns").end
+
+    //默认使用plotly
+    imageType match {
+      case "sklearn" => {
+        pyLang.raw.code("import matplotlib.pyplot as plt").end
+        pyLang.raw.code("import seaborn as sns").end
+      }
+      case _ => {
+        pyLang.raw.code("import plotly.express as px").end
+        pyLang.raw.code("import plotly.graph_objects as go")
+      }
+    }
 
     //default variables
     pyLang.raw.code("context:PythonContext = context").end
@@ -168,46 +185,50 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
       builderTemp.end.namedVariableName("df").end
     }
 
-    // 使用matplotlib绘图，默认不开启
-    var plt = false
+    var builder: Options[PyLang] = null
 
-    val builder = getFigType match {
-      //      case "sankey" =>
-      //        pyLang.let("go").invokeFunc("Figure").params.addKV("data","data",None)
-      case "matrix" =>
-        plt = true
-        pyLang.raw.code(
-          """
-            |from sklearn.metrics import confusion_matrix
-            |cm = confusion_matrix(df['label'], df['prediction'])
-            |""".stripMargin).end
-        pyLang.let("sns").invokeFunc("heatmap").params.add("cm", None)
-      case "auc" =>
-        plt = true
-        pyLang.raw.code(
-          """
-            |import sklearn.metrics as metrics
-            |fpr, tpr, threshold = metrics.roc_curve(df['label'], df['probability'])
-            |roc_auc = metrics.auc(fpr, tpr)
-            |_, ax = plt.subplots()
-            |""".stripMargin).end
-        val auc = pyLang.let("ax").invokeFunc("plot").params
-          .add("fpr", None)
-          .add("tpr", None)
-          .add("'b'", None)
-          .addKV("label", "'AUC = %0.2f' % roc_auc", None)
-        pyLang.raw.code(
-          """
-            |plt.legend(loc = 'lower right')
-            |ax.plot([0, 1], [0, 1],'r--')
-            |plt.xlim([0, 1])
-            |plt.ylim([0, 1])
-            |plt.ylabel('True Positive Rate')
-            |plt.xlabel('False Positive Rate')
-            |""".stripMargin).end
-        auc
-      case _ =>
-        pyLang.let("px").invokeFunc(getFigType).params.add("df", None)
+    imageType match {
+      case "sklearn" => {
+        builder = getFigType match {
+          case "matrix" =>
+            pyLang.raw.code(
+              """
+                |from sklearn.metrics import confusion_matrix
+                |cm = confusion_matrix(df['label'], df['prediction'])
+                |plt.figure()
+                |""".stripMargin).end
+            pyLang.let("sns").invokeFunc("heatmap").params.add("cm", None)
+          case "auc" =>
+            pyLang.raw.code(
+              """
+                |import sklearn.metrics as metrics
+                |fpr, tpr, threshold = metrics.roc_curve(df['label'], df['probability'])
+                |roc_auc = metrics.auc(fpr, tpr)
+                |plt.figure()
+                |_, ax = plt.subplots()
+                |""".stripMargin).end
+            val auc = pyLang.let("ax").invokeFunc("plot").params
+              .add("fpr", None)
+              .add("tpr", None)
+              .add("'b'", None)
+              .addKV("label", "'AUC = %0.2f' % roc_auc", None)
+            pyLang.raw.code(
+              """
+                |plt.legend(loc = 'lower right')
+                |ax.plot([0, 1], [0, 1],'r--')
+                |plt.xlim([0, 1])
+                |plt.ylim([0, 1])
+                |plt.ylabel('True Positive Rate')
+                |plt.xlabel('False Positive Rate')
+                |""".stripMargin).end
+            auc
+          case _ =>
+            pyLang.let("plt").invokeFunc(getFigType).params.add("df", None)
+        }
+      }
+      case _ => {
+        builder = pyLang.let("px").invokeFunc(getFigType).params.add("df", None)
+      }
     }
 
 
@@ -221,18 +242,21 @@ case class VisualSource(confFrom: Option[String], runtime: Map[String, String], 
     builder.end.namedVariableName("fig").end
     var format = control.get("format", "html")
 
-    if (plt) {
-      format = "image"
-      pyLang.raw.code("content = Utils.gen_img(plt)").end
-    } else {
-      format match {
-        case "html" =>
-          pyLang.raw.code("content = fig.to_html()").end
-        case "image" =>
-          pyLang.raw.code("""content = base64.b64encode(fig.to_image(format="png")).decode()""").end
-        case _ => {
-          format = "html"
-          pyLang.raw.code("content = '<h1>format格式错误</h1>'").end
+    imageType match {
+      case "sklearn" => {
+        format = "image"
+        pyLang.raw.code("content = Utils.gen_img(plt)").end
+      }
+      case _ => {
+        format match {
+          case "html" =>
+            pyLang.raw.code("content = fig.to_html()").end
+          case "image" =>
+            pyLang.raw.code("""content = base64.b64encode(fig.to_image(format="png")).decode()""").end
+          case _ => {
+            format = "html"
+            pyLang.raw.code("content = '<h1>format格式错误</h1>'").end
+          }
         }
       }
     }
