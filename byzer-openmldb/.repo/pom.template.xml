@@ -23,12 +23,12 @@
         <dependency>
             <groupId>com.4paradigm.openmldb</groupId>
             <artifactId>openmldb-jdbc</artifactId>
-            <version>0.5.2</version>
+            <version>0.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.4paradigm.openmldb</groupId>
             <artifactId>openmldb-native</artifactId>
-            <version>0.5.2</version>
+            <version>0.6.0-allinone</version>
         </dependency>
     </dependencies>
 
