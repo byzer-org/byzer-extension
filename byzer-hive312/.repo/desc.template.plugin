@@ -1,0 +1,16 @@
+moduleName=byzer-hive312-{{spark_binary_version}}
+mainClass=tech.mlsql.plugins.hive.ByzerHive312
+scala_version={{scala_binary_version}}
+spark_version={{spark_binary_version}}
+version=0.1.0-SNAPSHOT
+author=allwefantasy
+mlsqlVersions=""
+githubUrl=https://github.com/allwefantasy/mlsql-plugins/tree/master/byzer-hive312
+mlsqlPluginType=app
+desc=mlsql-shell
+
+
+
+
+
+
