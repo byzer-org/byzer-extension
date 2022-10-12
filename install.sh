@@ -22,8 +22,8 @@ echo ${SPARK}
 echo ${MIDDLE}
 
 mlsql_plugin_tool build --module_name ${MOUDLE_NAME} --spark ${SPARK}
-#mlsql_plugin_tool upload \
-#--module_name ${MOUDLE_NAME}  \
-#--user ${STORE_USER}        \
-#--password ${STORE_PASSWORD} \
-#--jar_path ${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar
+mlsql_plugin_tool upload \
+--module_name ${MOUDLE_NAME}  \
+--user ${STORE_USER}        \
+--password ${STORE_PASSWORD} \
+--jar_path ${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar
