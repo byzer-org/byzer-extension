@@ -3,33 +3,36 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>mlsql-plugins-{{spark_binary_version}}_{{scala_binary_version}}</artifactId>
+        <artifactId>mlsql-plugins-3.0_2.12</artifactId>
         <groupId>tech.mlsql</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>byzer-openmldb-{{spark_binary_version}}_{{scala_binary_version}}</artifactId>
-    <properties>
-        <fastjson.version>1.2.32</fastjson.version>
-    </properties>
-    <dependencies>
+    <artifactId>byzer-xgboost-3.0_2.12</artifactId>
 
+    <properties>
+        <!-- spark 3.0 start -->
+        <scala.version>2.12.10</scala.version>
+        <scala.binary.version>2.12</scala.binary.version>
+        <spark.version>3.1.1</spark.version>
+        <spark.bigversion>3.0</spark.bigversion>
+        <scalatest.version>3.0.3</scalatest.version>
+        <!-- spark 3.0 end -->
+    </properties>
+
+    <dependencies>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>${fastjson.version}</version>
+            <groupId>ml.dmlc</groupId>
+            <artifactId>xgboost4j_${scala.binary.version}</artifactId>
+            <version>1.6.2</version>
         </dependency>
         <dependency>
-            <groupId>com.4paradigm.openmldb</groupId>
-            <artifactId>openmldb-jdbc</artifactId>
-            <version>0.6.0</version>
+            <groupId>ml.dmlc</groupId>
+            <artifactId>xgboost4j-spark_${scala.binary.version}</artifactId>
+            <version>1.6.2</version>
         </dependency>
-        <dependency>
-            <groupId>com.4paradigm.openmldb</groupId>
-            <artifactId>openmldb-native</artifactId>
-            <version>0.6.0-allinone</version>
-        </dependency>
+
     </dependencies>
 
     <profiles>
