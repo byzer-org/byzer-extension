@@ -86,4 +86,36 @@ class FigTest extends FlatSpec {
         |      labels:
         |         unemp: "失业率"""".stripMargin)
   }
+
+  "yaml" should "with matrix" in {
+
+    printCode(
+      """
+        |runtime:
+        |   env: source /opt/miniconda3/bin/activate ray-1.12.0
+        |   cache: false
+        |control:
+        |   ignoreSort: True
+        |fig:
+        |   matrix:
+        |      annot: True
+        |      cmap: "Blues"
+        |      fmt: "d"
+        |      cbar: False""".stripMargin)
+  }
+
+  "yaml" should "with auc" in {
+
+    printCode(
+      """
+        |runtime:
+        |   env: source /opt/miniconda3/bin/activate ray-1.12.0
+        |   cache: false
+        |control:
+        |   ignoreSort: True
+        |fig:
+        |   auc:
+        |     linewidth: 2
+        |      """.stripMargin)
+  }
 }
