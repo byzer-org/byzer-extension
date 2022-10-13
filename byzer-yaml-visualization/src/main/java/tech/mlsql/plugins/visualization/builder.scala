@@ -2,6 +2,7 @@ package tech.mlsql.plugins.visualization
 
 import net.csdn.common.settings.{ImmutableSettings, Settings}
 import org.apache.commons.lang3.StringUtils
+import org.slf4j.{Logger, LoggerFactory}
 import tech.mlsql.plugins.visualization.pylang.{Options, PyLang}
 
 import scala.collection.JavaConverters._
@@ -24,6 +25,7 @@ import scala.collection.JavaConverters._
 
 
 object FigUtils {
+  private val log: Logger = LoggerFactory.getLogger(FigUtils.getClass)
   def valueWithQuote(s: String) = {
     var realS = s
     var isStr = true
@@ -42,7 +44,7 @@ object FigUtils {
               isStr = false
               realS = s.capitalize
             } catch {
-              case _: Exception =>
+              case e: Exception => log.error("Error: {}", e)
             }
         }
     }

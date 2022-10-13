@@ -6,6 +6,7 @@ import org.apache.spark.streaming.SparkOperationUtil
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import streaming.core.strategy.platform.SparkRuntime
+import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.test.BasicMLSQLConfig
 
 import java.sql.Timestamp
@@ -15,7 +16,7 @@ import java.util.UUID
 /**
  * 12/07/2022 hellozepp(lisheng.zhanglin@163.com)
  */
-class SQLDescriptiveMetricsTest extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig with BeforeAndAfterAll with BeforeAndAfterEach {
+class SQLDescriptiveMetricsTest extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig with BeforeAndAfterAll with BeforeAndAfterEach with Logging {
   def startParams = Array(
     "-streaming.master", "local[2]",
     "-streaming.name", "unit-test",
@@ -45,19 +46,29 @@ class SQLDescriptiveMetricsTest extends AnyFunSuite with SparkOperationUtil with
       val res = et.train(seq_df1, "", Map("metricSize" -> "100"))
       res.show()
       val r0 = res.collectAsList().get(0).toSeq
-      println(r0.mkString(","))
+      if (log.isInfoEnabled()) {
+        log.info(r0.mkString(","))
+      }
       assert(r0.mkString(",") === "income1,[{\"533000.0\" : 1}, {\"434000.0\" : 1}, {\"433000.0\" : 2}, {\"432000.0\" : 1}, {\"\" : 1}]")
       val r1 = res.collectAsList().get(1).toSeq
-      println(r1.mkString(","))
+      if (log.isInfoEnabled()) {
+        log.info(r1.mkString(","))
+      }
       assert(r1.mkString(",") === "name,[{\"elena\" : 1}, {\"cc\" : 1}, {\"bb\" : 1}, {\"abe\" : 1}, {\"AA\" : 1}, {\"\" : 1}]")
       val r2 = res.collectAsList().get(2).toSeq
-      println(r2.mkString(","))
+      if (log.isInfoEnabled()) {
+        log.info(r2.mkString(","))
+      }
       assert(r2.mkString(",") === "age,[{\"57\" : 1}, {\"50\" : 1}, {\"40\" : 1}, {\"30\" : 1}, {\"21\" : 1}, {\"10\" : 1}]")
       val r3 = res.collectAsList().get(3).toSeq
-      println(r3.mkString(","))
+      if (log.isInfoEnabled()) {
+        log.info(r3.mkString(","))
+      }
       assert(r3.mkString(",") === "income,[{\"533000\" : 1}, {\"434000\" : 1}, {\"433000\" : 2}, {\"432000\" : 1}, {\"\" : 1}]")
       val r4 = res.collectAsList().get(4).toSeq
-      println(r4.mkString(","))
+      if (log.isInfoEnabled()) {
+        log.info(r4.mkString(","))
+      }
       assert(r4.mkString(",") === "date,[{\"2021-03-08 18:00:00.0\" : 6}]")
     }
   }

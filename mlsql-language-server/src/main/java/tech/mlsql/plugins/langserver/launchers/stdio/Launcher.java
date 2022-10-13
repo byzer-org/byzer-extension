@@ -1,5 +1,6 @@
 package tech.mlsql.plugins.langserver.launchers.stdio;
 
+import org.apache.log4j.Logger;
 import org.eclipse.lsp4j.services.LanguageClient;
 import tech.mlsql.plugins.langserver.MLSQLLanguageServer;
 
@@ -13,6 +14,9 @@ import java.util.concurrent.ExecutionException;
  * 25/8/2021 WilliamZhu(allwefantasy@gmail.com)
  */
 public class Launcher {
+
+    private static final Logger log = Logger.getLogger(Launcher.class);
+
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         
         MLSQLLanguageServer server = new MLSQLLanguageServer();
@@ -46,6 +50,7 @@ public class Launcher {
             int exitIfNegative(int result) {
                 if (result < 0) {
                     System.err.println("Input stream has closed. Exiting...");
+                    log.error("Input stream has closed. Exiting...");
                     System.exit(0);
                 }
                 return result;

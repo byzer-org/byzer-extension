@@ -10,6 +10,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import streaming.dsl.mmlib.SQLAlg
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
+import org.slf4j.{Logger, LoggerFactory}
 import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.version.VersionCompatibility
@@ -21,6 +22,8 @@ import scala.collection.mutable.ArrayBuffer
 case class RsColumn(name: String, sqlType: DataType)
 
 object FeatureStoreExt {
+
+  private val log: Logger = LoggerFactory.getLogger(FeatureStoreExt.getClass)
   def getRsCloumns(rs: ResultSet, schema: RsSchema): Array[RsColumn] = {
     (0 until schema.GetColumnCnt()).map { index =>
       RsColumn(schema.GetColumnName(index), schema.GetColumnType(index))
@@ -105,7 +108,9 @@ object FeatureStoreExt {
           state.execute(_code)
           val rs = state.getResultSet
           val resultSet = rsToMaps(rs)
-          println(resultSet)
+          if (log.isInfoEnabled()) {
+            log.info(resultSet.toString())
+          }
       }
 
     } finally {

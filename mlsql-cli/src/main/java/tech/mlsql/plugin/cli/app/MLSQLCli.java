@@ -1,5 +1,6 @@
 package tech.mlsql.plugin.cli.app;
 
+import org.apache.log4j.Logger;
 import picocli.CommandLine;
 import tech.mlsql.core.version.MLSQLVersion;
 import tech.mlsql.core.version.VersionInfo;
@@ -12,9 +13,9 @@ import java.util.List;
  * 25/8/2021 WilliamZhu(allwefantasy@gmail.com)
  */
 public class MLSQLCli {
-
     private static PrintStream errStream = System.err;
     private static PrintStream outStream = System.out;
+    private static final Logger log = Logger.getLogger(MLSQLCli.class);
 
     public static void main(String[] args) {
 
@@ -70,12 +71,18 @@ public class MLSQLCli {
     private static void printUsageInfo(String commandName) {
         String usageInfo = MLSQLCmd.getCommandUsageInfo(commandName);
         errStream.println(usageInfo);
+        if (log.isInfoEnabled()) {
+            log.info(usageInfo);
+        }
     }
 
     private static void printVersionInfo() {
         VersionInfo verison = MLSQLVersion.version();
         String output = "MLSQL: " + verison.version() + "; Spark Core: None";
         outStream.print(output);
+        if (log.isInfoEnabled()) {
+            log.info(output);
+        }
     }
 }
 

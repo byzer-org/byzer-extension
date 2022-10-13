@@ -57,32 +57,46 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
         case false => pRow(0).getLong(0).toDouble
         case true => 0.toDouble
       }
-      println("p:" + p)
+      if (log.isInfoEnabled()) {
+        log.info("p: {}", p)
+      }
       val nRow = aggDF.select("count").where(aggDF(featureName + "_output") === i && aggDF(labelCol) === 1 - GOOD_VALUE).collect()
       val n = nRow.isEmpty match {
         case false => nRow(0).getLong(0).toDouble
         case true => 0.toDouble
       }
-      println("n:" + n)
+      if (log.isInfoEnabled()) {
+        log.info("n: {}", n)
+      }
       val total = n + p
-      println("total:" + total)
+      if (log.isInfoEnabled()) {
+        log.info("total: {}", total)
+      }
       val prate = total match {
         case 0.0 => 0.0
         case _ => p / total
       }
-      println("prate:" + prate)
+      if (log.isInfoEnabled()) {
+        log.info("prate: {}", prate)
+      }
       val woe = Math.log(prate / (POSITIVE_COUNT / NEGATIVE_COUNT))
-      println("woe:" + woe)
+      if (log.isInfoEnabled()) {
+        log.info("woe: {}", woe)
+      }
       val iv = (p / POSITIVE_COUNT - n / NEGATIVE_COUNT) * woe
       totalIV += iv
-      println("iv:" + iv)
+      if (log.isInfoEnabled()) {
+        log.info("iv: {}", iv)
+      }
       val start = splits(i)
       val end = splits(i + 1)
       val value = i match {
         case 0 => s"($start, $end)"
         case _ => s"[$start, $end)"
       }
-      println(s"value: $value")
+      if (log.isInfoEnabled()) {
+        log.info("value: {}", value)
+      }
       intervalInfo = intervalInfo :+ Map("p" -> p, "n" -> n, "prate" -> prate, "total" -> total, "woe" -> woe, "iv" -> iv, "value" -> value, "bin_id" -> i)
     }
     biningMap += ("bin" -> intervalInfo, "iv" -> totalIV)
@@ -107,28 +121,42 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
         case false => pRow(0).getLong(0).toDouble
         case true => 0.toDouble
       }
-      println("p:" + p)
+      if (log.isInfoEnabled()) {
+        log.info("p: {}", p)
+      }
       val nRow = aggDF.select("count").where(aggDF(featureName + "_output") === i && aggDF(labelCol) === 1 - GOOD_VALUE).collect()
       val n = nRow.isEmpty match {
         case false => nRow(0).getLong(0).toDouble
         case true => 0.toDouble
       }
-      println("n:" + n)
+      if (log.isInfoEnabled()) {
+        log.info("n: {}", n)
+      }
       val total = n + p
-      println("total:" + total)
+      if (log.isInfoEnabled()) {
+        log.info("total: {}", total)
+      }
       val prate = total match {
         case 0.0 => 0.0
         case _ => p / total
       }
-      println("prate:" + prate)
+      if (log.isInfoEnabled()) {
+        log.info("prate: {}", prate)
+      }
       val woe = Math.log(prate / (POSITIVE_COUNT / NEGATIVE_COUNT))
-      println("woe:" + woe)
+      if (log.isInfoEnabled()) {
+        log.info("woe: {}", woe)
+      }
       val iv = (p / POSITIVE_COUNT - n / NEGATIVE_COUNT) * woe
       totalIV += iv
-      println("iv:" + iv)
+      if (log.isInfoEnabled()) {
+        log.info("iv: {}", iv)
+      }
       val label = labelArray(i)
       val value = s"[$label]"
-      println(s"value: $value")
+      if (log.isInfoEnabled()) {
+        log.info("value: {}", value)
+      }
       intervalInfo = intervalInfo :+ Map("p" -> p, "n" -> n, "prate" -> prate, "total" -> total, "woe" -> woe, "iv" -> iv, "value" -> value, "bin_id" -> i)
     }
     biningMap += ("bin" -> intervalInfo, "iv" -> totalIV)
@@ -310,9 +338,8 @@ class SQLBinning(override val uid: String) extends SQLAlg with MllibFunctions wi
       val outputColName = inputColName + "_output"
       val labelToIndex = labelsToIndexArray(i)
       val labels = labelsArray(i)
-      if (!df.schema.fieldNames.contains(inputColName)) {
-        print(s"Input column ${inputColName} does not exist during transformation. " +
-          "Skip StringIndexerModel for this column.")
+      if (!df.schema.fieldNames.contains(inputColName) && log.isInfoEnabled()) {
+        log.info("Input column {} does not exist during transformation. Skip StringIndexerModel for this column.", inputColName)
       }
       val metadata = NominalAttribute.defaultAttr
         .withName(outputColName)

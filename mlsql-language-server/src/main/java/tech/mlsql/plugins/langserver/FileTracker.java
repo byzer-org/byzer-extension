@@ -1,6 +1,7 @@
 package tech.mlsql.plugins.langserver;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
@@ -12,6 +13,8 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class FileTracker {
+
+    private static Logger log = Logger.getLogger(FileTracker.class);
     private Map<String, String> sourceByPath = new HashMap<>();
 
     public FileTracker() {
@@ -43,7 +46,9 @@ public class FileTracker {
                 String newText = patch(existingText, change);
                 sourceByPath.put(path, newText);
             } else {
-                System.err.println("Failed to apply changes to code intelligence from path: " + path);
+                String message = "Failed to apply changes to code intelligence from path: " + path;
+                System.err.println(message);
+                log.error(message);
             }
         }
     }
@@ -158,7 +163,9 @@ public class FileTracker {
         Optional<Path> optionalPath = getFilePath(uri);
         if (!optionalPath.isPresent()) {
             if (!apiURI.startsWith("vscode-userdata:/")) {
-                System.err.println("Could not find URI " + uri);
+                String message = "Could not find URI " + uri;
+                System.err.println(message);
+                log.error(message);
             }
             return null;
         }
