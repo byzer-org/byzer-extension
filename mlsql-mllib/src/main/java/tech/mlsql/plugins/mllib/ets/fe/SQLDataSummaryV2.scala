@@ -221,7 +221,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
             newE = BigDecimal(v).setScale(round_at, BigDecimal.RoundingMode.HALF_UP).toDouble
           }
         } catch {
-          case e: Exception => logInfo(e.toString)
+          case e: Exception => //pass
         }
         newE
       })
