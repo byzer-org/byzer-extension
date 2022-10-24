@@ -403,7 +403,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       "nullValueRatio" -> nullValueCount(schema),
       "blankValueRatio" -> emptyCount(schema),
       "nonNullCount" -> countNonNullValue(schema),
-      "dataType" -> getDataType(schema),
+      "dataType" -> getDataType(schema)
       //      "uniqueValueRatio" -> countUniqueValueRatio(schema, approxCountDistinct),
       //      "primaryKeyCandidate" -> isPrimaryKey(schema, approxCountDistinct),
     )
