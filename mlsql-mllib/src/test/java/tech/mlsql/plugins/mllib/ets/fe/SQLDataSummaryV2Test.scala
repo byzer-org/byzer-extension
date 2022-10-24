@@ -1,13 +1,13 @@
 package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, desc, explode, struct}
 import org.apache.spark.streaming.SparkOperationUtil
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.{BeforeAndAfterAll}
 import streaming.core.strategy.platform.SparkRuntime
 import tech.mlsql.test.BasicMLSQLConfig
 
+import java.io.{File, IOException}
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.{Date, UUID}
@@ -19,6 +19,10 @@ import java.util.{Date, UUID}
  *
  */
 class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig with BeforeAndAfterAll {
+  val allMetrics: String = "columnName,ordinalPosition,%25,%75,blankValueRatio,dataLength,dataType,max,maximumLength,mean,median,min,minimumLength," +
+    "nonNullCount,nullValueRatio,skewness,standardDeviation,standardError,uniqueValueRatio,categoryCount,primaryKeyCandidate,mode"
+
+
   def startParams = Array(
     "-streaming.master", "local[*]",
     "-streaming.name", "unit-test",
@@ -31,12 +35,34 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
     "-spark.sql.shuffle.partitions", "12",
     "-spark.default.parallelism", "12",
     "-spark.executor.memoryOverheadFactor", "0.2",
-    "-spark.dirver.maxResultSize", "2g"
+    "-spark.driver.maxResultSize", "8g"
   )
+
+  /**
+   * Get the byzer streamingpro-it absolute path. e.g.: /opt/project/byzer-lang/streamingpro-it/
+   *
+   * @return
+   */
+  def getCurProjectRootPath(): String = {
+    var base: String = null
+    try {
+      val testClassPath: String = classOf[SQLDataSummaryV2Test].getResource(File.separator).getPath
+      val directory: File = new File(testClassPath + ".." + File.separator + ".." + File.separator)
+      base = directory.getCanonicalPath + File.separator
+    } catch {
+      case e: IOException =>
+        e.printStackTrace()
+    }
+    if (base == null) {
+      base = "." + File.separator
+    }
+    base
+  }
+
   test("DataSummary should summarize the Dataset") {
     withBatchContext(setupBatchContext(startParams)) { runtime: SparkRuntime =>
       implicit val spark: SparkSession = runtime.sparkSession
-      val et = new SQLDataSummaryV2()
+      val et = new SQLDataSummaryV3()
       val sseq1 = Seq(
         ("elena", 57, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0))),
         ("abe", 50, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0))),
@@ -46,17 +72,18 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
         ("bb", 21, "533000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)))
       )
       val seq_df1 = spark.createDataFrame(sseq1).toDF("name", "age", "income", "date")
-      val res1DF = et.train(seq_df1, "", Map("atRound" -> "2"))
+      val res1DF = et.train(seq_df1, "", Map("atRound" -> "2",
+        "metrics" -> allMetrics
+      ))
       res1DF.show()
       //      println(res1DF.collect()(0).mkString(","))
       //      println(res1DF.collect()(1).mkString(","))
       //      println(res1DF.collect()(2).mkString(","))
       //      println(res1DF.collect()(3).mkString(","))
-
-      assert(res1DF.collect()(0).mkString(",") === "name,1,string,5,elena,AA,5,0,,,,0.0,0.1667,6,1.0,1,0.0,")
-      assert(res1DF.collect()(1).mkString(",") === "age,2,integer,4,57.0,10.0,,,34.67,17.77,7.26,0.0,0.0,6,1.0,1,30.0,")
-      assert(res1DF.collect()(2).mkString(",") === "income,3,string,6,533000.0,432000.0,6,6,,,,0.0,0.0,6,0.6667,0,0.0,433000.0")
-      assert(res1DF.collect()(3).mkString(",") === "date,4,timestamp,8,2021-03-08 18:00:00,2021-03-08 18:00:00,,,,,,0.0,0.0,6,0.1667,0,0.0,2021-03-08 18:00:00")
+      assert(res1DF.collect()(0).mkString(",") === "name,1,,,,0.0,5,string,elena,5,,elena,5,1,0.0,,,,1.0,1,1,elena")
+      assert(res1DF.collect()(1).mkString(",") === "age,2,57.0,57.0,57.0,0.0,4,integer,57.0,,57.0,57.0,,1,0.0,,,,1.0,1,1,57.0")
+      assert(res1DF.collect()(2).mkString(",") === "income,3,,,,0.0,6,string,433000.0,6,,433000.0,6,1,0.0,,,,1.0,1,1,433000.0")
+      assert(res1DF.collect()(3).mkString(",") === "date,4,,,,0.0,8,timestamp,2021-03-08 18:00:00,,,2021-03-08 18:00:00,,1,0.0,,,,1.0,1,1,2021-03-08 18:00:00")
       val sseq = Seq(
         ("elena", 57, 57, 110L, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)), 110F, true, null, null, BigDecimal.valueOf(12), 1.123D),
         ("abe", 57, 50, 120L, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)), 120F, true, null, null, BigDecimal.valueOf(2), 1.123D),
@@ -66,7 +93,7 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
         ("bb", 57, 21, 160L, "533000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)), Float.NaN, false, null, null, BigDecimal.valueOf(2), 3.375D)
       )
       val seq_df = spark.createDataFrame(sseq).toDF("name", "favoriteNumber", "age", "mock_col1", "income", "date", "mock_col2", "alived", "extra", "extra1", "extra2", "extra3")
-      val res2DF = et.train(seq_df, "", Map("atRound" -> "2", "metrics" -> "dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,uniqueValueRatio,primaryKeyCandidate,median,mode"))
+      val res2DF = et.train(seq_df, "", Map("atRound" -> "2", "metrics" -> allMetrics))
       res2DF.show()
       //      println(res2DF.collect()(0).mkString(","))
       //      println(res2DF.collect()(1).mkString(","))
@@ -80,38 +107,43 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
       //      println(res2DF.collect()(9).mkString(","))
       //      println(res2DF.collect()(10).mkString(","))
       //      println(res2DF.collect()(11).mkString(","))
-
-      assert(res2DF.collect()(0).mkString(",") === "name,1,5,elena,AA,5,0,,,,0.0,0.1667,1.0,1,0.0,")
-      assert(res2DF.collect()(1).mkString(",") === "favoriteNumber,2,4,57.0,-1.0,,,37.83,29.69,12.12,0.0,0.0,0.5,0,57.0,57.0")
-      assert(res2DF.collect()(2).mkString(",") === "age,3,4,57.0,10.0,,,34.67,17.77,7.26,0.0,0.0,1.0,1,30.0,")
-      assert(res2DF.collect()(3).mkString(",") === "mock_col1,4,8,160.0,100.0,,,128.33,23.17,9.46,0.0,0.0,1.0,1,120.0,")
-      assert(res2DF.collect()(4).mkString(",") === "income,5,6,533000.0,432000.0,6,0,,,,0.0,0.1667,0.8,0,0.0,433000.0")
-      assert(res2DF.collect()(5).mkString(",") === "date,6,8,2021-03-08 18:00:00,2021-03-08 18:00:00,,,,,,0.0,0.0,0.1667,0,0.0,2021-03-08 18:00:00")
-      assert(res2DF.collect()(6).mkString(",") === "mock_col2,7,4,150.0,110.0,,,127.5,17.08,8.54,0.3333,0.0,1.0,1,110.0,")
-      assert(res2DF.collect()(7).mkString(",") === "alived,8,1,true,false,,,,,,0.0,0.0,0.3333,0,0.0,true")
-      assert(res2DF.collect()(8).mkString(",") === "extra,9,,,,,,,,,1.0,0.0,0.0,0,0.0,")
-      assert(res2DF.collect()(9).mkString(",") === "extra1,10,,,,,,,,,1.0,0.0,0.0,0,0.0,")
-      assert(res2DF.collect()(10).mkString(",") === "extra2,11,16,12.0,2.0,,,3.67,4.08,1.67,0.0,0.0,0.3333,0,2.0,2.0")
-      assert(res2DF.collect()(11).mkString(",") === "extra3,12,8,3.38,1.12,,,2.2,1.01,0.41,0.0,0.0,0.6667,0,2.0,")
+      assert(res2DF.collect()(0).mkString(",") === "name,1,,,,0.1667,5,string,elena,5,,AA,0,6,0.0,,,,1.0,5,1,")
+      assert(res2DF.collect()(1).mkString(",") === "favoriteNumber,2,14.25,57.0,57.0,0.0,4,integer,57.0,,37.83,-1.0,,6,0.0,-0.71,29.69,12.12,0.5,3,0,57.0")
+      assert(res2DF.collect()(2).mkString(",") === "age,3,23.25,35.0,47.5,0.0,4,integer,57.0,,34.67,10.0,,6,0.0,-0.11,17.77,7.26,1.0,6,1,")
+      assert(res2DF.collect()(3).mkString(",") === "mock_col1,4,112.5,125.0,145.0,0.0,8,long,160.0,,128.33,100.0,,6,0.0,0.22,23.17,9.46,1.0,6,1,")
+      assert(res2DF.collect()(4).mkString(",") === "income,5,,,,0.1667,6,string,533000.0,6,,432000.0,0,6,0.0,,,,0.8,4,0,433000.0")
+      assert(res2DF.collect()(5).mkString(",") === "date,6,,,,0.0,8,timestamp,2021-03-08 18:00:00,,,2021-03-08 18:00:00,,6,0.0,,,,0.1667,1,0,2021-03-08 18:00:00")
+      assert(res2DF.collect()(6).mkString(",") === "mock_col2,7,117.5,125.0,135.0,0.0,4,float,150.0,,127.5,110.0,,6,0.3333,0.43,17.08,8.54,1.0,4,1,")
+      assert(res2DF.collect()(7).mkString(",") === "alived,8,,,,0.0,1,boolean,true,,,false,,6,0.0,,,,0.3333,2,0,true")
+      assert(res2DF.collect()(8).mkString(",") === "extra,9,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
+      assert(res2DF.collect()(9).mkString(",") === "extra1,1,0.0,,,,0.0,,void,,,,,,0.0,1.0,,,,0.0,0,0.0")
+      assert(res2DF.collect()(10).mkString(",") === "extra2,1,1.0,2.0,2.0,2.0,0.0,16.0,decimal(38,18),12.000000000000000000,,3.67,2.000000000000000000,,6.0,0.0,1.79,4.08,1.6667,0.3333333333333333,2,0.0")
+      assert(res2DF.collect()(11).mkString(",") === "extra3,1,2.0,1.34,2.11,3.0873,0.0,8.0,double,3.375,,2.2,1.123,,6.0,0.0,0.15,1.01,0.4132,0.6666666666666666,4,0.0")
       val sseq2 = Seq(
         (null, null),
         (null, null)
       )
       val seq_df2 = spark.createDataFrame(sseq2).toDF("col1", "col2")
-      val res3DF = et.train(seq_df2, "", Map("atRound" -> "2", "metrics" -> "dataLength,max,min,maximumLength,minimumLength,mean,standardDeviation,standardError,nullValueRatio,blankValueRatio,uniqueValueRatio,primaryKeyCandidate,median,mode"))
+      val res3DF = et.train(seq_df2, "", Map("atRound" -> "2",
+        "metrics" -> allMetrics
+      ))
       res3DF.show()
-      //      println(res3DF.collect()(0).mkString(","))
-      //      println(res3DF.collect()(1).mkString(","))
-      assert(res3DF.collect()(0).mkString(",") === "col1,1,,,,,,,,,1.0,0.0,0.0,0,0.0,")
-      assert(res3DF.collect()(1).mkString(",") === "col2,2,,,,,,,,,1.0,0.0,0.0,0,0.0,")
-      //      val paquetDF1 = spark.sqlContext.read.format("parquet").load("/Users/yonghui.huang/Data/benchmarkZL1")
-      //      val paquetDF2 = paquetDF1.sample(true, 1)
-      //      println(paquetDF2.count())
-      //      val df1 = et.train(paquetDF2, "", Map("atRound" -> "2", "relativeError" -> "0.01"))
-      //      val df2 = et.train(paquetDF2, "", Map("atRound" -> "2", "metrics" -> "uniqueValueRatio,primaryKeyCandidate", "relativeError" -> "0.01", "approxCountDistinct" -> "true"))
-      //      df2.show()
-      //      val df2 = et.train(paquetDF2, "", Map("atRound" -> "2", "approxCountDistinct" -> "true"))
-      //      df2.show()
+      //        println(res3DF.collect()(0).mkString(","))
+      //          println(res3DF.collect()(1).mkString(","))
+      assert(res3DF.collect()(0).mkString(",") === "col1,1,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
+      assert(res3DF.collect()(1).mkString(",") === "col2,2,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
+      val parquetDF1 = spark.sqlContext.read.format("parquet").load(this.getCurProjectRootPath() +
+        "src/test/resources/benchmark")
+      val parquetDF2 = parquetDF1.sample(withReplacement = true, 1)
+      println(parquetDF2.count())
+
+      val start_time = new Date().getTime
+      val df1 = et.train(parquetDF2, "", Map("atRound" -> "2", "relativeError" -> "0.01"
+        , "metrics" -> allMetrics
+      ))
+      df1.show()
+      val end_time = new Date().getTime
+      println("The elapsed time for normal metrics is : " + (end_time - start_time) / 1000.0 + "s")
     }
   }
 }
