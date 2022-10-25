@@ -35,7 +35,7 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
     "-spark.sql.shuffle.partitions", "12",
     "-spark.default.parallelism", "12",
     "-spark.executor.memoryOverheadFactor", "0.2",
-    "-spark.driver.maxResultSize", "8g"
+    "-spark.driver.maxResultSize", "3g"
   )
 
   /**
@@ -62,7 +62,7 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
   test("DataSummary should summarize the Dataset") {
     withBatchContext(setupBatchContext(startParams)) { runtime: SparkRuntime =>
       implicit val spark: SparkSession = runtime.sparkSession
-      val et = new SQLDataSummaryV3()
+      val et = new SQLDataSummaryV2()
       val sseq1 = Seq(
         ("elena", 57, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0))),
         ("abe", 50, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0))),
@@ -76,14 +76,15 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
         "metrics" -> allMetrics
       ))
       res1DF.show()
-      //      println(res1DF.collect()(0).mkString(","))
-      //      println(res1DF.collect()(1).mkString(","))
-      //      println(res1DF.collect()(2).mkString(","))
-      //      println(res1DF.collect()(3).mkString(","))
-      assert(res1DF.collect()(0).mkString(",") === "name,1,,,,0.0,5,string,elena,5,,elena,5,1,0.0,,,,1.0,1,1,elena")
-      assert(res1DF.collect()(1).mkString(",") === "age,2,57.0,57.0,57.0,0.0,4,integer,57.0,,57.0,57.0,,1,0.0,,,,1.0,1,1,57.0")
-      assert(res1DF.collect()(2).mkString(",") === "income,3,,,,0.0,6,string,433000.0,6,,433000.0,6,1,0.0,,,,1.0,1,1,433000.0")
-      assert(res1DF.collect()(3).mkString(",") === "date,4,,,,0.0,8,timestamp,2021-03-08 18:00:00,,,2021-03-08 18:00:00,,1,0.0,,,,1.0,1,1,2021-03-08 18:00:00")
+      println(res1DF.collect()(0).mkString(","))
+      println(res1DF.collect()(1).mkString(","))
+      println(res1DF.collect()(2).mkString(","))
+      println(res1DF.collect()(3).mkString(","))
+      assert(res1DF.collect()(0).mkString(",") === "name,1,,,,0.1667,5,string,elena,5,,AA,0,6,0.0,,,,1.0,5,1,")
+      assert(res1DF.collect()(1).mkString(",") === "age,2,23.25,35.0,47.5,0.0,4,integer,57.0,,34.67,10.0,,6,0.0,-0.11,17.77,7.26,1.0,6,1,")
+      assert(res1DF.collect()(2).mkString(",") === "income,3,,,,0.0,6,string,533000.0,6,,432000.0,6,6,0.0,,,,0.6667,4,0,433000.0")
+      assert(res1DF.collect()(3).mkString(",") === "date,4,,,,0.0,8,timestamp,2021-03-08 18:00:00,,,2021-03-08 18:00:00,,6,0.0,,,,0.1667,1,0,2021-03-08 18:00:00")
+
       val sseq = Seq(
         ("elena", 57, 57, 110L, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)), 110F, true, null, null, BigDecimal.valueOf(12), 1.123D),
         ("abe", 57, 50, 120L, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)), 120F, true, null, null, BigDecimal.valueOf(2), 1.123D),
@@ -95,18 +96,18 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
       val seq_df = spark.createDataFrame(sseq).toDF("name", "favoriteNumber", "age", "mock_col1", "income", "date", "mock_col2", "alived", "extra", "extra1", "extra2", "extra3")
       val res2DF = et.train(seq_df, "", Map("atRound" -> "2", "metrics" -> allMetrics))
       res2DF.show()
-      //      println(res2DF.collect()(0).mkString(","))
-      //      println(res2DF.collect()(1).mkString(","))
-      //      println(res2DF.collect()(2).mkString(","))
-      //      println(res2DF.collect()(3).mkString(","))
-      //      println(res2DF.collect()(4).mkString(","))
-      //      println(res2DF.collect()(5).mkString(","))
-      //      println(res2DF.collect()(6).mkString(","))
-      //      println(res2DF.collect()(7).mkString(","))
-      //      println(res2DF.collect()(8).mkString(","))
-      //      println(res2DF.collect()(9).mkString(","))
-      //      println(res2DF.collect()(10).mkString(","))
-      //      println(res2DF.collect()(11).mkString(","))
+      println(res2DF.collect()(0).mkString(","))
+      println(res2DF.collect()(1).mkString(","))
+      println(res2DF.collect()(2).mkString(","))
+      println(res2DF.collect()(3).mkString(","))
+      println(res2DF.collect()(4).mkString(","))
+      println(res2DF.collect()(5).mkString(","))
+      println(res2DF.collect()(6).mkString(","))
+      println(res2DF.collect()(7).mkString(","))
+      println(res2DF.collect()(8).mkString(","))
+      println(res2DF.collect()(9).mkString(","))
+      println(res2DF.collect()(10).mkString(","))
+      println(res2DF.collect()(11).mkString(","))
       assert(res2DF.collect()(0).mkString(",") === "name,1,,,,0.1667,5,string,elena,5,,AA,0,6,0.0,,,,1.0,5,1,")
       assert(res2DF.collect()(1).mkString(",") === "favoriteNumber,2,14.25,57.0,57.0,0.0,4,integer,57.0,,37.83,-1.0,,6,0.0,-0.71,29.69,12.12,0.5,3,0,57.0")
       assert(res2DF.collect()(2).mkString(",") === "age,3,23.25,35.0,47.5,0.0,4,integer,57.0,,34.67,10.0,,6,0.0,-0.11,17.77,7.26,1.0,6,1,")
@@ -116,9 +117,10 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
       assert(res2DF.collect()(6).mkString(",") === "mock_col2,7,117.5,125.0,135.0,0.0,4,float,150.0,,127.5,110.0,,6,0.3333,0.43,17.08,8.54,1.0,4,1,")
       assert(res2DF.collect()(7).mkString(",") === "alived,8,,,,0.0,1,boolean,true,,,false,,6,0.0,,,,0.3333,2,0,true")
       assert(res2DF.collect()(8).mkString(",") === "extra,9,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
-      assert(res2DF.collect()(9).mkString(",") === "extra1,1,0.0,,,,0.0,,void,,,,,,0.0,1.0,,,,0.0,0,0.0")
-      assert(res2DF.collect()(10).mkString(",") === "extra2,1,1.0,2.0,2.0,2.0,0.0,16.0,decimal(38,18),12.000000000000000000,,3.67,2.000000000000000000,,6.0,0.0,1.79,4.08,1.6667,0.3333333333333333,2,0.0")
-      assert(res2DF.collect()(11).mkString(",") === "extra3,1,2.0,1.34,2.11,3.0873,0.0,8.0,double,3.375,,2.2,1.123,,6.0,0.0,0.15,1.01,0.4132,0.6666666666666666,4,0.0")
+      assert(res2DF.collect()(9).mkString(",") === "extra1,10,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
+      assert(res2DF.collect()(10).mkString(",") === "extra2,11,2.0,2.0,2.0,0.0,16,decimal(38,18),12.0,,3.67,2.0,,6,0.0,1.79,4.08,1.67,0.3333,2,0,2.0")
+      assert(res2DF.collect()(11).mkString(",") === "extra3,12,1.34,2.11,3.09,0.0,8,double,3.38,,2.2,1.12,,6,0.0,0.15,1.01,0.41,0.6667,4,0,")
+
       val sseq2 = Seq(
         (null, null),
         (null, null)
@@ -128,17 +130,15 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
         "metrics" -> allMetrics
       ))
       res3DF.show()
-      //        println(res3DF.collect()(0).mkString(","))
-      //          println(res3DF.collect()(1).mkString(","))
+      println(res3DF.collect()(0).mkString(","))
+      println(res3DF.collect()(1).mkString(","))
       assert(res3DF.collect()(0).mkString(",") === "col1,1,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
       assert(res3DF.collect()(1).mkString(",") === "col2,2,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
       val parquetDF1 = spark.sqlContext.read.format("parquet").load(this.getCurProjectRootPath() +
         "src/test/resources/benchmark")
-      val parquetDF2 = parquetDF1.sample(withReplacement = true, 1)
-      println(parquetDF2.count())
-
+      println(parquetDF1.count())
       val start_time = new Date().getTime
-      val df1 = et.train(parquetDF2, "", Map("atRound" -> "2", "relativeError" -> "0.01"
+      val df1 = et.train(parquetDF1, "", Map("atRound" -> "2", "relativeError" -> "0.01"
         , "metrics" -> allMetrics
       ))
       df1.show()

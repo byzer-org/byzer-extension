@@ -5,7 +5,7 @@ import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.plugins.mllib.ets._
-import tech.mlsql.plugins.mllib.ets.fe.{DataTranspose, OnehotExt, PSIExt, SQLDataSummary, SQLDataSummaryV2, SQLDataSummaryV3, SQLDescriptiveMetrics, SQLMissingValueProcess, SQLPatternDistribution, SQLUniqueIdentifier}
+import tech.mlsql.plugins.mllib.ets.fe.{DataTranspose, OnehotExt, PSIExt, SQLDataSummaryV2, SQLDescriptiveMetrics, SQLMissingValueProcess, SQLPatternDistribution, SQLUniqueIdentifier}
 import tech.mlsql.plugins.mllib.ets.fintech.scorecard.{SQLBinning, SQLScoreCard}
 import tech.mlsql.version.VersionCompatibility
 
@@ -20,7 +20,7 @@ class MLSQLMllib extends tech.mlsql.app.App with VersionCompatibility with Loggi
     ETRegister.register("SampleDatasetExt", classOf[SampleDatasetExt].getName)
     ETRegister.register("TakeRandomSampleExt", classOf[TakeRandomSampleExt].getName)
     ETRegister.register("ColumnsExt", classOf[ColumnsExt].getName)
-    ETRegister.register("DataSummary", classOf[SQLDataSummaryV3].getName)
+    ETRegister.register("DataSummary", classOf[SQLDataSummaryV2].getName)
     ETRegister.register("DataMissingValueProcess", classOf[SQLMissingValueProcess].getName)
     ETRegister.register("Binning", classOf[SQLBinning].getName)
     ETRegister.register("ScoreCard", classOf[SQLScoreCard].getName)
