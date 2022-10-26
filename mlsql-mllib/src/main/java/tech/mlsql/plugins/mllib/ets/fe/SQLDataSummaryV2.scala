@@ -73,31 +73,26 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }).toArray
   }
 
-  def countUniqueValueRatio(schema: StructType, approx: Boolean): Array[Column] = {
-    Array.concat(
-      schema.map(sc => {
-        val sum_expr = sum(when(colWithFilterBlank(sc), 1).otherwise(0))
-        // TODO:  张琳 唯一值比例，count(distinct FIELD_NAME) / count(*)。保留2为小数
-        val divide_expr = if (approx) {
-          approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))) / sum_expr
-        } else {
-          countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum_expr
-        }
-        val ratio_expr = when(sum_expr === 0, 0.0).otherwise(divide_expr)
-        ratio_expr.alias(sc.name + "_uniqueValueRatio")
-      }).toArray,
-      schema.map(sc => {
-        val sum_expr = sum(when(colWithFilterBlank(sc), 1).otherwise(0))
-        val count_distinct_expr = if (approx) {
-          approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name)))
-        } else {
-          countDistinct(when(colWithFilterBlank(sc), col(sc.name)))
-        }
-        val ratio_expr = when(sum_expr === 0, 0).otherwise(count_distinct_expr)
-        ratio_expr.alias(sc.name + "_count_distinct")
-      }).toArray: Array[Column]
-    )
-  }
+  def countUniqueValueRatio(schema: StructType, approx: Boolean): Array[Column] = Array.concat(
+    schema.map(sc => {
+      val sum_expr = sum(when(colWithFilterBlank(sc), 1).otherwise(0))
+      // TODO:  张琳 唯一值比例，count(distinct FIELD_NAME) / count(*)。保留2为小数
+      val divide_expr = if (approx) {
+        nanvl(approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))) / sum_expr, lit(0.0))
+      } else {
+        nanvl(countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum_expr, lit(0.0))
+      }
+      val ratio_expr = when(sum_expr === 0, 0.0).otherwise(divide_expr)
+      ratio_expr.alias(sc.name + "_uniqueValueRatio")
+    }).toArray,
+    schema.map(sc => {
+      if (approx) {
+        nanvl(approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))).alias(sc.name + "_count_distinct"), lit(0))
+      } else {
+        nanvl(countDistinct(when(colWithFilterBlank(sc), col(sc.name))).alias(sc.name + "_count_distinct"), lit(0))
+      }
+    }).toArray: Array[Column]
+  )
 
   def getMaxNum(schema: StructType): Array[Column] = {
     schema.map(sc => {
@@ -113,10 +108,6 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       val min_expr = min(when(colWithFilterBlank(sc), col(c)))
       when(min_expr.isNull, "").otherwise(min_expr.cast(StringType)).alias(c + "_min")
     }).toArray
-  }
-
-  def isArrayString(mode: Any): Boolean = {
-    mode.toString.startsWith("[") && mode.toString.endsWith("]")
   }
 
   def countNonNullValue(schema: StructType): Array[Column] = {
@@ -204,27 +195,33 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
   def dataFormat(resRow: Array[Seq[Any]], metricsIdx: Map[Int, String], roundAt: Int): Array[Seq[Any]] = {
     resRow.map(row => {
       row.zipWithIndex.map(el => {
-        val e = el._1
         val metricName = metricsIdx.getOrElse(el._2, "")
         val round_at = metricName match {
           case t if t.endsWith("Ratio") => roundAt + 2
           case _ => roundAt
         }
-        var newE = e
+
+        var e = ""
         try {
+          if (el._1 != null) {
+            e = el._1.toString
+          }
           val intTypeList = Array("primaryKeyCandidate", "ordinalPosition", "dataLength", "maximumLength",
             "minimumLength", "nonNullCount", "categoryCount")
+          // 'Max' and 'Min' are required to preserve decimal places, even though the value may be a string, because
+          // the decimal type appears as a long-tailed decimal
+          val nonFormat = Array("columnName", "dataType")
           if (intTypeList.contains(metricName)) {
-            val v = e.toString.toInt
-            newE = v
+            e = BigDecimal(e).setScale(0, BigDecimal.RoundingMode.HALF_UP).toLong.toString
+          } else if (nonFormat.contains(metricName)) {
+            // pass
           } else {
-            val v = e.toString.toDouble
-            newE = BigDecimal(v).setScale(round_at, BigDecimal.RoundingMode.HALF_UP).toDouble
+            e = BigDecimal(e).setScale(round_at, BigDecimal.RoundingMode.HALF_UP).toDouble.toString
           }
         } catch {
           case _: Exception => //pass
         }
-        newE
+        e
       })
     })
   }
@@ -345,12 +342,16 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     // TODO: 张琳 countUniqueValueRatio是否可以合并到上面的statistics统计
     // calculate uniqueValue Ratio
     var uniqueValueRatioAndCategory = df.select(countUniqueValueRatio(df.schema, approxCountDistinct): _*).collect()(0).toSeq
-    if (uniqueValueRatioAndCategory.isEmpty) {
-      return (Seq(), Seq(), Seq())
-    }
     val indices: Int = uniqueValueRatioAndCategory.length / 2
     uniqueValueRatioAndCategory.zipWithIndex.foreach(e => {
-      val ratio = String.valueOf(e._1).toDouble
+      var ratio = 0.0
+      try {
+        if (e._1 != null) {
+          ratio = String.valueOf(e._1).toDouble
+        }
+      } catch {
+        case e: Exception => logDebug("[uniqueValueRatioAndCategory]ratio is not a double number!" + e.getMessage, e)
+      }
       val pos = e._2
       if (pos < indices) {
         if (ratio != 1 && (ratio >= threshold)) {
@@ -388,9 +389,13 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
 
     var isPrimaryKeyRow: Array[Int] = Array()
     uniqueValueRatio.zipWithIndex.foreach(e => {
-      val ratio = String.valueOf(e._1).toDouble
+      var ratio = 0.0
+      if (e._1 != null) {
+        ratio = String.valueOf(e._1).toDouble
+      }
+
       var isPrimaryKeyE = 0
-      if (ratio == 1) {
+      if (ratio >= 1) {
         isPrimaryKeyE = 1
       }
       isPrimaryKeyRow = isPrimaryKeyRow :+ isPrimaryKeyE
@@ -436,6 +441,9 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     if (smallDatasetAccurately) {
       total = df.count()
       logInfo(format(s"The whole dataset is [${total}] and the approxThreshold is ${approxThreshold}"))
+      if (total == 0) {
+       return df.sparkSession.emptyDataFrame
+      }
       if (total <= approxThreshold) {
         isSmallData = true
       }
@@ -448,7 +456,11 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }
 
     val df_columns = df.columns
-
+    val schema = df.schema
+    val schemaLength = schema.length
+    if (schemaLength == 0) {
+      return df.sparkSession.emptyDataFrame
+    }
     df_columns.foreach(col => {
       if (col.contains(".") || col.contains("`")) {
         throw new RuntimeException(s"The column name : $col contains special symbols, like . or `, please rename it first!! ")
@@ -464,7 +476,6 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }).map(sc => {
       sc.name
     }).toArray
-    val schema = df.schema
 
     val default_metrics = Map(
       "dataLength" -> getTypeLength(schema),
@@ -490,11 +501,15 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
 
     logInfo("The first step spark expr is : select " + newCols.mkString(","))
     val rows = df.select(newCols: _*).collect()
-    val rowN = schema.length
     var statisticMetricsSeq = rows(0).toSeq
     if (processedSelectedMetrics.contains("uniqueValueRatio") || processedSelectedMetrics.contains("primaryKeyCandidate")
       || processedSelectedMetrics.contains("categoryCount")) {
-      val threshold = params.getOrElse("threshold", "0.9").toDouble
+      var threshold = 0.9
+      try {
+        threshold = params.getOrElse("threshold", "0.9").toDouble
+      } catch {
+        case _: Exception => logDebug("threshold is not a double number! threshold: " + params.get("threshold")) //pass
+      }
       val (uniqueValueRatioRow, categoryCountRow, isPrimaryKeyRow) = calculateCountMetrics(df, approxCountDistinct, threshold)
       if (processedSelectedMetrics.contains("uniqueValueRatio")) {
         statisticMetricsSeq = statisticMetricsSeq ++ uniqueValueRatioRow
@@ -509,13 +524,14 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       }
     }
 
-    val normalMetricsRow = statisticMetricsSeq.grouped(rowN).map(_.toSeq).toArray.toSeq.transpose
+    val normalMetricsRow = statisticMetricsSeq.grouped(schemaLength).map(_.toSeq).toArray.toSeq.transpose
     var end_time = new Date().getTime
 
     logInfo("The elapsed time for normal metrics is : " + (end_time - start_time))
+    logInfo("The rowN is:" + schemaLength + ", normalMetricsRow size is : " + normalMetricsRow.length)
 
     var datatype_schema: Array[StructField] = null
-    var resRows: Array[Seq[Any]] = Range(0, rowN).map(i => {
+    var resRows: Array[Seq[Any]] = Range(0, schemaLength).map(i => {
       Seq(schema(i).name) ++ Seq(String.valueOf(i + 1)) ++ normalMetricsRow(i)
     }).toArray
 
@@ -528,7 +544,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     // Calculate Mode
     if (processedSelectedMetrics.contains("mode")) {
       val modeRows = getModeValue(schema, df)
-      resRows = Range(0, rowN).map(i => {
+      resRows = Range(0, schemaLength).map(i => {
         resRows(i) :+ modeRows(i)
       }).toArray
       end_time = new Date().getTime
@@ -539,9 +555,8 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       (t._2, t._1.name)
     }).toMap
     resRows = dataFormat(resRows, metricsIdx, round_at)
-    val resAfterTransformed = resRows.map(row => row.map(e => String.valueOf(e)))
     val spark = df.sparkSession
-    spark.createDataFrame(spark.sparkContext.parallelize(resAfterTransformed.map(Row.fromSeq(_)), 1), StructType(datatype_schema))
+    spark.createDataFrame(spark.sparkContext.parallelize(resRows.map(Row.fromSeq), 1), StructType(datatype_schema))
   }
 
   override def load(sparkSession: SparkSession, path: String, params: Map[String, String]): Any = {
@@ -555,18 +570,18 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
   override def codeExample: Code = Code(SQLCode, CodeExampleText.jsonStr +
     """
       |
-      |set abc='''
-      |{"name": "elena", "age": 57, "phone": 15552231521, "income": 433000, "label": 0}
-      |{"name": "candy", "age": 67, "phone": 15552231521, "income": 1200, "label": 0}
-      |{"name": "bob", "age": 57, "phone": 15252211521, "income": 89000, "label": 0}
-      |{"name": "candy", "age": 25, "phone": 15552211522, "income": 36000, "label": 1}
-      |{"name": "candy", "age": 31, "phone": 15552211521, "income": 300000, "label": 1}
-      |{"name": "finn", "age": 23, "phone": 15552211521, "income": 238000, "label": 1}
-      |''';
-      |
-      |load jsonStr.`abc` as table1;
-      |select age, income from table1 as table2;
-      |run table2 as DataSummary.`` as summaryTable;
+      set abc='''
+      {"name": "elena", "age": 57, "phone": 15552231521, "income": 433000, "label": 0}
+      {"name": "candy", "age": 67, "phone": 15552231521, "income": 1200, "label": 0}
+      {"name": "bob", "age": 57, "phone": 15252211521, "income": 89000, "label": 0}
+      {"name": "candy", "age": 25, "phone": 15552211522, "income": 36000, "label": 1}
+      {"name": "candy", "age": 31, "phone": 15552211521, "income": 300000, "label": 1}
+      {"name": "finn", "age": 23, "phone": 15552211521, "income": 238000, "label": 1}
+      ''';
+
+      load jsonStr.`abc` as table1;
+      select age, income from table1 as table2;
+      run table2 as DataSummary.`` as summaryTable;
       |;
   """.stripMargin)
 

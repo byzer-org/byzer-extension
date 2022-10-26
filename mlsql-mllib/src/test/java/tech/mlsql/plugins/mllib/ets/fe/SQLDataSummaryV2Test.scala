@@ -121,7 +121,7 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
       assert(res2DF.collect()(10).mkString(",") === "extra2,11,2.0,2.0,2.0,0.0,16,decimal(38,18),12.0,,3.67,2.0,,6,0.0,1.79,4.08,1.67,0.3333,2,0,2.0")
       assert(res2DF.collect()(11).mkString(",") === "extra3,12,1.34,2.11,3.09,0.0,8,double,3.38,,2.2,1.12,,6,0.0,0.15,1.01,0.41,0.6667,4,0,")
 
-      val sseq2 = Seq(
+      val sseq2: Seq[(Null, Null)] = Seq(
         (null, null),
         (null, null)
       )
@@ -134,6 +134,14 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
       println(res3DF.collect()(1).mkString(","))
       assert(res3DF.collect()(0).mkString(",") === "col1,1,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
       assert(res3DF.collect()(1).mkString(",") === "col2,2,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
+
+      val seq_df4 = spark.emptyDataFrame
+      val res4DF = et.train(seq_df4, "", Map("atRound" -> "2",
+        "metrics" -> allMetrics
+      ))
+      println("-----------res4DF start-----------")
+      res4DF.show()
+      println("------------res4DF end----------")
       val parquetDF1 = spark.sqlContext.read.format("parquet").load(this.getCurProjectRootPath() +
         "src/test/resources/benchmark")
       println(parquetDF1.count())
