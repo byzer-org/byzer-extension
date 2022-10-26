@@ -59,20 +59,6 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }).toArray
   }
 
-  def isPrimaryKey(schmea: StructType, approx: Boolean): Array[Column] = {
-    schmea.map(sc => {
-      //      val approxExpr = approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
-      //      val accurateExpr = countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
-      val exp1 = if (approx) {
-        //        when(approxExpr >= 0.6, accurateExpr).otherwise(approxExpr)
-        approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
-      } else {
-        countDistinct(when(colWithFilterBlank(sc), col(sc.name))) / sum(when(colWithFilterBlank(sc), 1).otherwise(0))
-      }
-      when(exp1 === 1, 1).otherwise(0).alias(sc.name + "_primaryKeyCandidate")
-    }).toArray
-  }
-
   def countUniqueValueRatio(schema: StructType, approx: Boolean): Array[Column] = Array.concat(
     schema.map(sc => {
       val sum_expr = sum(when(colWithFilterBlank(sc), 1).otherwise(0))
@@ -149,7 +135,6 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }).toArray
   }
 
-
   def getMeanValue(schema: StructType): Array[Column] = {
     schema.map(sc => {
       val new_col = if (numericCols.contains(sc.name)) {
@@ -180,16 +165,6 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
         case _ => lit("").alias(sc.name)
       }
     }).toArray
-  }
-
-  def roundNumericCols(df: DataFrame): DataFrame = {
-    df.select(df.schema.map(sc => {
-      sc.dataType match {
-        case DoubleType => expr(s"cast (${sc.name} as decimal(38,2)) as ${sc.name}")
-        case FloatType => expr(s"cast (${sc.name} as decimal(38,2)) as ${sc.name}")
-        case _ => col(sc.name)
-      }
-    }): _*)
   }
 
   def dataFormat(resRow: Array[Seq[Any]], metricsIdx: Map[Int, String], roundAt: Int): Array[Seq[Any]] = {
@@ -225,47 +200,6 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       })
     })
   }
-
-
-  def getPercentileRowsByStatFunc(metrics: Array[String], schema: StructType, df: DataFrame, relativeError: Double):
-  (Array[Array[String]], Array[String]) = {
-    var percentilePoints: Array[Double] = Array()
-    var percentileCols: Array[String] = Array()
-    if (metrics.contains("%25")) {
-      percentilePoints = percentilePoints :+ 0.25
-      percentileCols = percentileCols :+ "%25"
-    }
-    if (metrics.contains("median")) {
-      percentilePoints = percentilePoints :+ 0.5
-      percentileCols = percentileCols :+ "median"
-    }
-    if (metrics.contains("%75")) {
-      percentilePoints = percentilePoints :+ 0.75
-      percentileCols = percentileCols :+ "%75"
-    }
-
-    if (percentileCols.isEmpty) {
-      return (null, percentileCols)
-    }
-
-    val cols = schema.map(sc => {
-      var res = lit(0.0).as(sc.name)
-      if (numericCols.contains(sc.name)) {
-        res = col(sc.name)
-      }
-      res
-    }).toArray
-    val quantileRows: Array[Array[Double]] = df.select(cols: _*).na.fill(0.0).stat.approxQuantile(df.columns,
-      percentilePoints, relativeError)
-    val quantileRowsAfterTrans = quantileRows.map(qr => {
-      qr.length match {
-        case 0 => Seq("").toArray
-        case _ => qr.map(e => String.valueOf(e))
-      }
-    })
-    (quantileRowsAfterTrans, percentileCols)
-  }
-
 
   def getPercentileRows(metrics: Array[String], schema: StructType, relativeError: Double,
                         numeric_columns: Array[String]): Array[Column] = {

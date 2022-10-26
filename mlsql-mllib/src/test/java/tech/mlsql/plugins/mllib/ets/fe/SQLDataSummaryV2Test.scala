@@ -1,6 +1,7 @@
 package tech.mlsql.plugins.mllib.ets.fe
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.streaming.SparkOperationUtil
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
@@ -135,10 +136,10 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
       assert(res3DF.collect()(0).mkString(",") === "col1,1,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
       assert(res3DF.collect()(1).mkString(",") === "col2,2,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
 
-      val seq_df4 = spark.emptyDataFrame
-      val res4DF = et.train(seq_df4, "", Map("atRound" -> "2",
-        "metrics" -> allMetrics
-      ))
+      val colNames = Array("id", "name", "age", "birth")
+      val schema = StructType(colNames.map(fieldName => StructField(fieldName, StringType, nullable = true)))
+      val emptyDf = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], schema)
+      val res4DF: DataFrame = et.train(emptyDf, "", Map("atRound" -> "2"))
       println("-----------res4DF start-----------")
       res4DF.show()
       println("------------res4DF end----------")
