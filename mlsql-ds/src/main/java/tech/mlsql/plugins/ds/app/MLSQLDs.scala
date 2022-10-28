@@ -11,6 +11,7 @@ import tech.mlsql.version.VersionCompatibility
 class MLSQLDs extends tech.mlsql.app.App with VersionCompatibility with Logging {
   override def run(args: Seq[String]): Unit = {
     registerDS(classOf[MLSQLXml].getName)
+    registerDS(classOf[MLSQLXtreme1].getName)
   }
 
 

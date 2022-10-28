@@ -1,0 +1,16 @@
+moduleName=byzer-xgboost-{{spark_binary_version}}
+mainClass=tech.mlsql.plugins.xgboost.app.XGBoostETApp
+scala_version={{scala_binary_version}}
+spark_version={{spark_binary_version}}
+version=0.1.0-SNAPSHOT
+author=tangf
+mlsqlVersions=""
+githubUrl=https://github.com/byzer-org/byzer-extension/tree/master/byzer-xgboost
+mlsqlPluginType=app
+desc=byzer-xgboost
+
+
+
+
+
+
