@@ -39,7 +39,7 @@
         <module>byzer-objectstore-blob</module>
         <module>byzer-objectstore-s3</module>
         <module>byzer-xgboost</module>
-        <module>byzer-xtreme1</module>
+<!--        <module>byzer-xtreme1</module>-->
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>
