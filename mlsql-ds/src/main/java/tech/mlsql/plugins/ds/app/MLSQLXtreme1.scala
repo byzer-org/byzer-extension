@@ -1,11 +1,11 @@
 package tech.mlsql.plugins.ds.app
 
-import org.apache.spark.sql.{DataFrame, DataFrameReader, SparkSession}
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.{DataFrame, DataFrameReader, Row, SparkSession, functions => F}
 import streaming.core.datasource._
 import streaming.dsl.ScriptSQLExec
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
-import tech.mlsql.tool.HDFSOperatorV2
 import tech.mlsql.version.VersionCompatibility
 
 import java.net.URI
@@ -20,35 +20,36 @@ class MLSQLXtreme1(override val uid: String) extends MLSQLBaseFileSource with Wo
 
   override def load(reader: DataFrameReader, config: DataSourceConfig): DataFrame = {
     val context = ScriptSQLExec.contextGetOrForTest()
+    val session = context.execListener.sparkSession
     val owner = config.config.get("owner").getOrElse(context.owner)
     val jsonPath = resourceRealPath(context.execListener, Option(owner), config.path)
-    val jsonFileStr = HDFSOperatorV2.readFile(jsonPath)
+    val jsonFileStr = session.read.format("text").option("wholeFile", "true").
+      load(jsonPath).collect().head.getString(0) //HDFSOperatorV2.readFile(jsonPath)
     val xtreme1Format = JSONTool.parseJson[Xtreme1Format](jsonFileStr)
-    val session = context.execListener.sparkSession
-    import session.implicits._
     val rows = xtreme1Format.contents.map(item =>
-      Seq(item.data.image.split("/").last, JSONTool.toJsonStr(item)))
+      Row.fromSeq(Seq(item.data.image.split("/").last.split("\\?").head, JSONTool.toJsonStr(item))))
 
     val p = new URI(jsonPath)
     val withSchema = p.getScheme != null
 
-    val metaDf = session.createDataset(rows).toDF("name", "meta")
+    val metaDF = session.createDataFrame(session.sparkContext.parallelize(rows),
+      StructType(Seq(StructField("name", StringType), StructField("meta", StringType))))
+
     val paths = xtreme1Format.contents.map { item =>
       val prefix = if (withSchema) {
         s"${p.getScheme}://x1-community"
       } else {
         ""
       }
-      prefix + "/" + item.data.image.split("x1-community").last
+      prefix + "/" + item.data.image.split("x1-community").last.split("\\?").head
     }
-    val imgDf = session.read.format("image").load(paths: _*)
-    imgDf.createTempView("imgDf")
-    metaDf.createTempView("metaDf")
 
-    session.sql(
-      """
-        |select imgDf.image.data as data, metaDf.meta as meta from imgDf left join metaDf on element_at(split(imgDf.name,"/"),-1) == metaDf.name
-        |""".stripMargin)
+    val imgDf = session.read.format("binaryFile").load(paths: _*).select(
+      F.element_at(F.split(F.col("path"), "/"), -1).alias("name"),
+      F.col("content").alias("data"))
+
+    val newDf = metaDF.join(imgDf, metaDF("name") === imgDf("name"), "left").select(metaDF("*"), imgDf("data"))
+    newDf
 
   }
 

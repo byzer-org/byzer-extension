@@ -2,10 +2,11 @@ package tech.mlsql.plugins.ds.app
 
 import scala.collection.mutable.ArrayBuffer
 
+case class Xtreme1Point(x:Double,y:Double)
 case class Xtreme1ResultObject(attrs: Map[String, String], color: String, frontId: String, objType: String, modelRun: String, classType: String,
-                               coordinate: List[(Double, Double)])
+                               coordinate: List[Xtreme1Point],modelClass: String)
 
-case class Xtreme1Result(objects: List[Xtreme1ResultObject], modelClass: String)
+case class Xtreme1Result(objects: List[Xtreme1ResultObject])
 
 case class Xtreme1ContentData(image: String, result: Xtreme1Result)
 
@@ -41,7 +42,7 @@ object Formats {
     val images = ArrayBuffer[CocoImage]()
     val annotations = ArrayBuffer[CocoAnnotation]()
 
-    val models = x.contents.map(item => item.data.result.modelClass).sorted
+    val models = x.contents.flatMap(item => item.data.result.objects.map(_.classType)).sorted
     val categories = models.zipWithIndex.map { case (name, index) => CocoCategory(name, index, name, List(), List()) }
 
     val categoryMap = categories.map(item => (item.name, item)).toMap
@@ -52,7 +53,7 @@ object Formats {
 
       item.data.result.objects.map { obj =>
         val catagoryId = categoryMap.get(obj.classType).get.id
-        annotations += CocoAnnotation(List(obj.coordinate.flatMap(temp => List(temp._1, temp._2))), 0, 0, List(), imgId,
+        annotations += CocoAnnotation(List(obj.coordinate.flatMap(temp => List(temp.x, temp.y))), 0, 0, List(), imgId,
           List(), category_id = catagoryId.toInt, imgId, "")
       }
     }
