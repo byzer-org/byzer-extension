@@ -59,7 +59,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     }).toArray
   }
 
-  def countUniqueValueRatio(schema: StructType, approx: Boolean): Array[Column] = Array.concat(
+  def countUniqueValueRatio(schema: StructType, approx: Boolean, numeric_columns: Array[String]): Array[Column] = Array.concat(
     schema.map(sc => {
       val sum_expr = sum(when(colWithFilterBlank(sc), 1).otherwise(0))
       // TODO:  张琳 唯一值比例，count(distinct FIELD_NAME) / count(*)。保留2为小数
@@ -72,10 +72,14 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       ratio_expr.alias(sc.name + "_uniqueValueRatio")
     }).toArray,
     schema.map(sc => {
-      if (approx) {
-        nanvl(approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))).alias(sc.name + "_count_distinct"), lit(0))
+      if (numeric_columns.contains(sc.name)) {
+        if (approx) {
+          nanvl(approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))).alias(sc.name + "_count_distinct"), lit(0))
+        } else {
+          nanvl(countDistinct(when(colWithFilterBlank(sc), col(sc.name))).alias(sc.name + "_count_distinct"), lit(0))
+        }
       } else {
-        nanvl(countDistinct(when(colWithFilterBlank(sc), col(sc.name))).alias(sc.name + "_count_distinct"), lit(0))
+        lit("").alias(sc.name + "_count_distinct")
       }
     }).toArray: Array[Column]
   )
@@ -267,7 +271,8 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     mode
   }
 
-  def calculateCountMetrics(df: DataFrame, approxCountDistinct: Boolean, threshold: Double = 0.9): (Seq[Any], Seq[Any], Seq[Any]) = {
+  def calculateCountMetrics(df: DataFrame, approxCountDistinct: Boolean, threshold: Double = 0.9,
+                            numeric_columns: Array[String]): (Seq[Any], Seq[Any], Seq[Any]) = {
     val schema = df.schema
     val columns = schema.map(sc => sc.name).toArray
     val idxToCol = df.columns.zipWithIndex.map(t => (t._2, t._1)).toMap
@@ -275,7 +280,8 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     var recalCols: Array[StructField] = Array()
     // TODO: 张琳 countUniqueValueRatio是否可以合并到上面的statistics统计
     // calculate uniqueValue Ratio
-    var uniqueValueRatioAndCategory = df.select(countUniqueValueRatio(df.schema, approxCountDistinct): _*).collect()(0).toSeq
+    var uniqueValueRatioAndCategory = df.select(countUniqueValueRatio(df.schema, approxCountDistinct, numeric_columns
+    ): _*).collect()(0).toSeq
     val indices: Int = uniqueValueRatioAndCategory.length / 2
     uniqueValueRatioAndCategory.zipWithIndex.foreach(e => {
       var ratio = 0.0
@@ -298,7 +304,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
 
     if (approxCountDistinct && recalCols.length > 0) {
       // TODO:  张琳 应该可以合并到上一个select，写成if（）
-      val replacedRatioDF = df.select(countUniqueValueRatio(StructType(recalCols), approx = false): _*)
+      val replacedRatioDF = df.select(countUniqueValueRatio(StructType(recalCols), approx = false, numeric_columns): _*)
       val replaceURrow = replacedRatioDF.collect().take(1)
       if (replaceURrow.length > 0) {
         val recalIndices: Int = replaceURrow.length / 2
@@ -444,7 +450,8 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       } catch {
         case _: Exception => logDebug("threshold is not a double number! threshold: " + params.get("threshold")) //pass
       }
-      val (uniqueValueRatioRow, categoryCountRow, isPrimaryKeyRow) = calculateCountMetrics(df, approxCountDistinct, threshold)
+      val (uniqueValueRatioRow, categoryCountRow, isPrimaryKeyRow) = calculateCountMetrics(df, approxCountDistinct,
+        threshold, numericCols)
       if (processedSelectedMetrics.contains("uniqueValueRatio")) {
         statisticMetricsSeq = statisticMetricsSeq ++ uniqueValueRatioRow
       }
