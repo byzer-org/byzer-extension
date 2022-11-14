@@ -9,13 +9,40 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <repositories>
+        <repository>
+            <id>maven-proxy</id>
+            <url>https://repo.huaweicloud.com/repository/maven/huaweicloudsdk</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <artifactId>byzer-objectstore-obs-3.3_2.12</artifactId>
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.hadoop</groupId>-->
-<!--            <artifactId>hadoop-huaweicloud</artifactId>-->
-<!--            <version>3.1.1.29</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-huaweicloud</artifactId>
+            <version>3.1.1.29</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-common</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.huawei.storage</groupId>
+            <artifactId>esdk-obs-java</artifactId>
+            <version>optimization-3.21.4.1</version>
+        </dependency>
+
     </dependencies>
 
     <profiles>
@@ -41,20 +68,20 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <relocation>
-                                    <pattern>org.apache.poi</pattern>
-                                    <shadedPattern>shadeio.poi</shadedPattern>
+                                    <pattern>org.eclipse.jetty</pattern>
+                                    <shadedPattern>shadeio.obs.org.eclipse.jetty</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.norbitltd.spoiwo</pattern>
-                                    <shadedPattern>shadeio.spoiwo</shadedPattern>
+                                    <pattern>com.fasterxml.jackson.databind</pattern>
+                                    <shadedPattern>shadeio.obs.com.fasterxml.jackson.databind</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.github.pjfanning</pattern>
-                                    <shadedPattern>shadeio.pjfanning</shadedPattern>
+                                    <pattern>com.fasterxml.jackson.annotation</pattern>
+                                    <shadedPattern>shadeio.obs.com.fasterxml.jackson.annotation</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>org.apache.commons.compress</pattern>
-                                    <shadedPattern>shadeio.commons.compress</shadedPattern>
+                                    <pattern>com.fasterxml.jackson.core</pattern>
+                                    <shadedPattern>shadeio.obs.com.fasterxml.jackson.core</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
