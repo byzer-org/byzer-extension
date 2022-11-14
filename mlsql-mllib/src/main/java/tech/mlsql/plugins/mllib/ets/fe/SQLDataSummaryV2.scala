@@ -72,7 +72,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       ratio_expr.alias(sc.name + "_uniqueValueRatio")
     }).toArray,
     schema.map(sc => {
-      if (numeric_columns.contains(sc.name)) {
+      if (!numeric_columns.contains(sc.name)) {
         if (approx) {
           nanvl(approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))).alias(sc.name + "_count_distinct"), lit(0))
         } else {
@@ -382,7 +382,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       total = df.count()
       logInfo(format(s"The whole dataset is [${total}] and the approxThreshold is ${approxThreshold}"))
       if (total == 0) {
-       return df.sparkSession.emptyDataFrame
+        return df.sparkSession.emptyDataFrame
       }
       if (total <= approxThreshold) {
         isSmallData = true
