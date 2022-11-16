@@ -107,7 +107,7 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
       , "owner"
       , "group"
       , "permission"
-      , "isDir"
+      , "isDirectory"
       , "byteLength"
       , "modificationTime"
     )
