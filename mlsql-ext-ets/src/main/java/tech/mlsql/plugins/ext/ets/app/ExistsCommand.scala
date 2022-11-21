@@ -2,24 +2,21 @@ package tech.mlsql.plugins.ext.ets.app
 
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.joda.time.DateTime
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import streaming.dsl.ScriptSQLExec
 import streaming.dsl.auth._
 import streaming.dsl.mmlib.algs.param.BaseParams
 import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import tech.mlsql.common.form.{Extra, FormParams, Text}
-import tech.mlsql.common.utils.path.PathFun
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.ets.HDFSCommand
 import tech.mlsql.tool.HDFSOperatorV2
 
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)
  */
-class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
+class ExistsCommand(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
 
   final val path: Param[String] = new Param[String](this, "path",
     FormParams.toJson(Text(
@@ -28,9 +25,9 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
       extra = Extra(
         doc =
           """
-            | Setting an hdfs address
+            | check the hdfs address
           """,
-        label = "Setting an hdfs Address",
+        label = "check the hdfs address",
         options = Map(
           "valueType" -> "string",
           "required" -> "true",
@@ -46,9 +43,9 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
 
   override def codeExample: Code = Code(SQLCode,
     """
-      | run command as LSCommand.`` where path="hdfs://localhost:8020/csv" as table1;
+      | run command as ExistsCommand.`` where path="hdfs://localhost:64066/csv" as table1;
       | Or you can use the command as follow:
-      | !ls "hdfs://localhost:8020/csv";
+      | !exists "hdfs://localhost:64066/csv";
     """.stripMargin)
 
   override def auth(etMethod: ETMethod, path: String, params: Map[String, String]): List[TableAuthResult] = {
@@ -82,53 +79,14 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val session = df.sparkSession
     val curPath = params("path")
-    val isEnableMaximumExceedException = params.getOrElse("enableMaximumExceedException", "false").toBoolean
-    val maximum = params.getOrElse("maximum", "1000").toInt
     if (curPath == null || curPath.isEmpty) {
-      return session.emptyDataFrame
+      throw new RuntimeException(s"hdfs path can not be null!")
     }
 
-    if (isEnableMaximumExceedException && maximum > 0) {
-      val hdfsParams = Map("parameters" -> s"""["-count","$curPath"]""")
-//                 1           27              45173 /opt/spark-3.3.0-bin-hadoop3/sbin
-      val rows = new HDFSCommand().train(df, null, hdfsParams).collect()
-      var pathCount = 0
-      if (rows != null) {
-        pathCount = rows(0).toSeq.head.toString.toInt
-      }
-      if (pathCount > maximum) {
-        throw new RuntimeException(s"maximum number of file exceeded! The expected maximum number of file is $maximum" +
-          s", but is $pathCount.")
-      }
-    }
-    val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = HDFSOperatorV2.listFiles(curPath)
-      //      .filterNot(_.getPath.getName.endsWith(".tmp.crc"))
-      //    #-rw-rw----+  3 username userPermission     0 2020-12-16 10:32    hdfs://xx/xy/xx/test_day_v2/20201216
-      .map { status =>
-        def timeFormat = "yyyy-MM-dd HH:mm:SS"
-
-        (status.getPath.getName.split(PathFun.pathSeparator).last,
-          status.getPath.toString,
-          status.getOwner,
-          status.getGroup,
-          status.getPermission.toString,
-          status.isDirectory,
-          if (status.isDirectory) "0" else status.getLen + "",
-          new DateTime(status.getModificationTime).toString(timeFormat)
-        )
-      }
-    // TODO: We need to add a create time
-    session.createDataFrame(session.sparkContext.parallelize(lastFile, 1)).toDF(
-      "name"
-      , "path"
-      , "owner"
-      , "group"
-      , "permission"
-      , "isDir"
-      , "byteLength"
-      , "modificationTime"
+    val isExists = HDFSOperatorV2.fileExists(curPath)
+    session.createDataFrame(session.sparkContext.parallelize(Seq(Tuple1(isExists.toString)), 1)).toDF(
+      "isExists"
     )
-
   }
 
 }
