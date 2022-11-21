@@ -13,6 +13,7 @@ import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.common.utils.path.PathFun
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
+import tech.mlsql.ets.HDFSCommand
 import tech.mlsql.tool.HDFSOperatorV2
 
 /**
@@ -45,9 +46,13 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
 
   override def codeExample: Code = Code(SQLCode,
     """
-      | run command as LSCommand.`` where path="hdfs://localhost:64066/csv" as table1;
-      | Or you can use the command as follow:
-      | !ls "hdfs://localhost:64066/csv";
+      | run command as LSCommand.`` where path="hdfs://localhost:8020/csv" as table1;
+      | -- Or you can use the command as follow:
+      | !ls "hdfs://localhost:8020/csv";
+      | -- Or you can turn on enableMaximumExceedException, and set the maximum to start the strategy of reporting errors
+      | -- exceeding the maximum value.
+      | run command as LSCommand.`` where path="/opt/spark-3.3.0-bin-hadoop3/sbin" and enableMaximumExceedException=
+      | "true" and maximum="27" as table1;
     """.stripMargin)
 
   override def auth(etMethod: ETMethod, path: String, params: Map[String, String]): List[TableAuthResult] = {
@@ -81,10 +86,30 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val session = df.sparkSession
     val curPath = params("path")
+    val isEnableMaximumExceedException = params.getOrElse("enableMaximumExceedException", "false").toBoolean
+    val maximum = params.getOrElse("maximum", "1000").toInt
     if (curPath == null || curPath.isEmpty) {
       return session.emptyDataFrame
     }
-    val lastFile = HDFSOperatorV2.listFiles(curPath)
+
+    if (isEnableMaximumExceedException && maximum > 0) {
+      val hdfsParams = Map("parameters" -> s"""["-count","$curPath"]""")
+      //                 1           27              45173 /opt/spark-3.3.0-bin-hadoop3/sbin
+      val rows = new HDFSCommand().train(df, null, hdfsParams).collect()
+      var pathCount = 0
+      if (rows != null && rows(0).toSeq.nonEmpty) {
+        val splits = rows(0).toSeq.head.toString.split(" {11}")
+        if (splits.length >= 3) {
+          pathCount = splits(2).toInt
+        }
+      }
+      if (pathCount > maximum) {
+        throw new RuntimeException(s"maximum number of file exceeded! The expected maximum number of file is $maximum" +
+          s", but is $pathCount.")
+      }
+    }
+
+    val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = HDFSOperatorV2.listFiles(curPath)
       //      .filterNot(_.getPath.getName.endsWith(".tmp.crc"))
       //    #-rw-rw----+  3 username userPermission     0 2020-12-16 10:32    hdfs://xx/xy/xx/test_day_v2/20201216
       .map { status =>
