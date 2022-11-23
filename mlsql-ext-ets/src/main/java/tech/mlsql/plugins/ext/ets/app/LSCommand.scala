@@ -1,5 +1,6 @@
 package tech.mlsql.plugins.ext.ets.app
 
+import org.apache.hadoop.fs.Path
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -15,6 +16,7 @@ import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 import tech.mlsql.ets.HDFSCommand
 import tech.mlsql.tool.HDFSOperatorV2
+import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
 
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)
@@ -93,16 +95,9 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
     }
 
     if (isEnableMaximumExceedException && maximum > 0) {
-      val hdfsParams = Map("parameters" -> s"""["-count","$curPath"]""")
-      //                 1           27              45173 /opt/spark-3.3.0-bin-hadoop3/sbin
-      val rows = new HDFSCommand().train(df, null, hdfsParams).collect()
-      var pathCount = 0
-      if (rows != null && rows(0).toSeq.nonEmpty) {
-        val splits = rows(0).toSeq.head.toString.split(" {11}")
-        if (splits.length >= 3) {
-          pathCount = splits(2).toInt
-        }
-      }
+      val fsPath = new Path(curPath)
+      val fs = fsPath.getFileSystem(hadoopConfiguration)
+      val pathCount = fs.getContentSummary(fsPath).getFileCount
       if (pathCount > maximum) {
         throw new RuntimeException(s"maximum number of file exceeded! The expected maximum number of file is $maximum" +
           s", but is $pathCount.")
