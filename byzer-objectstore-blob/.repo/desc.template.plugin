@@ -5,9 +5,9 @@ spark_version={{spark_binary_version}}
 version=0.1.0-SNAPSHOT
 author=allwefantasy
 mlsqlVersions=""
-githubUrl=https://github.com/allwefantasy/mlsql-plugins/tree/master/mlsql-objectstore-blob
+githubUrl=https://github.com/byzer-org/byzer-extension/tree/master/byzer-objectstore-blob
 mlsqlPluginType=app
-desc=mlsql-shell
+desc=byzer-objectstore-blob
 
 
 
