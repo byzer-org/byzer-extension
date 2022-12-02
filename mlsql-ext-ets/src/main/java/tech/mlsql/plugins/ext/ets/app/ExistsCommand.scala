@@ -82,6 +82,9 @@ class ExistsCommand(override val uid: String) extends SQLAlg with MllibFunctions
     if (curPath == null || curPath.isEmpty) {
       throw new RuntimeException(s"hdfs path can not be null!")
     }
+    if (curPath.startsWith("http") || curPath.startsWith("https")) {
+      throw new RuntimeException(s"current path can not be supported!")
+    }
 
     val isExists = HDFSOperatorV2.fileExists(curPath)
     session.createDataFrame(session.sparkContext.parallelize(Seq(Tuple1(isExists.toString)), 1)).toDF(
