@@ -134,7 +134,7 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
           status.getGroup,
           status.getPermission.toString,
           status.isDirectory,
-          if (status.isDirectory) "0" else status.getLen + "",
+          status.getLen + "",
           new DateTime(status.getModificationTime).toString(timeFormat)
         )
       }
