@@ -1,7 +1,7 @@
 package tech.mlsql.test.plugins.render
 
 import org.apache.spark.streaming.SparkOperationUtil
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import streaming.core.strategy.platform.SparkRuntime
 import streaming.dsl.ScriptSQLExec
 import tech.mlsql.job.JobManager
@@ -9,7 +9,7 @@ import tech.mlsql.plugins.render.ExceptionReplaceRender
 import tech.mlsql.runtime.plugins.request_cleaner.RequestCleanerManager
 import tech.mlsql.test.BasicMLSQLConfig
 
-class ExceptionReplaceRenderSuite extends FunSuite with SparkOperationUtil with BasicMLSQLConfig {
+class ExceptionReplaceRenderSuite extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig {
   test("ExceptionReplaceRender should work") {
     withBatchContext(setupBatchContext(batchParamsWithoutHive)) { runtime: SparkRuntime  =>
       JobManager.init(runtime.sparkSession, initialDelay = 2 , checkTimeInterval = 3)
