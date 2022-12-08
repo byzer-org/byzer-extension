@@ -1,6 +1,7 @@
 package tech.mlsql.plugins.ext.ets.app
 
-import org.apache.hadoop.fs.Path
+import org.apache.commons.lang3.StringUtils
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -17,6 +18,8 @@ import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 import tech.mlsql.ets.HDFSCommand
 import tech.mlsql.tool.HDFSOperatorV2
 import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
+
+import java.net.URI
 
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)
@@ -94,9 +97,15 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
       return session.emptyDataFrame
     }
 
+    val fsPath = new Path(curPath)
+    var fs: FileSystem = null
+    if (params.contains("user") && StringUtils.isNotEmpty(params("user"))) {
+      fs = FileSystem.get(FileSystem.getDefaultUri(hadoopConfiguration), hadoopConfiguration, params("user"))
+    } else {
+      fs = fsPath.getFileSystem(hadoopConfiguration)
+    }
+
     if (isEnableMaximumExceedException && maximum > 0) {
-      val fsPath = new Path(curPath)
-      val fs = fsPath.getFileSystem(hadoopConfiguration)
       val pathCount = fs.getContentSummary(fsPath).getFileCount
       if (pathCount > maximum) {
         throw new RuntimeException(s"maximum number of file exceeded! The expected maximum number of file is $maximum" +
@@ -104,7 +113,7 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
       }
     }
 
-    val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = HDFSOperatorV2.listFiles(curPath)
+    val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = fs.listStatus(fsPath)
       //      .filterNot(_.getPath.getName.endsWith(".tmp.crc"))
       //    #-rw-rw----+  3 username userPermission     0 2020-12-16 10:32    hdfs://xx/xy/xx/test_day_v2/20201216
       .map { status =>
