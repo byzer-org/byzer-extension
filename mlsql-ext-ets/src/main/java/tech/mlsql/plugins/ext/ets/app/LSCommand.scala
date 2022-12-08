@@ -90,17 +90,26 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val session = df.sparkSession
-    val curPath = params("path")
+    var curPath = params("path")
     val isEnableMaximumExceedException = params.getOrElse("enableMaximumExceedException", "false").toBoolean
     val maximum = params.getOrElse("maximum", "1000").toInt
     if (curPath == null || curPath.isEmpty) {
       return session.emptyDataFrame
     }
 
-    val fsPath = new Path(curPath)
+    var fsPath = new Path(curPath)
     var fs: FileSystem = null
     if (params.contains("user") && StringUtils.isNotEmpty(params("user"))) {
-      fs = FileSystem.get(FileSystem.getDefaultUri(hadoopConfiguration), hadoopConfiguration, params("user"))
+      if (curPath.startsWith("/")) {
+        val tmpPath = hadoopConfiguration.get("fs.defaultFS", "file:///")
+        if (tmpPath.endsWith("/")) {
+          curPath = tmpPath.substring(0, tmpPath.length - 1) + curPath
+        } else {
+          curPath = tmpPath + curPath
+        }
+        fsPath = new Path(curPath)
+      }
+      fs = FileSystem.get(fsPath.toUri, hadoopConfiguration, params("user"))
     } else {
       fs = fsPath.getFileSystem(hadoopConfiguration)
     }
