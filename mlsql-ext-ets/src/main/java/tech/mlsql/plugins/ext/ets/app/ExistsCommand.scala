@@ -13,7 +13,6 @@ import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.tool.HDFSOperatorV2
 import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
 
 /**
@@ -85,6 +84,7 @@ class ExistsCommand(override val uid: String) extends SQLAlg with MllibFunctions
     if (curPath == null || curPath.isEmpty) {
       throw new RuntimeException(s"hdfs path can not be null!")
     }
+
     var fsPath = new Path(curPath)
     var fs: FileSystem = null
     if (params.contains("user") && StringUtils.isNotEmpty(params("user"))) {

@@ -86,8 +86,7 @@ class FigTest  extends AnyFunSuite {
         |         unemp: "失业率"""".stripMargin)
   }
 
-  "yaml" should "with matrix" in {
-
+  test("yaml should with matrix") {
     printCode(
       """
         |runtime:
@@ -103,7 +102,7 @@ class FigTest  extends AnyFunSuite {
         |      cbar: False""".stripMargin)
   }
 
-  "yaml" should "with auc" in {
+  test("yaml should with auc") {
 
     printCode(
       """
