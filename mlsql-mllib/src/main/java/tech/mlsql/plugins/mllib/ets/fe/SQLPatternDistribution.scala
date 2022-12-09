@@ -32,6 +32,9 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
 
     val find_patterns_udf = udf(SQLPatternDistribution.find_patterns(_, internalChLimit))
     val find_alternative_pattern_udf = udf(SQLPatternDistribution.find_alternativePatterns(_, internalChLimit))
+    if (df.isEmpty){
+      return df.sparkSession.emptyDataFrame
+    }
     val strColumns = df.schema.filter(_.dataType == StringType).map(s => col(s.name))
     val fDf = df.select(strColumns: _*)
     val res = fDf.schema.par.map(sc => {

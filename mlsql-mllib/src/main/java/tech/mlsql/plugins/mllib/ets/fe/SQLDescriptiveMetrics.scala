@@ -88,6 +88,9 @@ class SQLDescriptiveMetrics(override val uid: String) extends SQLAlg with MllibF
     if (metricSize <= 0) {
       throw new IllegalArgumentException("The limit parameter `metricSize` is not allowed to be less than 1!")
     }
+    if (df.isEmpty){
+      return df.sparkSession.emptyDataFrame
+    }
     import spark.implicits._
     val descriptiveRes = getDescriptiveMetrics(df, metricSize)
     spark.createDataset[(String, String)](descriptiveRes).toDF("columnName", "descriptiveMetrics")
