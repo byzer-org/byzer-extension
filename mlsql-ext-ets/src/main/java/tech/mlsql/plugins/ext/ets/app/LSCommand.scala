@@ -15,11 +15,7 @@ import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.common.utils.path.PathFun
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.ets.HDFSCommand
-import tech.mlsql.tool.HDFSOperatorV2
 import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
-
-import java.net.URI
 
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)

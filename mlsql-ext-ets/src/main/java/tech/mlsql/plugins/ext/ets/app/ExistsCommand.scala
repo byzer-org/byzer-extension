@@ -85,6 +85,10 @@ class ExistsCommand(override val uid: String) extends SQLAlg with MllibFunctions
       throw new RuntimeException(s"hdfs path can not be null!")
     }
 
+    if (curPath.startsWith("http") || curPath.startsWith("https")) {
+      throw new RuntimeException(s"current path can not be supported!")
+    }
+
     var fsPath = new Path(curPath)
     var fs: FileSystem = null
     if (params.contains("user") && StringUtils.isNotEmpty(params("user"))) {
