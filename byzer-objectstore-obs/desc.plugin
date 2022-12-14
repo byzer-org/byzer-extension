@@ -5,9 +5,9 @@ spark_version=3.3
 version=0.1.0-SNAPSHOT
 author=allwefantasy
 mlsqlVersions=""
-githubUrl=https://github.com/allwefantasy/mlsql-plugins/tree/master/mlsql-objectstore-obs
+githubUrl=https://github.com/byzer-org/byzer-extension/tree/master/byzer-objectstore-obs
 mlsqlPluginType=app
-desc=mlsql-shell
+desc=byzer-objectstore-obs
 
 
 

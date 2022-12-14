@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>byzer-objectstore-obs-3.3_2.12</artifactId>
     <repositories>
         <repository>
             <id>maven-proxy</id>
@@ -24,7 +25,6 @@
         </repository>
     </repositories>
 
-    <artifactId>byzer-objectstore-obs-3.3_2.12</artifactId>
     <dependencies>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
