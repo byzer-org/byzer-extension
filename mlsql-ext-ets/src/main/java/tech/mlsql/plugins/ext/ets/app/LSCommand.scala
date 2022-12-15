@@ -1,5 +1,7 @@
 package tech.mlsql.plugins.ext.ets.app
 
+import org.apache.commons.lang3.StringUtils
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -13,8 +15,7 @@ import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.common.utils.path.PathFun
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.ets.HDFSCommand
-import tech.mlsql.tool.HDFSOperatorV2
+import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
 
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)
@@ -85,35 +86,49 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val session = df.sparkSession
-    val curPath = params("path")
+    var curPath = params("path")
     val isEnableMaximumExceedException = params.getOrElse("enableMaximumExceedException", "false").toBoolean
+    val isEnabledCount = params.getOrElse("enableCount", "false").toBoolean
     val maximum = params.getOrElse("maximum", "1000").toInt
     if (curPath == null || curPath.isEmpty) {
       return session.emptyDataFrame
     }
 
-    if (isEnableMaximumExceedException && maximum > 0) {
-      val hdfsParams = Map("parameters" -> s"""["-count","$curPath"]""")
-      //                 1           27              45173 /opt/spark-3.3.0-bin-hadoop3/sbin
-      val rows = new HDFSCommand().train(df, null, hdfsParams).collect()
-      var pathCount = 0
-      if (rows != null && rows(0).toSeq.nonEmpty) {
-        val splits = rows(0).toSeq.head.toString.split(" {11}")
-        if (splits.length >= 3) {
-          pathCount = splits(2).toInt
+    var fsPath = new Path(curPath)
+    var fs: FileSystem = null
+    if (params.contains("user") && StringUtils.isNotEmpty(params("user"))) {
+      if (curPath.startsWith("/")) {
+        val tmpPath = hadoopConfiguration.get("fs.defaultFS", "file:///")
+        if (tmpPath.endsWith("/")) {
+          curPath = tmpPath.substring(0, tmpPath.length - 1) + curPath
+        } else {
+          curPath = tmpPath + curPath
         }
+        fsPath = new Path(curPath)
       }
+      fs = FileSystem.get(fsPath.toUri, hadoopConfiguration, params("user"))
+    } else {
+      fs = fsPath.getFileSystem(hadoopConfiguration)
+    }
+
+    if (isEnableMaximumExceedException && maximum > 0) {
+      val pathCount = fs.getContentSummary(fsPath).getFileAndDirectoryCount
       if (pathCount > maximum) {
-        throw new RuntimeException(s"maximum number of file exceeded! The expected maximum number of file is $maximum" +
+        throw new RuntimeException(s"maximum number of file and directory exceeded! The expected maximum number of file is $maximum" +
           s", but is $pathCount.")
       }
     }
 
-    val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = HDFSOperatorV2.listFiles(curPath)
+    val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = fs.listStatus(fsPath)
       //      .filterNot(_.getPath.getName.endsWith(".tmp.crc"))
       //    #-rw-rw----+  3 username userPermission     0 2020-12-16 10:32    hdfs://xx/xy/xx/test_day_v2/20201216
       .map { status =>
         def timeFormat = "yyyy-MM-dd HH:mm:SS"
+
+        var len = status.getLen
+        if (isEnabledCount && status.isDirectory && len <= 0) {
+          len = fs.getContentSummary(status.getPath).getLength
+        }
 
         (status.getPath.getName.split(PathFun.pathSeparator).last,
           status.getPath.toString,
@@ -121,7 +136,7 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
           status.getGroup,
           status.getPermission.toString,
           status.isDirectory,
-          if (status.isDirectory) "0" else status.getLen + "",
+          len + "",
           new DateTime(status.getModificationTime).toString(timeFormat)
         )
       }

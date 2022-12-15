@@ -1,5 +1,7 @@
 package tech.mlsql.plugins.ext.ets.app
 
+import org.apache.commons.lang3.StringUtils
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -11,7 +13,7 @@ import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.tool.HDFSOperatorV2
+import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
 
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)
@@ -78,15 +80,32 @@ class ExistsCommand(override val uid: String) extends SQLAlg with MllibFunctions
 
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val session = df.sparkSession
-    val curPath = params("path")
+    var curPath = params("path")
     if (curPath == null || curPath.isEmpty) {
       throw new RuntimeException(s"hdfs path can not be null!")
     }
+
     if (curPath.startsWith("http") || curPath.startsWith("https")) {
       throw new RuntimeException(s"current path can not be supported!")
     }
 
-    val isExists = HDFSOperatorV2.fileExists(curPath)
+    var fsPath = new Path(curPath)
+    var fs: FileSystem = null
+    if (params.contains("user") && StringUtils.isNotEmpty(params("user"))) {
+      if (curPath.startsWith("/")) {
+        val tmpPath = hadoopConfiguration.get("fs.defaultFS", "file:///")
+        if (tmpPath.endsWith("/")) {
+          curPath = tmpPath.substring(0, tmpPath.length - 1) + curPath
+        } else {
+          curPath = tmpPath + curPath
+        }
+        fsPath = new Path(curPath)
+      }
+      fs = FileSystem.get(fsPath.toUri, hadoopConfiguration, params("user"))
+    } else {
+      fs = fsPath.getFileSystem(hadoopConfiguration)
+    }
+    val isExists = fs.exists(fsPath)
     session.createDataFrame(session.sparkContext.parallelize(Seq(Tuple1(isExists.toString)), 1)).toDF(
       "isExists"
     )
