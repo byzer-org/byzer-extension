@@ -88,6 +88,7 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
     val session = df.sparkSession
     var curPath = params("path")
     val isEnableMaximumExceedException = params.getOrElse("enableMaximumExceedException", "false").toBoolean
+    val isEnabledCount = params.getOrElse("enableCount", "false").toBoolean
     val maximum = params.getOrElse("maximum", "1000").toInt
     if (curPath == null || curPath.isEmpty) {
       return session.emptyDataFrame
@@ -111,9 +112,9 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
     }
 
     if (isEnableMaximumExceedException && maximum > 0) {
-      val pathCount = fs.getContentSummary(fsPath).getFileCount
+      val pathCount = fs.getContentSummary(fsPath).getFileAndDirectoryCount
       if (pathCount > maximum) {
-        throw new RuntimeException(s"maximum number of file exceeded! The expected maximum number of file is $maximum" +
+        throw new RuntimeException(s"maximum number of file and directory exceeded! The expected maximum number of file is $maximum" +
           s", but is $pathCount.")
       }
     }
@@ -124,13 +125,18 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
       .map { status =>
         def timeFormat = "yyyy-MM-dd HH:mm:SS"
 
+        var len = status.getLen
+        if (isEnabledCount && status.isDirectory && len <= 0) {
+          len = fs.getContentSummary(status.getPath).getLength
+        }
+
         (status.getPath.getName.split(PathFun.pathSeparator).last,
           status.getPath.toString,
           status.getOwner,
           status.getGroup,
           status.getPermission.toString,
           status.isDirectory,
-          status.getLen + "",
+          len + "",
           new DateTime(status.getModificationTime).toString(timeFormat)
         )
       }
