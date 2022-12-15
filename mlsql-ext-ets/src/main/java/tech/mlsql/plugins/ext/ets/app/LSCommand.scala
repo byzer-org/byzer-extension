@@ -1,7 +1,7 @@
 package tech.mlsql.plugins.ext.ets.app
 
 import org.apache.commons.lang3.StringUtils
-import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -111,15 +111,20 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
       fs = fsPath.getFileSystem(hadoopConfiguration)
     }
 
+    val statuses: Array[FileStatus] = fs.listStatus(fsPath)
+    if (statuses == null || statuses.isEmpty) {
+      throw new RuntimeException(s"current path can not exists! path:" + curPath)
+    }
+
     if (isEnableMaximumExceedException && maximum > 0) {
-      val pathCount = fs.getContentSummary(fsPath).getFileAndDirectoryCount
-      if (pathCount > maximum) {
+      val length = statuses.length
+      if (length > maximum) {
         throw new RuntimeException(s"maximum number of file and directory exceeded! The expected maximum number of file is $maximum" +
-          s", but is $pathCount.")
+          s", but is $length.")
       }
     }
 
-    val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = fs.listStatus(fsPath)
+    val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = statuses
       //      .filterNot(_.getPath.getName.endsWith(".tmp.crc"))
       //    #-rw-rw----+  3 username userPermission     0 2020-12-16 10:32    hdfs://xx/xy/xx/test_day_v2/20201216
       .map { status =>
