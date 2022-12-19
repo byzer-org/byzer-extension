@@ -1,16 +1,19 @@
 package tech.mlsql.plugins.ext.ets.app
 
 import org.apache.commons.lang3.StringUtils
-import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.joda.time.DateTime
+
 import streaming.dsl.ScriptSQLExec
 import streaming.dsl.auth._
 import streaming.dsl.mmlib.algs.param.BaseParams
 import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}
 import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import tech.mlsql.common.form.{Extra, FormParams, Text}
+import tech.mlsql.common.utils.path.PathFun
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
@@ -18,7 +21,7 @@ import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)
  */
-class ExistsCommand(override val uid: String) extends SQLAlg with FileCommonFunctions with MllibFunctions with Functions with BaseParams with ETAuth {
+class FileStatusCommand(override val uid: String) extends SQLAlg with FileCommonFunctions with MllibFunctions with Functions with BaseParams with ETAuth {
 
   final val path: Param[String] = new Param[String](this, "path",
     FormParams.toJson(Text(
@@ -27,9 +30,9 @@ class ExistsCommand(override val uid: String) extends SQLAlg with FileCommonFunc
       extra = Extra(
         doc =
           """
-            | check the hdfs address
+            | Setting an hdfs address
           """,
-        label = "check the hdfs address",
+        label = "Setting an hdfs Address",
         options = Map(
           "valueType" -> "string",
           "required" -> "true",
@@ -45,9 +48,9 @@ class ExistsCommand(override val uid: String) extends SQLAlg with FileCommonFunc
 
   override def codeExample: Code = Code(SQLCode,
     """
-      | run command as ExistsCommand.`` where path="hdfs://localhost:64066/csv" as table1;
-      | Or you can use the command as follow:
-      | !exists "hdfs://localhost:64066/csv";
+      | run command as FileStatusCommand.`` where path="hdfs://localhost:8020/csv" as table1;
+      | -- Or you can use the command as follow:
+      | !fileStatus "hdfs://localhost:8020/csv";
     """.stripMargin)
 
   override def auth(etMethod: ETMethod, path: String, params: Map[String, String]): List[TableAuthResult] = {
@@ -81,12 +84,9 @@ class ExistsCommand(override val uid: String) extends SQLAlg with FileCommonFunc
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val session = df.sparkSession
     var curPath = params("path")
+    val isEnabledCount = params.getOrElse("enableCount", "false").toBoolean
     if (curPath == null || curPath.isEmpty) {
-      throw new RuntimeException(s"hdfs path can not be null!")
-    }
-
-    if (curPath.startsWith("http") || curPath.startsWith("https")) {
-      throw new RuntimeException(s"current path can not be supported!")
+      return session.emptyDataFrame
     }
 
     rewriteHadoopConfiguration(hadoopConfiguration, params)
@@ -107,10 +107,43 @@ class ExistsCommand(override val uid: String) extends SQLAlg with FileCommonFunc
     } else {
       fs = fsPath.getFileSystem(hadoopConfiguration)
     }
-    val isExists = fs.exists(fsPath)
-    session.createDataFrame(session.sparkContext.parallelize(Seq(Tuple1(isExists.toString)), 1)).toDF(
-      "isExists"
+    val fileStatus = fs.getFileStatus(fsPath)
+    if (fileStatus == null) {
+      throw new RuntimeException(s"current path can not exists! path:" + curPath)
+    }
+
+    val statuses: Array[FileStatus] = Array(fileStatus)
+    val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = statuses
+      .map { status =>
+        def timeFormat = "yyyy-MM-dd HH:mm:SS"
+
+        var len = status.getLen
+        if (isEnabledCount && status.isDirectory && len <= 0) {
+          len = fs.getContentSummary(status.getPath).getLength
+        }
+
+        (status.getPath.getName.split(PathFun.pathSeparator).last,
+          status.getPath.toString,
+          status.getOwner,
+          status.getGroup,
+          status.getPermission.toString,
+          status.isDirectory,
+          len + "",
+          new DateTime(status.getModificationTime).toString(timeFormat)
+        )
+      }
+
+    session.createDataFrame(session.sparkContext.parallelize(lastFile, 1)).toDF(
+      "name"
+      , "path"
+      , "owner"
+      , "group"
+      , "permission"
+      , "isDir"
+      , "byteLength"
+      , "modificationTime"
     )
+
   }
 
 }

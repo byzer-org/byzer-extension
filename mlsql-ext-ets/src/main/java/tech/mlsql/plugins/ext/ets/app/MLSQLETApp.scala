@@ -14,8 +14,10 @@ class MLSQLETApp extends tech.mlsql.app.App with VersionCompatibility with Loggi
     ETRegister.register("AthenaSchemaExt", classOf[AthenaSchemaExt].getName)
     ETRegister.register("LSCommand", classOf[LSCommand].getName)
     ETRegister.register("ExistsCommand", classOf[ExistsCommand].getName)
+    ETRegister.register("FileStatusCommand", classOf[FileStatusCommand].getName)
     CommandCollection.refreshCommandMapping(Map("ls" -> """ run command as LSCommand.`` where path="{0}" """))
     CommandCollection.refreshCommandMapping(Map("exists" -> """ run command as ExistsCommand.`` where path="{0}" """))
+    CommandCollection.refreshCommandMapping(Map("fileStatus" -> """ run command as FileStatusCommand.`` where path="{0}" """))
   }
 
 

@@ -20,7 +20,7 @@ import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)
  */
-class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
+class LSCommand(override val uid: String) extends SQLAlg with FileCommonFunctions with MllibFunctions with Functions with BaseParams with ETAuth {
 
   final val path: Param[String] = new Param[String](this, "path",
     FormParams.toJson(Text(
@@ -94,6 +94,8 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
       return session.emptyDataFrame
     }
 
+    rewriteHadoopConfiguration(hadoopConfiguration, params)
+
     var fsPath = new Path(curPath)
     var fs: FileSystem = null
     if (params.contains("user") && StringUtils.isNotEmpty(params("user"))) {
@@ -110,18 +112,24 @@ class LSCommand(override val uid: String) extends SQLAlg with MllibFunctions wit
     } else {
       fs = fsPath.getFileSystem(hadoopConfiguration)
     }
-
-    val statuses: Array[FileStatus] = fs.listStatus(fsPath)
-    if (statuses == null || statuses.isEmpty) {
+    val fileStatus = fs.getFileStatus(fsPath)
+    if (fileStatus == null) {
       throw new RuntimeException(s"current path can not exists! path:" + curPath)
     }
 
-    if (isEnableMaximumExceedException && maximum > 0) {
-      val length = statuses.length
-      if (length > maximum) {
-        throw new RuntimeException(s"maximum number of file and directory exceeded! The expected maximum number of file is $maximum" +
-          s", but is $length.")
+    val isDir = fileStatus.isDirectory
+    var statuses: Array[FileStatus] = null
+    if (isDir) {
+      statuses = fs.listStatus(fsPath)
+      if (isEnableMaximumExceedException && maximum > 0) {
+        val length = statuses.length
+        if (length > maximum) {
+          throw new RuntimeException(s"maximum number of file and directory exceeded! The expected maximum number of file is $maximum" +
+            s", but is $length.")
+        }
       }
+    } else {
+      statuses = Array(fileStatus)
     }
 
     val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = statuses
