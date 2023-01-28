@@ -1,3 +1,4 @@
+conda activate dev
 PROJECT=/Users/allwefantasy/projects/byzer-extension
 
 MOUDLE_NAME=$1
@@ -32,3 +33,10 @@ mlsql_plugin_tool upload \
 --user ${STORE_USER}        \
 --password ${STORE_PASSWORD} \
 --jar_path ${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar
+
+
+object_store_name=${3:-s3}
+curl \
+  -F "${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar=@${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar" \
+"${BYZER_UPLOADER_URL}&overwrite=true&pathPrefix=byzer/misc/cloud/${object_store_name}"
+
