@@ -1,10 +1,12 @@
 package tech.mlsql.plugins.ext.ets.app
 
 import org.apache.commons.lang3.StringUtils
+import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
+
 import streaming.dsl.ScriptSQLExec
 import streaming.dsl.auth._
 import streaming.dsl.mmlib.algs.param.BaseParams
@@ -13,12 +15,11 @@ import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}
 import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.tool.HDFSOperatorV2.hadoopConfiguration
 
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)
  */
-class ExistsCommand(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
+class ExistsCommand(override val uid: String) extends SQLAlg with FileCommonFunctions with MllibFunctions with Functions with BaseParams with ETAuth {
 
   final val path: Param[String] = new Param[String](this, "path",
     FormParams.toJson(Text(
@@ -88,12 +89,14 @@ class ExistsCommand(override val uid: String) extends SQLAlg with MllibFunctions
     if (curPath.startsWith("http") || curPath.startsWith("https")) {
       throw new RuntimeException(s"current path can not be supported!")
     }
+    val conf = new Configuration()
+    rewriteHadoopConfiguration(conf, params)
 
     var fsPath = new Path(curPath)
     var fs: FileSystem = null
     if (params.contains("user") && StringUtils.isNotEmpty(params("user"))) {
       if (curPath.startsWith("/")) {
-        val tmpPath = hadoopConfiguration.get("fs.defaultFS", "file:///")
+        val tmpPath = conf.get("fs.defaultFS", "file:///")
         if (tmpPath.endsWith("/")) {
           curPath = tmpPath.substring(0, tmpPath.length - 1) + curPath
         } else {
@@ -101,9 +104,9 @@ class ExistsCommand(override val uid: String) extends SQLAlg with MllibFunctions
         }
         fsPath = new Path(curPath)
       }
-      fs = FileSystem.get(fsPath.toUri, hadoopConfiguration, params("user"))
+      fs = FileSystem.get(fsPath.toUri, conf, params("user"))
     } else {
-      fs = fsPath.getFileSystem(hadoopConfiguration)
+      fs = fsPath.getFileSystem(conf)
     }
     val isExists = fs.exists(fsPath)
     session.createDataFrame(session.sparkContext.parallelize(Seq(Tuple1(isExists.toString)), 1)).toDF(

@@ -21,7 +21,7 @@ import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 /**
  * 14/11/2022 hellozepp(lisheng.zhanglin@163.com)
  */
-class LSCommand(override val uid: String) extends SQLAlg with FileCommonFunctions with MllibFunctions with Functions with BaseParams with ETAuth {
+class FileStatusCommand(override val uid: String) extends SQLAlg with FileCommonFunctions with MllibFunctions with Functions with BaseParams with ETAuth {
 
   final val path: Param[String] = new Param[String](this, "path",
     FormParams.toJson(Text(
@@ -48,13 +48,9 @@ class LSCommand(override val uid: String) extends SQLAlg with FileCommonFunction
 
   override def codeExample: Code = Code(SQLCode,
     """
-      | run command as LSCommand.`` where path="hdfs://localhost:8020/csv" as table1;
+      | run command as FileStatusCommand.`` where path="hdfs://localhost:8020/csv" as table1;
       | -- Or you can use the command as follow:
-      | !ls "hdfs://localhost:8020/csv";
-      | -- Or you can turn on enableMaximumExceedException, and set the maximum to start the strategy of reporting errors
-      | -- exceeding the maximum value.
-      | run command as LSCommand.`` where path="/opt/spark-3.3.0-bin-hadoop3/sbin" and enableMaximumExceedException=
-      | "true" and maximum="27" as table1;
+      | !fileStatus "hdfs://localhost:8020/csv";
     """.stripMargin)
 
   override def auth(etMethod: ETMethod, path: String, params: Map[String, String]): List[TableAuthResult] = {
@@ -88,9 +84,7 @@ class LSCommand(override val uid: String) extends SQLAlg with FileCommonFunction
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val session = df.sparkSession
     var curPath = params("path")
-    val isEnableMaximumExceedException = params.getOrElse("enableMaximumExceedException", "false").toBoolean
     val isEnabledCount = params.getOrElse("enableCount", "false").toBoolean
-    val maximum = params.getOrElse("maximum", "1000").toInt
     if (curPath == null || curPath.isEmpty) {
       return session.emptyDataFrame
     }
@@ -118,24 +112,8 @@ class LSCommand(override val uid: String) extends SQLAlg with FileCommonFunction
       throw new RuntimeException(s"current path can not exists! path:" + curPath)
     }
 
-    val isDir = fileStatus.isDirectory
-    var statuses: Array[FileStatus] = null
-    if (isDir) {
-      statuses = fs.listStatus(fsPath)
-      if (isEnableMaximumExceedException && maximum > 0) {
-        val length = statuses.length
-        if (length > maximum) {
-          throw new RuntimeException(s"maximum number of file and directory exceeded! The expected maximum number of file is $maximum" +
-            s", but is $length.")
-        }
-      }
-    } else {
-      statuses = Array(fileStatus)
-    }
-
+    val statuses: Array[FileStatus] = Array(fileStatus)
     val lastFile: Seq[(String, String, String, String, String, Boolean, String, String)] = statuses
-      //      .filterNot(_.getPath.getName.endsWith(".tmp.crc"))
-      //    #-rw-rw----+  3 username userPermission     0 2020-12-16 10:32    hdfs://xx/xy/xx/test_day_v2/20201216
       .map { status =>
         def timeFormat = "yyyy-MM-dd HH:mm:SS"
 
@@ -154,7 +132,7 @@ class LSCommand(override val uid: String) extends SQLAlg with FileCommonFunction
           new DateTime(status.getModificationTime).toString(timeFormat)
         )
       }
-    // TODO: We need to add a create time
+
     session.createDataFrame(session.sparkContext.parallelize(lastFile, 1)).toDF(
       "name"
       , "path"
