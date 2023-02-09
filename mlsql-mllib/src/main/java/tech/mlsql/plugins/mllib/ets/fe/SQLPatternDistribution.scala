@@ -2,7 +2,7 @@ package tech.mlsql.plugins.mllib.ets.fe
 
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.{col, desc, udf}
+import org.apache.spark.sql.functions.{col, desc, trim, udf}
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import streaming.dsl.ScriptSQLExec
@@ -40,13 +40,13 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
     val res = fDf.schema.par.map(sc => {
       var col_pattern_map = Map[String, String]()
       val sub_df = if (excludeEmpty) {
-        fDf.select(sc.name).where(col(sc.name).isNotNull).where(col(sc.name) =!= "")
+        fDf.select(sc.name).where(col(sc.name).isNotNull).where(trim(col(sc.name)) =!= "")
       } else {
         fDf.select(sc.name)
       }
       val isEmpty = sub_df == null || sub_df.limit(1).collect().length == 0
       if (isEmpty) {
-        Seq(sc.name, "")
+        Seq(sc.name, "{}")
       } else {
         val startTime = System.currentTimeMillis()
         val rows_num = sub_df.count()
@@ -67,7 +67,7 @@ class SQLPatternDistribution(override val uid: String) extends SQLAlg with Mllib
         val items = pattern_group_df.limit(limit).collect()
         logInfo(s"${sc.name}: pattern match time ${(System.currentTimeMillis() - countTime) / 1000d}")
 
-        val total_count = items.head.getAs[Long]("count")
+        val total_count = pattern_group_df.count()
 
         val jsonItems = items.map { item =>
           val patternColNameV = item.getAs[String](SQLPatternDistribution.patternColName)

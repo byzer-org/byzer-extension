@@ -1,8 +1,9 @@
 package tech.mlsql.plugins.mllib.ets.fe
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.{col, trim}
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import streaming.dsl.ScriptSQLExec
 import streaming.dsl.auth._
@@ -20,6 +21,30 @@ import scala.util.parsing.json.{JSONArray, JSONObject}
  * 04/07/2022 hellozepp(lisheng.zhanglin@163.com)
  */
 class SQLDescriptiveMetrics(override val uid: String) extends SQLAlg with MllibFunctions with Functions with BaseParams with ETAuth {
+
+  final val excludeEmptyVal: Param[String] = new Param[String](this, "excludeEmptyVal",
+    FormParams.toJson(Input(
+      name = "excludeEmptyVal",
+      value = "",
+      extra = Extra(
+        doc =
+          """
+            | define whether exclude empty value
+            | e.g. excludeEmptyVal = "true
+          """,
+        label = "limit",
+        options = Map(
+          "valueType" -> "string",
+          "defaultValue" -> "true",
+          "required" -> "false",
+          "derivedType" -> "NONE"
+        )), valueProvider = Option(() => {
+        ""
+      })
+    )
+    )
+  )
+  setDefault(excludeEmptyVal, "true")
 
   final val metricSize: Param[String] = new Param[String](this, "metricSize",
     FormParams.toJson(Input(
@@ -92,17 +117,24 @@ class SQLDescriptiveMetrics(override val uid: String) extends SQLAlg with MllibF
       return df.sparkSession.emptyDataFrame
     }
     import spark.implicits._
-    val descriptiveRes = getDescriptiveMetrics(df, metricSize)
+    val descriptiveRes = getDescriptiveMetrics(df, metricSize, params)
     spark.createDataset[(String, String)](descriptiveRes).toDF("columnName", "descriptiveMetrics")
   }
 
-  def getDescriptiveMetrics(df: DataFrame, metricSize: Int): Array[(String, String)] = {
-    df.columns.map(c => {
+  def getDescriptiveMetrics(df: DataFrame, metricSize: Int, params: Map[String, String]): Array[(String, String)] = {
+    val excludeEmpty = params.getOrElse(excludeEmptyVal.name, "true").toBoolean
+    df.schema.toArray.map(c => {
+      val sub_df = if (excludeEmpty) {
+        df.select(c.name).where(col(c.name).isNotNull).where(trim(col(c.name)) =!= "")
+      } else {
+        df.select(c.name)
+      }
+
       import org.apache.spark.sql.functions
-      val countRow: Dataset[Row] = df.groupBy(col(c)).count().toDF("word", "count")
+      val countRow: Dataset[Row] = sub_df.groupBy(col(c.name)).count().toDF("word", "count")
         .sort(functions.desc("count")).limit(metricSize)
       val countRes = countRow.sort(functions.asc("word")).collect
-      (c, convertRowToJSON(countRes))
+      (c.name, convertRowToJSON(countRes))
     })
   }
 
@@ -110,7 +142,7 @@ class SQLDescriptiveMetrics(override val uid: String) extends SQLAlg with MllibF
     val list = mutable.ListBuffer[JSONObject]()
     rows.map(row => {
       var m: Map[String, Any] = row.getValuesMap(row.schema.fieldNames)
-      m = m.map(v => {
+      m = m.filter(v => StringUtils.isNotBlank(v._1)).map(v => {
         if (v._2 == null) (v._1, "") else v
       })
       var word: String = ""
