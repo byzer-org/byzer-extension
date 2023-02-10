@@ -11,7 +11,7 @@
 
     <artifactId>byzer-objectstore-blob-{{spark_binary_version}}_{{scala_binary_version}}</artifactId>
     <properties>
-        <hadoop.version>3.3.0</hadoop.version>
+        <hadoop.version>3.3.2</hadoop.version>
         <jackson.version>2.10.3</jackson.version>
     </properties>
     <dependencies>

@@ -1,13 +1,13 @@
 ## Install
 
 ```
-!plugin ds add - "mlsql-excel-2.4";
+!plugin ds add - "mlsql-excel-3.3";
 ```
 
 or install as app:
 
 ```
-!plugin app add "tech.mlsql.plugins.ds.MLSQLApp" "mlsql-excel-2.4";
+!plugin app add "tech.mlsql.plugins.ds.MLSQLExcelApp" "mlsql-excel-3.3";
 ```
 
 
