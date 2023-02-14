@@ -28,8 +28,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
     sc.dataType match {
       case DoubleType => col(col_name).isNotNull && !col(col_name).isNaN
       case FloatType => col(col_name).isNotNull && !col(col_name).isNaN
-      // TODO:  张琳 空字符串有业务含义，不应该直接过滤掉
-      case StringType => col(col_name).isNotNull && col(col_name) =!= ""
+      case StringType => col(col_name).isNotNull && trim(col(col_name)) =!= ""
       case _ => col(col_name).isNotNull
     }
   }
@@ -72,15 +71,15 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       ratio_expr.alias(sc.name + "_uniqueValueRatio")
     }).toArray,
     schema.map(sc => {
-      if (!numeric_columns.contains(sc.name)) {
+      var count_distinct_expr: Column = lit(0)
+        if (!numeric_columns.contains(sc.name)) {
         if (approx) {
-          nanvl(approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name))).alias(sc.name + "_count_distinct"), lit(0))
+          count_distinct_expr = approx_count_distinct(when(colWithFilterBlank(sc), col(sc.name)))
         } else {
-          nanvl(countDistinct(when(colWithFilterBlank(sc), col(sc.name))).alias(sc.name + "_count_distinct"), lit(0))
+          count_distinct_expr = countDistinct(when(colWithFilterBlank(sc), col(sc.name)))
         }
-      } else {
-        lit("").alias(sc.name + "_count_distinct")
       }
+      count_distinct_expr.alias(sc.name + "_count_distinct")
     }).toArray: Array[Column]
   )
 
@@ -102,7 +101,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
 
   def countNonNullValue(schema: StructType): Array[Column] = {
     schema.map(sc => {
-      sum(when(col(sc.name).isNotNull, 1).otherwise(0))
+      sum(when(colWithFilterBlank(sc), 1).otherwise(0))
     }).toArray
   }
 
@@ -117,7 +116,7 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
 
   def emptyCount(schema: StructType): Array[Column] = {
     schema.map(sc => {
-      sum(when(col(sc.name) === "", 1).otherwise(0)) / sum(lit(1.0)).alias(sc.name + "_blankValueRatio")
+      sum(when(trim(col(sc.name)) === "", 1).otherwise(0)) / sum(lit(1.0)).alias(sc.name + "_blankValueRatio")
     }).toArray
   }
 
