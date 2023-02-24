@@ -1,0 +1,52 @@
+apiVersion: auth.byzer.org/v1
+kind: Auth
+userView:
+  - metadata:
+      users:
+        - name: jack
+          role: testRole
+    rules:
+      - rule:
+          resources:
+            - allows:
+                - name: "file"
+                  path: "s3a://bucket1/jack"
+              denies:
+                - name: "file"
+                  path: "s3a://bucket1/jack"
+
+          verbs:
+            - "load"
+
+resourceView:
+  - metadata:
+      resources:
+        - name: "mlsql_system"
+          path: "__auth_admin__"
+    rules:
+      - rule:
+          verbs:
+            - "empty"
+          users:
+            allows:
+              - name: admin
+                role: testRole
+  - metadata:
+      resources:
+        - name: "file"
+          path: "s3a://bucket2/jack"
+    rules:
+      - rule:
+          verbs:
+            - "load"
+          users:
+            allows:
+              - name: jack
+                role: testRole
+            denies:
+              - name: jack
+                role: testRole
+
+
+
+

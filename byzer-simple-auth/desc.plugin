@@ -1,0 +1,15 @@
+moduleName=byzer-simple-auth-3.3
+mainClass=tech.mlsql.plugins.auth.simple.app.ByzerSimpleAuthApp
+scala_version=2.12
+spark_version=3.3
+version=0.1.0-SNAPSHOT
+author=william
+mlsqlVersions=""
+githubUrl=https://github.com/byzer-org/byzer-extension/tree/master/byzer-simple-auth
+mlsqlPluginType=app
+desc=byzer-simple-auth
+
+
+
+
+
