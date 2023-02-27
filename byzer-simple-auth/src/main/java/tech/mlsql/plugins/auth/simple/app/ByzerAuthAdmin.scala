@@ -10,7 +10,7 @@ import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.plugins.auth.simple.app.action.{ResourceAddAction, ResourceDeleteAction}
+import tech.mlsql.plugins.auth.simple.app.action.{ResourceAddAction, ResourceDeleteAction, ResourceQueryAction}
 import tech.mlsql.version.VersionCompatibility
 
 /**
@@ -37,6 +37,8 @@ class ByzerAuthAdmin(override val uid: String) extends SQLAlg
         new ResourceAddAction().run(args.slice(2, args.length))
       case List("resource", "delete") =>
         new ResourceDeleteAction().run(args.slice(2, args.length))
+      case List("resource", "query") =>
+        new ResourceQueryAction().run(args.slice(2, args.length))
       case _ =>
         ""
     }

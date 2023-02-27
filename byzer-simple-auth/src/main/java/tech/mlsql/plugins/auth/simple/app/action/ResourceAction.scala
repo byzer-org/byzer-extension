@@ -5,7 +5,7 @@ import streaming.dsl.ScriptSQLExec
 import tech.mlsql.common.PathFun
 import tech.mlsql.common.utils.Md5
 import tech.mlsql.common.utils.shell.command.ParamsUtil
-import tech.mlsql.plugins.auth.simple.app.{AuthConfig, Json_Yaml, Metadata, ResourceBlock, ResourceRule, ResourceRuleWrapper, ResourceUnit, User, UserBlock, UserUnit}
+import tech.mlsql.plugins.auth.simple.app.{AuthConfig, ByzerSimpleAuth, Json_Yaml, Metadata, ResourceBlock, ResourceRule, ResourceRuleWrapper, ResourceUnit, User, UserBlock, UserUnit}
 import tech.mlsql.tool.HDFSOperatorV2
 
 /**
@@ -49,6 +49,21 @@ object ResourceActionHelper {
     )
     authConfig
 
+  }
+}
+
+class ResourceQueryAction {
+  // !simpleAuth resource query _ -type file -path "s3a://xxxx"
+  def run(args:List[String]):String = {
+    assert(args.headOption.isDefined, "parameters must be provided")
+    assert(args.head == "_", "the first parameter must be _")
+    val parser = new ParamsUtil(args.drop(1).mkString(" "))
+
+    val t = parser.getParam("type")
+    val path = parser.getParam("path")
+
+    val items = ByzerSimpleAuth.config.get().resourceView.filter(_.metadata.resources.getOrElse(List()).exists(f=>f.name==t && f.path == path)).toList
+    Json_Yaml.object_to_yaml(ByzerSimpleAuth.config.get().copy(resourceView = items,userView = List()))
   }
 }
 
