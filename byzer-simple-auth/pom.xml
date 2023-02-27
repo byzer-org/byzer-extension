@@ -10,16 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>byzer-simple-auth-3.3_2.12</artifactId>
-
     <properties>
         <circe-yaml-version>0.13.0</circe-yaml-version>
     </properties>
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>net.jcazevedo</groupId>-->
-<!--            <artifactId>moultingyaml_2.12</artifactId>-->
-<!--            <version>0.4.2</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
