@@ -62,6 +62,11 @@ You can also use the following command to delete a resource:
 
 Make sure that the resource parameters you want to delete is exactly the same as the resource you added.
 
+You can also use the following command to query a resource:
+
+```shell
+!simpleAuth resource query _ -type file -path "s3a://bucket7/tmp/jack";
+```
 ### Manual way of writing YAML Auth file
 
 The auth configuration file is a YAML file, the following is an example:
