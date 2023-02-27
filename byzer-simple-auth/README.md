@@ -54,6 +54,14 @@ Once you add a resource, you can use the following command to reload the auth co
 !simpleAuth admin reload;
 ```
 
+You can also use the following command to delete a resource:
+
+```shell
+!simpleAuth resource delete _ -type file -path "s3a://bucket7/tmp/jack" -allows allwefantasy;
+```
+
+Make sure that the resource parameters you want to delete is exactly the same as the resource you added.
+
 ### Manual way of writing YAML Auth file
 
 The auth configuration file is a YAML file, the following is an example:
