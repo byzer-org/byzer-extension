@@ -10,6 +10,7 @@ import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
+import tech.mlsql.plugins.auth.simple.app.action.{ResourceAction, ResourceAddAction, ResourceDeleteAction}
 import tech.mlsql.version.VersionCompatibility
 
 /**
@@ -23,13 +24,24 @@ class ByzerAuthAdmin(override val uid: String) extends SQLAlg
     val args = JSONTool.parseJson[List[String]](params("parameters"))
     import df.sparkSession.implicits._
 
-    args match {
+    /**
+     * !authSimple resource add  _  -type file -path "s3a://xxxx" -allows testRole:jack -denies testRole:tom
+     * !authSimple admin refresh
+     * !authSimple resource delete _ -type file -path "s3a://xxxx" -allows testRole:jack -denies testRole:tom
+     */
+    val value = args.slice(0, 2) match {
       case List("admin", "refresh") =>
         ByzerSimpleAuth.reload
+        ""
+      case List("resource", "add") =>
+        new ResourceAddAction().run(args.slice(2, args.length))
+      case List("resource", "delete") =>
+        new ResourceDeleteAction().run(args.slice(2, args.length))
       case _ =>
+        ""
     }
 
-    df.sparkSession.createDataset[String](Seq().toSeq).toDF("content")
+    df.sparkSession.createDataset[String](Seq(value)).toDF("content")
 
   }
 

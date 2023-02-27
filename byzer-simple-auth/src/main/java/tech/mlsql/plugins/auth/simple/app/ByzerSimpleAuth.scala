@@ -1,14 +1,15 @@
 package tech.mlsql.plugins.auth.simple.app
 
-import org.apache.commons.io.FileUtils
+
 import streaming.core.strategy.platform.{PlatformManager, SparkRuntime}
 import streaming.dsl.ScriptSQLExec
 import streaming.dsl.auth.{MLSQLTable, TableAuth, TableAuthResult}
 import streaming.log.WowLog
 import tech.mlsql.common.utils.log.Logging
+import tech.mlsql.tool.HDFSOperatorV2
 
-import java.io.File
 import java.util.concurrent.atomic.AtomicReference
+
 
 class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
 
@@ -32,7 +33,7 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
 
     def resourceName(table: MLSQLTable): String = {
       if (table.db.isEmpty && table.table.map(_.startsWith("/")).isDefined) return "file";
-      return "file"
+      table.db.get
     }
 
     def getByResource(k: ResourceUnit) = {
@@ -46,7 +47,7 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
 
     val result = tables.map { table =>
       val verb = table.operateType.toString.toLowerCase()
-      val FAIL = TableAuthResult(false, s"you have no permission to ${verb} ${table.table.getOrElse("")}")
+      val FAIL = TableAuthResult(false, s"you have no permission to ${table.db.getOrElse("")}.${table.table.getOrElse("")} with operation ${verb}")
 
       def matchVerb(verbs: List[String], verb: String): Boolean = {
         if (verbs.contains("*")) return true
@@ -58,20 +59,20 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
         val deniedUsers = rule.users.denies
 
         if (!allowUsers.isEmpty) {
-          return allowUsers.contains(owner)
+          return allowUsers.exists(_.name == owner)
         }
-        return !deniedUsers.contains(owner)
+        return !deniedUsers.exists(_.name == owner)
       }
 
 
       val tableAuthResult = resourceName(table) match {
-        case "file" =>
+        case "file" | "mlsql_system" =>
           val key = ResourceUnit(resourceName(table), table.table.getOrElse(""))
           val value = getByResource(key)
           if (value.isDefined) {
             val rules = value.get
-            val result = rules.filter(rule => matchVerb(rule.verbs, verb)).exists { rule =>
-              checkRule(rule)
+            val result = rules.filter(rule => matchVerb(rule.rule.verbs, verb)).exists { rule =>
+              checkRule(rule.rule)
             }
             if (result) {
               SUCCESS
@@ -81,7 +82,6 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
           } else {
             TableAuthResult(true, "")
           }
-
         case _ => TableAuthResult(true, "")
       }
       tableAuthResult
@@ -91,21 +91,33 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
 }
 
 class ByzerSimpleAuthConfig(path: String) {
+
+
   def load(): AuthConfig = {
-    import io.circe.generic.auto._
-    import io.circe.yaml
-    val conent = FileUtils.readFileToString(new File(path), "UTF-8")
-    val json = yaml.parser.parse(conent)
-    val value = json.right.get.as[AuthConfig]
-    value.right.get
+    val files = HDFSOperatorV2.iteratorFiles(path, false)
+    val v = files.map { f =>
+      val content = HDFSOperatorV2.readFile(f)
+      ByzerSimpleAuth.parse(content)
+    }.reduce { (l, r) =>
+      l.copy(
+        userView = l.userView ++ r.userView,
+        resourceView = l.resourceView ++ r.resourceView
+      )
+    }
+    v
   }
 }
 
 object ByzerSimpleAuth {
+  var v_spark_mlsql_auth_simple_dir: Option[String] = None
   lazy val config = {
     val v = new AtomicReference[AuthConfig]()
-    val session = PlatformManager.getRuntime.asInstanceOf[SparkRuntime].sparkSession
-    val authFile = session.conf.get("spark.mlsql.auth.simple.dir", "")
+    val authFile = if (v_spark_mlsql_auth_simple_dir.isEmpty) {
+      val session = PlatformManager.getRuntime.asInstanceOf[SparkRuntime].sparkSession
+      session.conf.get("spark.mlsql.auth.simple.dir", "")
+    } else {
+      v_spark_mlsql_auth_simple_dir.get
+    }
     if (!authFile.isEmpty) {
       val c = new ByzerSimpleAuthConfig(authFile)
       v.set(c.load())
@@ -114,12 +126,23 @@ object ByzerSimpleAuth {
   }
 
   def reload = {
-    val session = PlatformManager.getRuntime.asInstanceOf[SparkRuntime].sparkSession
-    val authFile = session.conf.get("spark.mlsql.auth.simple.dir", "")
+    val authFile = if (v_spark_mlsql_auth_simple_dir.isEmpty) {
+      val session = PlatformManager.getRuntime.asInstanceOf[SparkRuntime].sparkSession
+      session.conf.get("spark.mlsql.auth.simple.dir", "")
+    } else {
+      v_spark_mlsql_auth_simple_dir.get
+    }
     if (!authFile.isEmpty) {
       val c = new ByzerSimpleAuthConfig(authFile)
       config.set(c.load())
     }
+  }
+
+  def parse(content: String): AuthConfig = {
+
+    //    val cc = Json_Yaml.object_to_json()
+    //    JSONTool.parseJson[AuthConfig](cc)
+    Json_Yaml.yaml_to_object(content)
   }
 
 }
