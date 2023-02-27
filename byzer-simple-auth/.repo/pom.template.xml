@@ -19,27 +19,6 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>2.13.3</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>net.jcazevedo</groupId>-->
-        <!--            <artifactId>moultingyaml_{{scala_binary_version}}</artifactId>-->
-        <!--            <version>0.4.2</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.circe</groupId>-->
-        <!--            <artifactId>circe-yaml_2.12</artifactId>-->
-        <!--            <version>${circe-yaml-version}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.circe</groupId>-->
-        <!--            <artifactId>circe-parser_2.12</artifactId>-->
-        <!--            <version>${circe-yaml-version}</version>-->
-        <!--        </dependency>-->
-
-        <!--        <dependency>-->
-        <!--            <groupId>io.circe</groupId>-->
-        <!--            <artifactId>circe-generic_2.12</artifactId>-->
-        <!--            <version>${circe-yaml-version}</version>-->
-        <!--        </dependency>-->
     </dependencies>
 
     <profiles>

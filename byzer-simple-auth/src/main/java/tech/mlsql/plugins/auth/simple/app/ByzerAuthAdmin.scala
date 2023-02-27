@@ -10,7 +10,7 @@ import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
-import tech.mlsql.plugins.auth.simple.app.action.{ResourceAction, ResourceAddAction, ResourceDeleteAction}
+import tech.mlsql.plugins.auth.simple.app.action.{ResourceAddAction, ResourceDeleteAction}
 import tech.mlsql.version.VersionCompatibility
 
 /**
@@ -26,11 +26,11 @@ class ByzerAuthAdmin(override val uid: String) extends SQLAlg
 
     /**
      * !authSimple resource add  _  -type file -path "s3a://xxxx" -allows testRole:jack -denies testRole:tom
-     * !authSimple admin refresh
+     * !authSimple admin reload
      * !authSimple resource delete _ -type file -path "s3a://xxxx" -allows testRole:jack -denies testRole:tom
      */
     val value = args.slice(0, 2) match {
-      case List("admin", "refresh") =>
+      case List("admin", "reload") =>
         ByzerSimpleAuth.reload
         ""
       case List("resource", "add") =>

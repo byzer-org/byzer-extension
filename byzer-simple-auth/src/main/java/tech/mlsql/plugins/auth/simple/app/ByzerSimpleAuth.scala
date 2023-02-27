@@ -32,8 +32,8 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
     }.toMap
 
     def resourceName(table: MLSQLTable): String = {
-      if (table.db.isEmpty && table.table.map(_.startsWith("/")).isDefined) return "file";
-      table.db.get
+      if ((table.db.isEmpty || table.db.get == "") && table.tableType.name != "temp") return "file";
+      table.db.getOrElse(table.tableType.name)
     }
 
     def getByResource(k: ResourceUnit) = {
@@ -47,7 +47,7 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
 
     val result = tables.map { table =>
       val verb = table.operateType.toString.toLowerCase()
-      val FAIL = TableAuthResult(false, s"you have no permission to ${table.db.getOrElse("")}.${table.table.getOrElse("")} with operation ${verb}")
+      val FAIL = TableAuthResult(false, s"you have no permission to access ${table.db.getOrElse("")}.${table.table.getOrElse("")} with operation ${verb}")
 
       def matchVerb(verbs: List[String], verb: String): Boolean = {
         if (verbs.contains("*")) return true
@@ -64,7 +64,7 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
         return !deniedUsers.exists(_.name == owner)
       }
 
-
+      // mlsql_system_db.system_info sourceType: _mlsql_
       val tableAuthResult = resourceName(table) match {
         case "file" | "mlsql_system" =>
           val key = ResourceUnit(resourceName(table), table.table.getOrElse(""))
@@ -86,6 +86,15 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
       }
       tableAuthResult
     }
+
+    val denies = result.filter(_.granted == false).map { item =>
+      item.msg
+    }
+
+    if (denies.nonEmpty) {
+      throw new RuntimeException(s"you(${owner}) have no permission to access some resources(click more for detail)\n ${denies.mkString("\n")}")
+    }
+
     result
   }
 }
@@ -95,7 +104,7 @@ class ByzerSimpleAuthConfig(path: String) {
 
   def load(): AuthConfig = {
     val files = HDFSOperatorV2.iteratorFiles(path, false)
-    val v = files.map { f =>
+    val v = files.filter(_.endsWith(".yml")).map { f =>
       val content = HDFSOperatorV2.readFile(f)
       ByzerSimpleAuth.parse(content)
     }.reduce { (l, r) =>

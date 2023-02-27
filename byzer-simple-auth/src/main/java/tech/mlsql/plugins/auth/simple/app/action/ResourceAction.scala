@@ -5,7 +5,7 @@ import streaming.dsl.ScriptSQLExec
 import tech.mlsql.common.PathFun
 import tech.mlsql.common.utils.Md5
 import tech.mlsql.common.utils.shell.command.ParamsUtil
-import tech.mlsql.plugins.auth.simple.app.{AuthConfig, Json_Yaml, Metadata, ResourceBlock, ResourceRule, ResourceRuleWrapper, ResourceUnit, User, UserUnit}
+import tech.mlsql.plugins.auth.simple.app.{AuthConfig, Json_Yaml, Metadata, ResourceBlock, ResourceRule, ResourceRuleWrapper, ResourceUnit, User, UserBlock, UserUnit}
 import tech.mlsql.tool.HDFSOperatorV2
 
 /**
@@ -20,7 +20,7 @@ object ResourceActionHelper {
   }
 
   def createAuthConfig(t: String, path: String, allows: String, denies: String) = {
-    val authConfig = AuthConfig("auth.byzer.org/v1", "Auth", List(),
+    val authConfig = AuthConfig("auth.byzer.org/v1", "Auth", List[UserBlock](),
       List(
         ResourceBlock(
           metadata = Metadata(users = None, resources = Option(List(ResourceUnit(t, path)))),
