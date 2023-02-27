@@ -54,7 +54,7 @@ object ResourceActionHelper {
 
 class ResourceQueryAction {
   // !simpleAuth resource query _ -type file -path "s3a://xxxx"
-  def run(args:List[String]):String = {
+  def run(args: List[String]): String = {
     assert(args.headOption.isDefined, "parameters must be provided")
     assert(args.head == "_", "the first parameter must be _")
     val parser = new ParamsUtil(args.drop(1).mkString(" "))
@@ -62,8 +62,8 @@ class ResourceQueryAction {
     val t = parser.getParam("type")
     val path = parser.getParam("path")
 
-    val items = ByzerSimpleAuth.config.get().resourceView.filter(_.metadata.resources.getOrElse(List()).exists(f=>f.name==t && f.path == path)).toList
-    Json_Yaml.object_to_yaml(ByzerSimpleAuth.config.get().copy(resourceView = items,userView = List()))
+    val items = ByzerSimpleAuth.config.get().resourceView.filter(_.metadata.resources.getOrElse(List()).exists(f => f.name == t && f.path == path)).toList
+    Json_Yaml.object_to_yaml(ByzerSimpleAuth.config.get().copy(resourceView = items, userView = List()))
   }
 }
 
@@ -72,6 +72,14 @@ class ResourceAddAction {
     assert(args.headOption.isDefined, "parameters must be provided")
     assert(args.head == "_", "the first parameter must be _")
     val parser = new ParamsUtil(args.drop(1).mkString(" "))
+
+    val yaml = parser.getParam("yaml", "")
+    if (!yaml.isEmpty) {
+      // to test the yaml string format
+      Json_Yaml.yaml_to_object(yaml)
+      HDFSOperatorV2.saveFile(ResourceActionHelper.getDir, s"${Md5.md5Hash(yaml)}.yml", List(("", yaml)).toIterator);
+      return "success"
+    }
 
     val t = parser.getParam("type")
     val path = parser.getParam("path")
@@ -93,6 +101,15 @@ class ResourceDeleteAction {
     assert(args.headOption.isDefined, "parameters must be provided")
     assert(args.head == "_", "the first parameter must be _")
     val parser = new ParamsUtil(args.drop(1).mkString(" "))
+
+    val yaml = parser.getParam("yaml", "")
+    if (!yaml.isEmpty) {
+      // to test the yaml string format
+      Json_Yaml.yaml_to_object(yaml)
+      HDFSOperatorV2.deleteDir(PathFun(ResourceActionHelper.getDir).add(s"${Md5.md5Hash(yaml)}.yml").toPath);
+      return "success"
+    }
+
 
     val t = parser.getParam("type")
     val path = parser.getParam("path")
