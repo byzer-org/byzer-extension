@@ -1,0 +1,10 @@
+moduleName=byzer-expand-include-{{spark_binary_version}}
+mainClass=tech.mlsql.plugins.expandinclude.MLSQLExpandInclude
+version=0.1.0-SNAPSHOT
+author=zhao_wei_nan
+mlsqlVersions="1.5.0,1.5.0-SNAPSHOT,1.6.0,1.6.0-SNAPSHOT"
+githubUrl=https://github.com/byzer-org/byzer-extension/tree/master/byzer-expand-include
+scala_version={{scala_binary_version}}
+spark_version={{spark_binary_version}}
+mlsqlPluginType=app
+desc=this plugin allow expand `include*` in .byzer file
