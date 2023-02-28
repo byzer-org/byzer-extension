@@ -98,6 +98,37 @@ You can also use the following command to query a resource:
 !simpleAuth resource query _ -type file -path "s3a://bucket7/tmp/jack";
 ```
 
+### Other type resources
+
+You can also add other type resources, such as jdbc, hive, delta and son on.
+
+#### JDBC
+
+```shell
+!simpleAuth resource add _ -type jdbc -path "wow.vega_datasets" -denies allwefantasy;
+!simpleAuth admin reload;
+```
+
+Notice that the path of jdbc resource is composed of database.table. 
+The path may be conflict in different database instances since we may connect many database instances eg. mysql, oracle, db2, etc.
+We may try to fix this issue in the future.
+
+#### Delta
+
+```shell
+!simpleAuth resource add _ -type delta -path "demo.table1" -denies allwefantasy;
+!simpleAuth admin reload;
+```
+
+#### Hive
+
+```shell
+!simpleAuth resource add _ -type hive -path "default.table1" -denies allwefantasy;
+!simpleAuth admin reload;
+```
+
+
+
 ### Manual way of writing YAML Auth file
 
 The auth configuration file is a YAML file, the following is an example:

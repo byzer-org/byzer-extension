@@ -32,13 +32,21 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
     }.toMap
 
     def resourceName(table: MLSQLTable): String = {
-      if ((table.db.isEmpty || table.db.get == "") && table.tableType.name != "temp") return "file";
+      if ((table.db.isEmpty || table.db.get == "")
+        && table.tableType.name != "temp"
+        && table.sourceType.getOrElse("") != "delta") return "file";
       table.db.getOrElse(table.tableType.name)
     }
 
     def getByResource(k: ResourceUnit) = {
-      resourceRules.keys.filter(p => p.name == k.name && k.path.toLowerCase.startsWith(p.path.toLowerCase())).
-        headOption.
+      resourceRules.keys.filter { p =>
+        val nameMatch = p.name == k.name
+        val pathMatch = p.name match {
+          case "file" => k.path.toLowerCase.startsWith(p.path.toLowerCase())
+          case _ => k.path == p.path
+        }
+        nameMatch && pathMatch
+      }.headOption.
         map(p => resourceRules(p))
     }
 
@@ -64,25 +72,49 @@ class ByzerSimpleAuth extends TableAuth with Logging with WowLog {
         return !deniedUsers.exists(_.name == owner)
       }
 
+      def checkResource(key: ResourceUnit): TableAuthResult = {
+        val value = getByResource(key)
+        if (value.isDefined) {
+          val rules = value.get
+          val result = rules.filter(rule => matchVerb(rule.rule.verbs, verb)).exists { rule =>
+            checkRule(rule.rule)
+          }
+          if (result) {
+            SUCCESS
+          } else {
+            FAIL
+          }
+        } else {
+          TableAuthResult(true, "")
+        }
+      }
+
       // mlsql_system_db.system_info sourceType: _mlsql_
       val tableAuthResult = resourceName(table) match {
         case "file" | "mlsql_system" =>
           val key = ResourceUnit(resourceName(table), table.table.getOrElse(""))
-          val value = getByResource(key)
-          if (value.isDefined) {
-            val rules = value.get
-            val result = rules.filter(rule => matchVerb(rule.rule.verbs, verb)).exists { rule =>
-              checkRule(rule.rule)
-            }
-            if (result) {
-              SUCCESS
-            } else {
-              FAIL
-            }
-          } else {
-            TableAuthResult(true, "")
+          checkResource(key)
+        case _ =>
+          (table.tableType.name, table.sourceType.getOrElse("")) match {
+            case ("temp", _) => TableAuthResult(true, "")
+            case ("system", "_mlsql_") => TableAuthResult(true, "")
+            case ("jdbc", _) =>
+              val key = ResourceUnit("jdbc", s"${table.db.get}.${table.table.get}")
+              checkResource(key)
+            case ("hive", "hive") =>
+              val key = ResourceUnit("hive", s"${table.db.get}.${table.table.get}")
+              checkResource(key)
+
+            case ("hdfs", "delta") =>
+              table.table.get.split("/").takeRight(2) match {
+                case Array(db, table) =>
+                  val key = ResourceUnit("delta", s"${db}.${table}")
+                  checkResource(key)
+              }
+            case (_, _) =>
+              TableAuthResult(true, "")
           }
-        case _ => TableAuthResult(true, "")
+
       }
       tableAuthResult
     }

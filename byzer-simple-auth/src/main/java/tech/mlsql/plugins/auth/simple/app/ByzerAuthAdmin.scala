@@ -40,7 +40,7 @@ class ByzerAuthAdmin(override val uid: String) extends SQLAlg
       case List("resource", "query") =>
         new ResourceQueryAction().run(args.slice(2, args.length))
       case _ =>
-        ""
+        "No action found"
     }
 
     df.sparkSession.createDataset[String](Seq(value)).toDF("content")
