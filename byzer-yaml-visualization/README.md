@@ -1,24 +1,29 @@
 # Byzer YAML Visualization
+                          
+## Introduction
 
-byzer-yaml-visualization 是一款 Byzer 可视化插件。通过该插件，用户可以通过 YAML 配置文件描述图表。
+byzer-yaml-visualization is a visualization extension for Byzer. 
+It can generate charts based on the data returned by Byzer script.
 
-## 安装部署
+## Online 
 
-可使用如下命令安装（需要有网络）：
+### Installation
+
+Make sure public network is available.
 
 ```
-!plugin app add - "byzer-yaml-visualization-3.0";
+!plugin app add - "byzer-yaml-visualization-3.3";
 ```
 
-卸载:
+### Uninstall
                                                    
 ```
-!plugin app remove  "byzer-yaml-visualization-3.0";
+!plugin app remove  "byzer-yaml-visualization-3.3";
 ```
 
-> 卸载需要重启引擎
+> Note: Restarting Byzer after installation or uninstallation is required.
 
-## 使用示例
+## Usage
 
 ```sql
 load excel.`./example-data/excel/user-behavior.xlsx` 
@@ -44,34 +49,41 @@ fig:
 ''';
 ```
 
-## 描述文档
+## YAML Format
 
-YAML中的顶级元数有三个：
-1. runtime  配置运行时。 YAML 文件会被转化为 Python 代码执行，所以runtime 其实是配置 Python环境。 
-2. control  控制图表的一些生成行为，比如是生成html还是image，数据是不是再需要一次排序等等
-3. fig      描绘生成什么样的图表，该图表的配置是什么
+There are three top-level elements in YAML:
+1. runtime:  Configure the runtime. The YAML Format will be converted to Python code for execution, so the runtime actually configures the Python environment.
+2. control:  Control some generation behaviors of the chart, such as whether to generate html or image, whether the data needs to be sorted again, etc.
+3. fig:      Describe what kind of chart to generate, and what is the configuration of the chart
+
 
 ### runtime
-runtime 下只有一层子元数，常见配置如下。
-1. env 指定需要使用的 Python环境。 
-2. cache 图表结果是不是要缓存，如果你在其他cell要引用这个图标结果，需要设置为true。默认设置为false 即可。
-3. output 将图表转化为一个表引用，方便后续 SQL 使用。默认可以不用配置。
-4. runIn  在哪个类型节点执行。 driver/executor 。推荐 driver。
+
+runtime is the configuration of the Python environment. The normal configuration is as follows.
+
+1. env:  Specify the Python environment to use.
+2. cache:  Whether to cache the chart result. If you want to reference the chart result in other cells, you need to set it to true. The default setting is false.
+3. output:  Convert the chart to a table reference for subsequent SQL use. 
+4. runIn:  Which type of node to execute. driver/executor. It is recommended to use driver.
+
 
 ### control
 
-1. ignoreSort  默认为true. 系统会对 X 轴字段进行默认进行排序
-2. format  默认为 html。 如果需要生成图片，可以设置为 `image`
+1. ignoreSort  Default is true. The system will sort the X-axis field by default
+2. format  Default is html. If you need to generate an image, you can set it to `image`
 
 ### fig
 
-1. fig.xxx  其中 xxx 为图标类型。支持 line,bar
-2. fig.xxx.title 图表标题
-3. fig.xxx.x X 轴。 支持字符串或者数组配置
-4. fig.xxx.y Y 轴。 支持字符串或者数组配置
-5. fig.xxx.labels 改动图标中的一些名称。 默认为字典
+1. fig.xxx  Where xxx is the type of chart. line,bar are supported
+2. fig.xxx.title Chart title
+3. fig.xxx.x X axis. Support string or array configuration
+4. fig.xxx.y Y axis. Support string or array configuration
+5. fig.xxx.labels Change some names in the chart. The default is a dictionary
 
-一个较为完整的配置如下：
+### Example
+
+One complete configuration is as follows:
+
 
 ```
 runtime: 
@@ -92,13 +104,13 @@ fig:
            day: "日期"
 ```
 
-## 图表类型示例
+## More examples
 
-参考文章：
+https://zhuanlan.zhihu.com/p/538701145
 
 
 
-## 如何获取生成的图片
+## How to get the chart result
 
 ```sql
 load excel.`./example-data/excel/user-behavior.xlsx` 
@@ -139,7 +151,9 @@ and fileName="fileName";
 !fs -ls /tmp/images;
 ```
 
-图片默认使用 base64 编码，所以需要进行一次解码。然后使用 image 数据源把他写到对象存储里去。如果用户需要上传改图标，可以使用如下代码：
+The chart is encoded in base64 format. You need to decode it first. Then use the image data source to write it to the object storage. 
+If the user needs to upload this chart, you can use the following code:
+
 
 ```sql
 save overwrite command as Rest.`YOUR_UPLOAD_URL` 
