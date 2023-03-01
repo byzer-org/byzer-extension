@@ -15,7 +15,7 @@ Clone [byzer-lang](https://github.com/byzer-org/byzer-lang),
 and run the following command to install it in your local maven repository.
 
 ```
-mvn clean install  -DskipTests -Ponline  -Phive-thrift-server  -Pscala-2.12 
+mvn clean install -DskipTests -Ponline -pl streamingpro-mlsql -am  
 ```
 
 ## Install build tools
