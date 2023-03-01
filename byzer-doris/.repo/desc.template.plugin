@@ -1,5 +1,5 @@
 moduleName=byzer-dors-{{spark_binary_version}}
-mainClass=-
+mainClass=tech.mlsql.plugins.doris.MLSQLDorisApp
 version=0.1.0-SNAPSHOT
 author=allwefantasy
 mlsqlVersions="1.5.0,1.5.0-SNAPSHOT,1.6.0,1.6.0-SNAPSHOT"

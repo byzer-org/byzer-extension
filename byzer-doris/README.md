@@ -3,6 +3,11 @@
 ## Introduction
 Byzer-doris is an extension for Byzer to read and write [Apache Doris](https://github.com/apache/doris)
 
+## pre-requirements
+
+The doris-spark-connector jar file should be placed in the plugin directory of Byzer 
+before this extension is loaded. 
+
 ## Online Installation
 
 ```sql
@@ -18,7 +23,7 @@ Byzer-doris is an extension for Byzer to read and write [Apache Doris](https://g
 
    ```properties
    # Configure entry class of the extension 
-   streaming.plugin.clzznames=tech.mlsql.plugins.eval.ByzerEvalApp 
+   streaming.plugin.clzznames=tech.mlsql.plugins.doris.MLSQLDorisApp 
    ```
 
 4. Restart Byzer (./bin/byzer.sh restart) with the new configuration , the extension will be loaded automatically.

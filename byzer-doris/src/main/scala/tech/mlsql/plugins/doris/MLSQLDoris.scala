@@ -1,16 +1,14 @@
-package tech.mlsql.datasource.impl
+package tech.mlsql.plugins.doris
 
 import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter, Row}
-
-import streaming.core.datasource.{DataAuthConfig, DataSinkConfig, DataSourceConfig, DataSourceRegistry, MLSQLDataSourceKey, MLSQLRegistry, MLSQLSink, MLSQLSource, MLSQLSourceConfig, MLSQLSourceInfo, MLSQLSparkDataSourceType, SourceInfo}
+import streaming.core.datasource._
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import streaming.log.WowLog
-
 import tech.mlsql.common.form.{Extra, FormParams, Text}
 import tech.mlsql.common.utils.log.Logging
-import tech.mlsql.datasource.impl.MLSQLDoris.{DORIS_FENODES, DORIS_PASSWORD, DORIS_USER, TABLE_IDENTIFIER}
 import tech.mlsql.dsl.adaptor.DslTool
+import tech.mlsql.plugins.doris.MLSQLDoris.{DORIS_FENODES, DORIS_PASSWORD, DORIS_USER, TABLE_IDENTIFIER}
 
 class MLSQLDoris(override val uid: String) extends MLSQLSource
   with MLSQLSink
