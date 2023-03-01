@@ -13,7 +13,7 @@
         <module>delta-enhancer</module>
         <module>stream-persist</module>
         <module>last-command</module>
-        <module>run-script</module>
+        <module>byzer-eval</module>
         <module>echo-controller</module>
         <module>table-repartition</module>
         <module>ds-hbase-2x</module>

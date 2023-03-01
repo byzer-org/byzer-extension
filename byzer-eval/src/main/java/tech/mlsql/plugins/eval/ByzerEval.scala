@@ -1,4 +1,4 @@
-package tech.mlsql.plugins.et
+package tech.mlsql.plugins.eval
 
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -14,7 +14,7 @@ import tech.mlsql.ets.ScriptRunner
 import tech.mlsql.version.VersionCompatibility
 
 
-class RunScript(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams with ETAuth {
+class ByzerEval(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams with ETAuth {
   def this() = this(BaseParams.randomUID())
 
   // 
@@ -24,16 +24,16 @@ class RunScript(override val uid: String) extends SQLAlg with VersionCompatibili
     val command = JSONTool.parseJson[List[String]](params("parameters")).toArray
     val sparkOpt = Option(df.sparkSession)
     command match {
-      case Array(script, "named", tableName) =>
-        var jobRes: DataFrame = ScriptRunner.rubSubJob(
+      case Array(variable) =>
+        val script  = context.execListener.env().get(variable).getOrElse("")
+        val jobRes: DataFrame = ScriptRunner.rubSubJob(
           script,
           (_df: DataFrame) => {},
           sparkOpt,
           true,
           true).get
-        jobRes.createOrReplaceTempView(tableName)
         jobRes
-      case _ => throw new RuntimeException("try !runScript code named table1")
+      case _ => throw new RuntimeException("try !eval variableName")
     }
 
   }
@@ -43,14 +43,12 @@ class RunScript(override val uid: String) extends SQLAlg with VersionCompatibili
   }
 
   override def supportedVersions: Seq[String] = {
-    Seq("1.5.0-SNAPSHOT", "1.5.0", "1.6.0-SNAPSHOT", "1.6.0")
+    ByzerEvalApp.versions
   }
 
 
   override def doc: Doc = Doc(MarkDownDoc,
     s"""
-       |When you want to get the result from command and used
-       | in next command(SQL), you can use !last command.
        |
        |For example:
        |
@@ -61,10 +59,10 @@ class RunScript(override val uid: String) extends SQLAlg with VersionCompatibili
 
 
   override def codeExample: Code = Code(SQLCode,
-    """
-      |!hdfs /tmp;
-      |!last named hdfsTmpTable;
-      |select * from hdfsTmpTable;
+    """                     
+      |set script="select 1 as a as table1;";
+      |!eval script;
+      |select * from table1 as output;
     """.stripMargin)
 
   override def batchPredict(df: DataFrame, path: String, params: Map[String, String]): DataFrame = train(df, path, params)

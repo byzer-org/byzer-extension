@@ -7,7 +7,6 @@ import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.datalake.DataLake
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
-import tech.mlsql.plugins.et.{ConnectMetaItem, ConnectPersistCommand, ConnectPersistMeta}
 import tech.mlsql.store.DBStore
 import tech.mlsql.version.VersionCompatibility
 
