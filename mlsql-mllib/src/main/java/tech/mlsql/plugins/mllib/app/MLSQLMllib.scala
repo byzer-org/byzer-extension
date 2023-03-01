@@ -4,9 +4,9 @@ package tech.mlsql.plugins.mllib.app
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
-import tech.mlsql.plugins.mllib.ets._
-import tech.mlsql.plugins.mllib.ets.fe.{DataSummaryOld, DataTranspose, OnehotExt, PSIExt, SQLDataSummary, SQLDataSummaryV2, SQLDescriptiveMetrics, SQLDigitalColumnConvert, SQLMissingValueProcess, SQLPatternDistribution, SQLUniqueIdentifier}
+import tech.mlsql.plugins.mllib.ets.fe.{DataTranspose, OnehotExt, PSIExt, SQLDataSummaryV2, SQLDescriptiveMetrics, SQLDigitalColumnConvert, SQLMissingValueProcess, SQLPatternDistribution, SQLUniqueIdentifier}
 import tech.mlsql.plugins.mllib.ets.fintech.scorecard.{SQLBinning, SQLScoreCard}
+import tech.mlsql.plugins.mllib.ets.{ClassificationEvaluator, ColumnsExt, RegressionEvaluator, SampleDatasetExt, TakeRandomSampleExt}
 import tech.mlsql.version.VersionCompatibility
 
 /**
@@ -49,5 +49,5 @@ class MLSQLMllib extends tech.mlsql.app.App with VersionCompatibility with Loggi
 }
 
 object MLSQLMllib {
-  val versions = Seq(">=2.0.0", "2.1.0", "2.1.0-SNAPSHOT", "2.0.0", "2.0.1")
+  val versions = Seq(">=2.0.0")
 }

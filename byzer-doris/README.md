@@ -1,5 +1,28 @@
 # Byzer-Doris
-This extension enables Byzer-lang to read and write [Apache Doris](https://github.com/apache/doris)
+
+## Introduction
+Byzer-doris is an extension for Byzer to read and write [Apache Doris](https://github.com/apache/doris)
+
+## Online Installation
+
+```sql
+!plugin app add - byzer-doris-3.3;
+```
+
+## Offline Installation
+
+1. Download the latest release
+   from [here](http://store.mlsql.tech/run?action=downloadPlugin&pluginType=MLSQL_PLUGIN&pluginName=byzer-doris-3.3&version=0.1.0-SNAPSHOT).
+2. Move the downloaded jar file to the plugin directory of Byzer.
+3. Modify `conf/byzer.properties.overwrite` file of Byzer, add the following configurations:
+
+   ```properties
+   # Configure entry class of the extension 
+   streaming.plugin.clzznames=tech.mlsql.plugins.eval.ByzerEvalApp 
+   ```
+
+4. Restart Byzer (./bin/byzer.sh restart) with the new configuration , the extension will be loaded automatically.
+
 
 ## Usage
 To read Doris table, use `load` statement. The following statement reads **Doris db**: zjc_1

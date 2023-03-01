@@ -1,22 +1,16 @@
-package tech.mlsql.plugins.et
-
-import java.util.concurrent.ConcurrentHashMap
+package tech.mlsql.plugins.connectpersist
 
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import streaming.dsl.{ConnectMeta, DBMappingKey}
+import streaming.dsl.ConnectMeta
 import streaming.dsl.auth.TableAuthResult
 import streaming.dsl.mmlib._
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
-import tech.mlsql.common.utils.classloader.ClassLoaderTool
-import tech.mlsql.common.utils.lang.sc.ScalaReflect
 import tech.mlsql.dsl.auth.ETAuth
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 import tech.mlsql.store.DBStore
 import tech.mlsql.version.VersionCompatibility
-
-import scala.collection.JavaConverters._
 
 /**
  * 15/1/2020 WilliamZhu(allwefantasy@gmail.com)

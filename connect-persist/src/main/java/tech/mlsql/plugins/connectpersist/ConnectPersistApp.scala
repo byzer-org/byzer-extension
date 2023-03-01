@@ -1,10 +1,8 @@
-package tech.mlsql.plugins.mllib
+package tech.mlsql.plugins.connectpersist
 
 import _root_.streaming.core.strategy.platform.{PlatformManager, SparkRuntime}
 import _root_.streaming.dsl._
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import tech.mlsql.common.utils.log.Logging
-import tech.mlsql.datalake.DataLake
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.store.DBStore
@@ -32,6 +30,6 @@ class ConnectPersistApp extends tech.mlsql.app.App with VersionCompatibility wit
     PlatformManager.getRuntime.asInstanceOf[SparkRuntime]
   }
 
-  override def supportedVersions: Seq[String] = Seq("1.5.0-SNAPSHOT", "1.5.0", "1.6.0-SNAPSHOT", "1.6.0")
+  override def supportedVersions: Seq[String] = Seq(">=1.5.0-SNAPSHOT")
 }
 
