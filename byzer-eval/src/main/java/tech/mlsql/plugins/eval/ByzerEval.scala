@@ -8,13 +8,13 @@ import streaming.dsl.mmlib._
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
-import tech.mlsql.dsl.auth.ETAuth
+import tech.mlsql.dsl.auth.{BaseETAuth, ETAuth}
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 import tech.mlsql.ets.ScriptRunner
 import tech.mlsql.version.VersionCompatibility
 
 
-class ByzerEval(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams with ETAuth {
+class ByzerEval(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams with BaseETAuth {
   def this() = this(BaseParams.randomUID())
 
   // 
@@ -25,7 +25,7 @@ class ByzerEval(override val uid: String) extends SQLAlg with VersionCompatibili
     val sparkOpt = Option(df.sparkSession)
     command match {
       case Array(variable) =>
-        val script  = context.execListener.env().get(variable).getOrElse("")
+        val script = context.execListener.env().get(variable).getOrElse("")
         val jobRes: DataFrame = ScriptRunner.rubSubJob(
           script,
           (_df: DataFrame) => {},
@@ -36,10 +36,6 @@ class ByzerEval(override val uid: String) extends SQLAlg with VersionCompatibili
       case _ => throw new RuntimeException("try !eval variableName")
     }
 
-  }
-
-  override def auth(etMethod: ETMethod, path: String, params: Map[String, String]): List[TableAuthResult] = {
-    List()
   }
 
   override def supportedVersions: Seq[String] = {
@@ -71,5 +67,5 @@ class ByzerEval(override val uid: String) extends SQLAlg with VersionCompatibili
 
   override def predict(sparkSession: SparkSession, _model: Any, name: String, params: Map[String, String]): UserDefinedFunction = ???
 
-
+  override def etName: String = "__eval__"
 }

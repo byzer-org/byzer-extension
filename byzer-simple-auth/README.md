@@ -127,6 +127,35 @@ We may try to fix this issue in the future.
 !simpleAuth admin reload;
 ```
 
+#### Special resources
+
+#### Auth admin
+
+There is a special resource `mlsql_system.__auth_admin__` which is used to control who can operate auth configuration.
+Normally we can provide a base configuration file which contains the resource `mlsql_system.__auth_admin__` to make sure 
+only the specified users can operate auth configuration.
+
+
+```yaml
+apiVersion: auth.byzer.org/v1
+kind: Auth
+userView: [ ]
+resourceView:
+  - metadata:
+      resources:
+        - name: "mlsql_system"
+          path: "__auth_admin__"
+    rules:
+      - rule:
+          verbs:
+            - "empty"
+          users:
+            allows:
+              - name: allwefantasy
+                role: testRole
+```
+   
+Then you can use the command to add the resource access control with this user.
 
 
 ### Manual way of writing YAML Auth file
