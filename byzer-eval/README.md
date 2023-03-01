@@ -2,11 +2,11 @@
 
 ## Introduction
 
-Byzer-eval is an extension of Byzer, which can execute string variable. This means
-you can write a SQL statement in a variable and execute it.
+Byzer-eval is an extension of Byzer, which can execute string variable as Byzer script. This means
+you can write a script in a variable and execute it.
 
-With the help of UDF/UDAF of Byzer and Byzer-python, you can build a complex Byzer script 
-and then deliver it to this extension to execute it.
+With the help of UDF of Byzer and Byzer-python, you can build a complex Byzer script 
+and then deliver it to this extension to execute it and then get the result table in following steps.
 
 ## Online Installation 
 
