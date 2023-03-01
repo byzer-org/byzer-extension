@@ -45,7 +45,7 @@ select * from b as output;
 
 ## Auth
 
-If you want to control the access of the extension with [byzer-simple-auth](byzer-simple-auth),
+If you want to control the access of this extension with [byzer-simple-auth](byzer-simple-auth),
 try the following command:
 
 ```sql

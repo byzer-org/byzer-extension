@@ -9,7 +9,7 @@ import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.common.utils.shell.ShellCommand
-import tech.mlsql.dsl.auth.ETAuth
+import tech.mlsql.dsl.auth.{BaseETAuth, ETAuth}
 import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 import tech.mlsql.plugins.shell.app.MLSQLShell
 import tech.mlsql.version.VersionCompatibility
@@ -20,7 +20,7 @@ import scala.collection.mutable.ArrayBuffer
  * 2/6/2021 WilliamZhu(allwefantasy@gmail.com)
  */
 class ShellExecute(override val uid: String) extends SQLAlg
-  with VersionCompatibility with Functions with WowParams with ETAuth {
+  with VersionCompatibility with Functions with WowParams with BaseETAuth {
   def this() = this(BaseParams.randomUID())
 
   /**
@@ -69,19 +69,5 @@ class ShellExecute(override val uid: String) extends SQLAlg
 
   override def supportedVersions: Seq[String] = MLSQLShell.versions
 
-  override def auth(etMethod: ETMethod, path: String, params: Map[String, String]): List[TableAuthResult] = {
-    val vtable = MLSQLTable(
-      db = Option(DB_DEFAULT.MLSQL_SYSTEM.toString),
-      table = Option("__shell_execute__"),
-      operateType = OperateType.EMPTY,
-      sourceType = Option("_mlsql_"),
-      tableType = TableType.SYSTEM)
-
-    val context = ScriptSQLExec.contextGetOrForTest()
-    context.execListener.getTableAuth match {
-      case Some(tableAuth) =>
-        tableAuth.auth(List(vtable))
-      case None => List(TableAuthResult(true, ""))
-    }
-  }
+  override def etName: String = "__mlsql_shell__"
 }

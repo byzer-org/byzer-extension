@@ -31,5 +31,5 @@ class MLSQLShell extends tech.mlsql.app.App with VersionCompatibility with Loggi
 }
 
 object MLSQLShell {
-  val versions = Seq("2.1.0", "2.1.0-SNAPSHOT", "2.0.0", "2.0.1")
+  val versions = Seq(">=2.0.0")
 }
