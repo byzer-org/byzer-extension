@@ -30,12 +30,16 @@ class PythonHint extends BaseHint {
     val env = header.params.get("env").map(item => s""" !python env "PYTHON_ENV=${item}"; """).getOrElse("")
     val dataMode = header.params.get("dataMode").map(item => s""" !python conf "dataMode=${item}"; """).getOrElse("")
     val runIn = header.params.get("runIn").map(item => s""" !python conf "runIn=${item}"; """).getOrElse("")
+    val pythonExec = header.params.get("pythonExec").map(item => s""" !python conf "pythonExec=${item}"; """).getOrElse("")
+    val pythonOutputEncoding = header.params.get("pythonOutputEncoding").map(item => s""" !python conf "pythonOutputEncoding=${item}"; """).getOrElse("")
 
     s"""
        |${schema}
        |${env}
        |${dataMode}
        |${runIn}
+       |${pythonExec}
+       |${pythonOutputEncoding}
        |run command as Ray.`` where
        |inputTable="${input}" and
        |outputTable="${output}_0" and
