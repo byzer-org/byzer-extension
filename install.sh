@@ -44,6 +44,7 @@ then
   prefix="byzer/misc/cloud/${object_store_name}"
 fi
 
+echo "upload ${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar to ${prefix}"
 curl --progress-bar \
     -F "${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar=@${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar" \
   "${BYZER_UPLOADER_URL}&overwrite=true&pathPrefix=${prefix}" | cat
