@@ -33,10 +33,20 @@ mlsql_plugin_tool upload \
 --user ${STORE_USER}        \
 --password ${STORE_PASSWORD} \
 --jar_path ${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar
-#
-#
-#object_store_name=${3:-s3}
-#curl \
-#  -F "${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar=@${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar" \
-#"${BYZER_UPLOADER_URL}&overwrite=true&pathPrefix=byzer/misc/cloud/${object_store_name}"
+
+
+## if MOUDLE_NAME starts with byzer-objectstore-xxx, we will upload it to byzer/misc/cloud/xxx
+## otherwise we will upload it to byzer-extensions/nightly-build
+object_store_name=$(echo ${MOUDLE_NAME} | sed 's/byzer-objectstore-//g')
+prefix="byzer-extensions/nightly-build"
+if [[ "${MOUDLE_NAME}" == "byzer-objectstore"* ]]
+then
+  prefix="byzer/misc/cloud/${object_store_name}"
+fi
+
+curl --progress-bar \
+    -F "${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar=@${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar" \
+  "${BYZER_UPLOADER_URL}&overwrite=true&pathPrefix=${prefix}" | cat
+
+
 
