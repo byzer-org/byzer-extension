@@ -136,14 +136,19 @@ class ByzerSimpleAuthConfig(path: String) {
 
   def load(): AuthConfig = {
     val files = HDFSOperatorV2.iteratorFiles(path, false)
-    val v = files.filter(_.endsWith(".yml")).map { f =>
+    val vTemp = files.filter(_.endsWith(".yml")).map { f =>
       val content = HDFSOperatorV2.readFile(f)
       ByzerSimpleAuth.parse(content)
-    }.reduce { (l, r) =>
-      l.copy(
-        userView = l.userView ++ r.userView,
-        resourceView = l.resourceView ++ r.resourceView
-      )
+    }
+    val v = if (vTemp.isEmpty) {
+      AuthConfig("auth.byzer.org/v1", "Auth", List(), List())
+    } else {
+      vTemp.reduce { (l, r) =>
+        l.copy(
+          userView = l.userView ++ r.userView,
+          resourceView = l.resourceView ++ r.resourceView
+        )
+      }
     }
     v
   }
