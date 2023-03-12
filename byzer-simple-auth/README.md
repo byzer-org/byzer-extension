@@ -134,15 +134,19 @@ We may try to fix this issue in the future.
 
 This is a table which contains type,path and description of special resources.
 
+
 | Type | Path | Description |
 |--| ---- | ----------- |
-| mlsql_system | __auth_admin__ | This resource is used to control who can operate auth configuration. |
-| mlsql_system | __script_udf__ | This resource is used to control who can register udf  |
-| mlsql_system | __plugin_operator__ | This resource is used to who can use `!plugin` command  |
-| mlsql_system | __profiler__ | This resource is used to who can use `!profiler` command  |
+| mlsql_system | `__auth_admin__` | This resource is used to control who can operate auth configuration. |
+| mlsql_system | `__script_udf__` | This resource is used to control who can register udf  |
+| mlsql_system | `__plugin_operator__` | This resource is used to who can use `!plugin` command  |
+| mlsql_system | `__profiler__` | This resource is used to who can use `!profiler` command  |
+     
+
 
 Most plugins will use the special resources to control who can use the plugin. You can check the plugin's document to know
 which special resource name it will use.
+
 
 #### Auth admin
 
