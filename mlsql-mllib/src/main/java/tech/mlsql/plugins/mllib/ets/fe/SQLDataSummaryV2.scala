@@ -57,7 +57,6 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       }
     }).toArray
   }
-
   def countUniqueValueRatio(schema: StructType, approx: Boolean, numeric_columns: Array[String]): Array[Column] = Array.concat(
     schema.map(sc => {
       val sum_expr = sum(when(colWithFilterBlank(sc), 1).otherwise(0))
