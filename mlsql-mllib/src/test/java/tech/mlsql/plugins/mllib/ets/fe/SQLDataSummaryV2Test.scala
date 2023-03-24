@@ -21,7 +21,7 @@ import java.util.{Date, UUID}
  */
 class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with BasicMLSQLConfig with BeforeAndAfterAll {
   val allMetrics: String = "columnName,ordinalPosition,%25,%75,blankValueRatio,dataLength,dataType,max,maximumLength,mean,median,min,minimumLength," +
-    "nonNullCount,nullValueRatio,skewness,standardDeviation,standardError,uniqueValueRatio,categoryCount,primaryKeyCandidate,mode"
+    "nonNullCount,nullValueRatio,skewness,totalCount,standardDeviation,standardError,uniqueValueRatio,categoryCount,primaryKeyCandidate,mode"
 
 
   def startParams = Array(
@@ -81,10 +81,10 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
       println(res1DF.collect()(1).mkString(","))
       println(res1DF.collect()(2).mkString(","))
       println(res1DF.collect()(3).mkString(","))
-      assert(res1DF.collect()(0).mkString(",") === "name,1,,,,0.1667,5,string,elena,5,,AA,0,5,0.0,,,,1.0,5,1,")
-      assert(res1DF.collect()(1).mkString(",") === "age,2,23.25,35.0,47.5,0.0,4,integer,57.0,,34.67,10.0,,6,0.0,-0.11,17.77,7.26,1.0,0,1,")
-      assert(res1DF.collect()(2).mkString(",") === "income,3,,,,0.0,6,string,533000.0,6,,432000.0,6,6,0.0,,,,0.6667,4,0,433000.0")
-      assert(res1DF.collect()(3).mkString(",") === "date,4,,,,0.0,8,timestamp,2021-03-08 18:00:00,,,2021-03-08 18:00:00,,6,0.0,,,,0.1667,1,0,2021-03-08 18:00:00")
+      assert(res1DF.collect()(0).mkString(",") === "name,1,,,,0.1667,5,string,elena,5,,AA,0,5,0.0,,6,,,1.0,5,1,")
+      assert(res1DF.collect()(1).mkString(",") === "age,2,23.25,35.0,47.5,0.0,4,integer,57.0,,34.67,10.0,,6,0.0,-0.11,6,17.77,7.26,1.0,0,1,")
+      assert(res1DF.collect()(2).mkString(",") === "income,3,,,,0.0,6,string,533000.0,6,,432000.0,6,6,0.0,,6,,,0.6667,4,0,433000.0")
+      assert(res1DF.collect()(3).mkString(",") === "date,4,,,,0.0,8,timestamp,2021-03-08 18:00:00,,,2021-03-08 18:00:00,,6,0.0,,6,,,0.1667,1,0,2021-03-08 18:00:00")
 
       val sseq = Seq(
         ("elena", 57, 57, 110L, "433000", Timestamp.valueOf(LocalDateTime.of(2021, 3, 8, 18, 0)), 110F, true, null, null, BigDecimal.valueOf(12), 1.123D),
@@ -109,18 +109,18 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
       println(res2DF.collect()(9).mkString(","))
       println(res2DF.collect()(10).mkString(","))
       println(res2DF.collect()(11).mkString(","))
-      assert(res2DF.collect()(0).mkString(",") === "name,1,,,,0.1667,5,string,elena,5,,AA,0,5,0.0,,,,1.0,5,1,")
-      assert(res2DF.collect()(1).mkString(",") === "favoriteNumber,2,14.25,57.0,57.0,0.0,4,integer,57.0,,37.83,-1.0,,6,0.0,-0.71,29.69,12.12,0.5,0,0,57.0")
-      assert(res2DF.collect()(2).mkString(",") === "age,3,23.25,35.0,47.5,0.0,4,integer,57.0,,34.67,10.0,,6,0.0,-0.11,17.77,7.26,1.0,0,1,")
-      assert(res2DF.collect()(3).mkString(",") === "mock_col1,4,112.5,125.0,145.0,0.0,8,long,160.0,,128.33,100.0,,6,0.0,0.22,23.17,9.46,1.0,0,1,")
-      assert(res2DF.collect()(4).mkString(",") === "income,5,,,,0.1667,6,string,533000.0,6,,432000.0,0,5,0.0,,,,0.8,4,0,433000.0")
-      assert(res2DF.collect()(5).mkString(",") === "date,6,,,,0.0,8,timestamp,2021-03-08 18:00:00,,,2021-03-08 18:00:00,,6,0.0,,,,0.1667,1,0,2021-03-08 18:00:00")
-      assert(res2DF.collect()(6).mkString(",") === "mock_col2,7,117.5,125.0,135.0,0.0,4,float,150.0,,127.5,110.0,,4,0.3333,0.43,17.08,8.54,1.0,0,1,")
-      assert(res2DF.collect()(7).mkString(",") === "alived,8,,,,0.0,1,boolean,true,,,false,,6,0.0,,,,0.3333,2,0,true")
-      assert(res2DF.collect()(8).mkString(",") === "extra,9,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
-      assert(res2DF.collect()(9).mkString(",") === "extra1,10,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
-      assert(res2DF.collect()(10).mkString(",") === "extra2,11,2.0,2.0,2.0,0.0,16,decimal(38,18),12.0,,3.67,2.0,,6,0.0,1.79,4.08,1.67,0.3333,0,0,2.0")
-      assert(res2DF.collect()(11).mkString(",") === "extra3,12,1.34,2.11,3.09,0.0,8,double,3.38,,2.2,1.12,,6,0.0,0.15,1.01,0.41,0.6667,0,0,")
+      assert(res2DF.collect()(0).mkString(",") === "name,1,,,,0.1667,5,string,elena,5,,AA,0,5,0.0,,6,,,1.0,5,1,")
+      assert(res2DF.collect()(1).mkString(",") === "favoriteNumber,2,14.25,57.0,57.0,0.0,4,integer,57.0,,37.83,-1.0,,6,0.0,-0.71,6,29.69,12.12,0.5,0,0,57.0")
+      assert(res2DF.collect()(2).mkString(",") === "age,3,23.25,35.0,47.5,0.0,4,integer,57.0,,34.67,10.0,,6,0.0,-0.11,6,17.77,7.26,1.0,0,1,")
+      assert(res2DF.collect()(3).mkString(",") === "mock_col1,4,112.5,125.0,145.0,0.0,8,long,160.0,,128.33,100.0,,6,0.0,0.22,6,23.17,9.46,1.0,0,1,")
+      assert(res2DF.collect()(4).mkString(",") === "income,5,,,,0.1667,6,string,533000.0,6,,432000.0,0,5,0.0,,6,,,0.8,4,0,433000.0")
+      assert(res2DF.collect()(5).mkString(",") === "date,6,,,,0.0,8,timestamp,2021-03-08 18:00:00,,,2021-03-08 18:00:00,,6,0.0,,6,,,0.1667,1,0,2021-03-08 18:00:00")
+      assert(res2DF.collect()(6).mkString(",") === "mock_col2,7,117.5,125.0,135.0,0.0,4,float,150.0,,127.5,110.0,,4,0.3333,0.43,6,17.08,8.54,1.0,0,1,")
+      assert(res2DF.collect()(7).mkString(",") === "alived,8,,,,0.0,1,boolean,true,,,false,,6,0.0,,6,,,0.3333,2,0,true")
+      assert(res2DF.collect()(8).mkString(",") === "extra,9,,,,0.0,,void,,,,,,0,1.0,,6,,,0.0,0,0,")
+      assert(res2DF.collect()(9).mkString(",") === "extra1,10,,,,0.0,,void,,,,,,0,1.0,,6,,,0.0,0,0,")
+      assert(res2DF.collect()(10).mkString(",") === "extra2,11,2.0,2.0,2.0,0.0,16,decimal(38,18),12.0,,3.67,2.0,,6,0.0,1.79,6,4.08,1.67,0.3333,0,0,2.0")
+      assert(res2DF.collect()(11).mkString(",") === "extra3,12,1.34,2.11,3.09,0.0,8,double,3.38,,2.2,1.12,,6,0.0,0.15,6,1.01,0.41,0.6667,0,0,")
 
       val sseq2: Seq[(Null, Null)] = Seq(
         (null, null),
@@ -134,8 +134,8 @@ class SQLDataSummaryV2Test extends AnyFunSuite with SparkOperationUtil with Basi
       println("-----------res3DF-----------------")
       println(res3DF.collect()(0).mkString(","))
       println(res3DF.collect()(1).mkString(","))
-      assert(res3DF.collect()(0).mkString(",") === "col1,1,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
-      assert(res3DF.collect()(1).mkString(",") === "col2,2,,,,0.0,,void,,,,,,0,1.0,,,,0.0,0,0,")
+      assert(res3DF.collect()(0).mkString(",") === "col1,1,,,,0.0,,void,,,,,,0,1.0,,2,,,0.0,0,0,")
+      assert(res3DF.collect()(1).mkString(",") === "col2,2,,,,0.0,,void,,,,,,0,1.0,,2,,,0.0,0,0,")
 
       val colNames = Array("id", "name", "age", "birth")
       val schema = StructType(colNames.map(fieldName => StructField(fieldName, StringType, nullable = true)))

@@ -384,7 +384,10 @@ class SQLDataSummaryV2(override val uid: String) extends SQLAlg with MllibFuncti
       smallDatasetAccurately = false
     }
 
-    total = df.count()
+    if (selectedMetrics.contains("totalCount") || smallDatasetAccurately) {
+      total = df.count()
+    }
+
     if (smallDatasetAccurately) {
       logInfo(format(s"The whole dataset is [${total}] and the approxThreshold is ${approxThreshold}"))
       if (total == 0) {
