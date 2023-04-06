@@ -1,0 +1,1 @@
+mvn install -DskipTests -pl byzer-llm

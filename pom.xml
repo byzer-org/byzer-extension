@@ -42,6 +42,7 @@
         <module>byzer-doris</module>
         <module>byzer-simple-auth</module>
         <module>byzer-expand-include</module>
+        <module>byzer-llm</module>
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>
