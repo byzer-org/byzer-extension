@@ -29,7 +29,7 @@ class MLSQLModel(override val uid: String) extends MLSQLBaseFileSource with WowP
     val modelByteSize = JavaUtils.byteStringAsBytes(config.config.getOrElse("modelSize", "20g"))
 
     val ROW_BLOCK_SIZE = 1024 * 64
-    val PARTITION_NUM = config.config.getOrElse("partitionNum", "10").toLong
+    val PARTITION_NUM = config.config.getOrElse("partitionNum", "1").toLong
 
     val enableDebug = config.config.getOrElse("enableDebug", "false").toBoolean
 
