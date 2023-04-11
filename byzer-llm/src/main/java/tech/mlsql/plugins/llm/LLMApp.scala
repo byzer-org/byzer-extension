@@ -13,10 +13,10 @@ import tech.mlsql.version.VersionCompatibility
 class LLMApp extends tech.mlsql.app.App with VersionCompatibility with Logging {
   override def run(args: Seq[String]): Unit = {
     ETRegister.register("LLM", classOf[LLM].getName)
-    CommandCollection.refreshCommandMapping(Map("llm" ->
-      """
-        |run command as LLM.`` where parameters='''{:all}'''
-        |""".stripMargin))
+    //    CommandCollection.refreshCommandMapping(Map("llm" ->
+    //      """
+    //        |run command as LLM.`` where parameters='''{:all}'''
+    //        |""".stripMargin))
     registerDS(classOf[MLSQLModel].getName)
 
   }

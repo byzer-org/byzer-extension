@@ -58,9 +58,9 @@ public class TarfileUtilsWrapper {
                 int len = files.size();
                 int i = 1;
                 for (FileStatus cur : files) {
-                    logger.info("[" + i++ + "/" + len + "]" + ",读取文件" + cur);
                     inputStream = fs.open(cur.getPath());
-                    String entryName = StringUtils.stripStart(cur.getPath().toUri().getPath(), pathStr);
+                    String entryName = StringUtils.removeStart(cur.getPath().toUri().getPath(), pathStr);
+                    logger.info("[" + i++ + "/" + len + "]" + entryName + ",读取文件" + cur);
                     tarOutputStream.putNextEntry(new HDFSTarEntry(cur, entryName));
                     org.apache.commons.io.IOUtils.copyLarge(inputStream, tarOutputStream);
                     inputStream.close();
