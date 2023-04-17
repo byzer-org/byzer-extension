@@ -44,7 +44,24 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
         } else ""
 
         val code =
-          s"""import ray
+          s"""try:
+             |    import sys
+             |    import logging
+             |    import transformers
+             |    import datasets
+             |    logging.basicConfig(
+             |    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+             |    datefmt="%m/%d/%Y %H:%M:%S",
+             |    handlers=[logging.StreamHandler(sys.stdout)],)
+             |    transformers.utils.logging.set_verbosity_info()
+             |    datasets.utils.logging.set_verbosity(logging.INFO)
+             |    transformers.utils.logging.set_verbosity(logging.INFO)
+             |    transformers.utils.logging.enable_default_handler()
+             |    transformers.utils.logging.enable_explicit_format()
+             |except ImportError:
+             |    pass
+             |    
+             |import ray
              |import numpy as np
              |from pyjava.api.mlsql import RayContext,PythonContext
              |
@@ -131,7 +148,24 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
         val pretrainedModel = params.getOrElse("pretrainedModel", "byzerllm/chatglm6b")
 
         val code =
-          s"""from pyjava.api.mlsql import RayContext
+          s"""try:
+             |    import sys
+             |    import logging
+             |    import transformers
+             |    import datasets
+             |    logging.basicConfig(
+             |    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+             |    datefmt="%m/%d/%Y %H:%M:%S",
+             |    handlers=[logging.StreamHandler(sys.stdout)],)
+             |    transformers.utils.logging.set_verbosity_info()
+             |    datasets.utils.logging.set_verbosity(logging.INFO)
+             |    transformers.utils.logging.set_verbosity(logging.INFO)
+             |    transformers.utils.logging.enable_default_handler()
+             |    transformers.utils.logging.enable_explicit_format()
+             |except ImportError:
+             |    pass
+             |    
+             |from pyjava.api.mlsql import RayContext
              |import os
              |import json
              |import uuid
