@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import streaming.core.HDFSTarEntry;
 import tech.mlsql.tool.HDFSOperatorV2;
-import tech.mlsql.tool.TarfileUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +50,7 @@ public class TarfileUtilsWrapper {
             List<FileStatus> files = new ArrayList<FileStatus>();
 
             for (String path : paths) {
+                logger.info("Walk the path: " + path);
                 TarfileUtilsWrapper.walk(fs, files, new Path(path), fileNameFilter);
             }
 
@@ -59,7 +60,13 @@ public class TarfileUtilsWrapper {
                 int i = 1;
                 for (FileStatus cur : files) {
                     inputStream = fs.open(cur.getPath());
-                    String entryName = StringUtils.removeStart(cur.getPath().toUri().getPath(), pathStr);
+                    URI tempUri = cur.getPath().toUri();
+                    String prefix = "";
+                    if(tempUri.getScheme()!=null){
+                        prefix = tempUri.getScheme()+"://";
+                    }
+                    prefix = prefix + tempUri.getPath();
+                    String entryName = StringUtils.removeStart(prefix, pathStr);
                     logger.info("[" + i++ + "/" + len + "]" + entryName + ",读取文件" + cur);
                     tarOutputStream.putNextEntry(new HDFSTarEntry(cur, entryName));
                     org.apache.commons.io.IOUtils.copyLarge(inputStream, tarOutputStream);
