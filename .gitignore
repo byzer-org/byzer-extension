@@ -4,4 +4,4 @@ target
 .DS_Store
 /**/build
 logs/
-
+./install-dev.sh

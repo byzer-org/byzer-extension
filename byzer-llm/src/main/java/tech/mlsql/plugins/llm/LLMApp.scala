@@ -3,7 +3,6 @@ package tech.mlsql.plugins.llm
 import streaming.core.datasource.MLSQLRegistry
 import tech.mlsql.common.utils.classloader.ClassLoaderTool
 import tech.mlsql.common.utils.log.Logging
-import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.version.VersionCompatibility
 
@@ -18,6 +17,7 @@ class LLMApp extends tech.mlsql.app.App with VersionCompatibility with Logging {
     //        |run command as LLM.`` where parameters='''{:all}'''
     //        |""".stripMargin))
     registerDS(classOf[MLSQLModel].getName)
+    registerDS(classOf[MLSQLModelFast].getName)
 
   }
 

@@ -174,8 +174,8 @@ class MLSQLModel(override val uid: String) extends MLSQLBaseFileSource with WowP
   }
 
 
-  override def fullFormat: String = "model"
+  override def fullFormat: String = "model2"
 
-  override def shortFormat: String = "model"
+  override def shortFormat: String = "model2"
 
 }
