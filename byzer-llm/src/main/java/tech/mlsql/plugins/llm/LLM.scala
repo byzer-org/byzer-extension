@@ -40,8 +40,8 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
       case "finetune" =>
         pretrainedModelType match {
           case "chatglm" =>
-            import tech.mlsql.plugins.llm.chatglm.Finetune
-            val finetune = new Finetune(params)
+            import tech.mlsql.plugins.llm.chatglm.PFinetune
+            val finetune = new PFinetune(params)
             finetune.run
           case "moss" =>
             throw new RuntimeException(s"Finetune ${pretrainedModelType} is not supported yet")

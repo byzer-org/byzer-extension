@@ -29,7 +29,7 @@ class Infer(params: Map[String, String]) extends Logging {
     val devices = params.getOrElse("devices", "-1")
     val quantizationBit = params.getOrElse("quantizationBit", "false").toBoolean
     val quantizationBitCode = if (quantizationBit) {
-      "quantization_bit=4,"
+      ",load_in_8bit=True"
     } else ""
 
     val code =
@@ -83,7 +83,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |          restore_model(conf,MODEL_DIR)
          |      else:
          |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
-         |    infer = Inference(MODEL_DIR).half().cuda()
+         |    infer = Inference(MODEL_DIR ${quantizationBitCode})
          |    return infer
          |
          |def predict_func(model,v):

@@ -28,8 +28,10 @@ class Infer(params: Map[String, String]) extends Logging {
     //        pythonConf.train(df, "", Map("parameters" -> command2))
     val devices = params.getOrElse("devices", "-1")
     val quantizationBit = params.getOrElse("quantizationBit", "false").toBoolean
+    val quantizationBitNum = params.getOrElse("quantizationBitNum", "4")
+
     val quantizationBitCode = if (quantizationBit) {
-      "quantization_bit=4,"
+      s"quantization_bit=${quantizationBitNum},"
     } else ""
 
     val code =
