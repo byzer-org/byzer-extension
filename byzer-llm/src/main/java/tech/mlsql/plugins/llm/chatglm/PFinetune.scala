@@ -35,7 +35,11 @@ class PFinetune(params: Map[String, String]) extends Logging {
     } else ""
     
     val code =
-      s"""try:
+      s"""
+         |import os
+         |if ${devices} != -1:
+         |    os.environ["CUDA_VISIBLE_DEVICES"] = "${devices}"
+         |try:
          |    import sys
          |    import logging
          |    import transformers
@@ -53,10 +57,11 @@ class PFinetune(params: Map[String, String]) extends Logging {
          |    pass
          |
          |from pyjava.api.mlsql import RayContext
-         |import os
          |import json
          |import uuid
-         |from byzerllm.chatglm6b.tunning import finetune
+         |import shutil
+         |import byzerllm.chatglm6b.tunning.finetune as finetune
+         |from byzerllm.chatglm6b.finetune import restore_model,load_model
          |
          |ray_context = RayContext.connect(globals(),None)
          |
@@ -70,8 +75,6 @@ class PFinetune(params: Map[String, String]) extends Logging {
          |if not os.path.exists(DATA_DIR):
          |    os.makedirs(DATA_DIR)
          |
-         |if ${devices} != -1:
-         |    os.environ["CUDA_VISIBLE_DEVICES"] = "${devices}"
          |
          |if not "${localModelDir}":
          |    restore_model(ray_context.conf(),MODEL_DIR)
@@ -86,7 +89,7 @@ class PFinetune(params: Map[String, String]) extends Logging {
          |finetune.run([
          | "--do_train",
          | "--model_name_or_path",MODEL_DIR,
-         | "--dataset", DATA_FILE,
+         | "--dataset_dir", DATA_DIR,
          | "--finetuning_type", "${finetuningType}",
          | "--per_device_train_batch_size", "4",
          | "--gradient_accumulation_steps", "4",
@@ -99,8 +102,11 @@ class PFinetune(params: Map[String, String]) extends Logging {
          | "--output_dir", OUTPUT_DIR,
          | ${quantizationBitCode}
          |])
-         |model_binary = load_model(OUTPUT_DIR+"/checkpoint-${maxSteps}")
-         |
+         |new_model_dir=os.path.join(OUTPUT_DIR,"checkpoint-${maxSteps}")
+         |if "${finetuningType}" == "lora":
+         |    new_dir_path = f"{new_model_dir}/pretrained_model"
+         |    shutil.copytree(MODEL_DIR, new_dir_path)
+         |model_binary = load_model(new_model_dir)
          |ray_context.build_result(model_binary)""".stripMargin
     logInfo(code)
     trainer.train(session.emptyDataFrame, "", Map(
