@@ -34,7 +34,11 @@ class Infer(params: Map[String, String]) extends Logging {
     } else ""
 
     val code =
-      s"""try:
+      s"""
+         |import os
+         |if ${devices} != -1:
+         |    os.environ["CUDA_VISIBLE_DEVICES"] = "${devices}"
+         |try:
          |    import sys
          |    import logging
          |    import transformers
@@ -60,7 +64,6 @@ class Infer(params: Map[String, String]) extends Logging {
          |import time
          |from ray.util.client.common import ClientActorHandle, ClientObjectRef
          |import uuid
-         |import os
          |import json
          |from byzerllm.bark.bark_voice import build_void_infer, ZH_SPEAKER, EN_SPEAKER
          |from byzerllm import restore_model
@@ -75,8 +78,6 @@ class Infer(params: Map[String, String]) extends Logging {
          |
          |if "${localModelDir}":
          |    MODEL_DIR="${localModelDir}"
-         |if ${devices} != -1:
-         |    os.environ["CUDA_VISIBLE_DEVICES"] = "${devices}"
          |
          |
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
@@ -88,7 +89,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |                 
          |    infer = build_void_infer(
          |    model_dir=MODEL_DIR,
-         |    tokenizer_dir=f"{MODEL_DIR}/pretrain_tokenizer")
+         |    tokenizer_dir=f"{MODEL_DIR}/pretrained_tokenizer")
          |    return infer
          |
          |def predict_func(model,v):

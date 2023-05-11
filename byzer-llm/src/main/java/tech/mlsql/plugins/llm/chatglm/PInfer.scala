@@ -79,10 +79,7 @@ class PInfer(params: Map[String, String]) extends Logging {
          |OUTPUT_DIR=os.path.join("${localPathPrefix}",rd,"checkpoint")
          |
          |if "${localModelDir}":
-         |    MODEL_DIR="${localModelDir}"
-         |if ${devices} != -1:
-         |    os.environ["CUDA_VISIBLE_DEVICES"] = "${devices}"
-         |
+         |    MODEL_DIR="${localModelDir}"                  
          |
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
          |    if not "${localModelDir}":

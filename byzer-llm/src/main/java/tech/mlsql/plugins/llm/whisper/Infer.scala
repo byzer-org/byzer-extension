@@ -18,23 +18,16 @@ class Infer(params: Map[String, String]) extends Logging {
     val modelTable = params.getOrElse("modelTable", params.getOrElse("model", ""))
     require(modelTable.nonEmpty, "modelTable/model is required")
     val udfName = params("udfName")
-    val pythonConf = new PythonCommand()
 
-    //        val num_gpus = params.getOrElse("num_gpus", params.getOrElse("numGPUs", "1"))
-    //        val maxConcurrency = params.getOrElse("maxConcurrency", "1")
-    //        val command = JSONTool.toJsonStr(List("conf", s"num_gpus=${num_gpus}"))
-    //        val command2 = JSONTool.toJsonStr(List("conf", s"maxConcurrency=${maxConcurrency}"))
-    //        pythonConf.train(df, "", Map("parameters" -> command))
-    //        pythonConf.train(df, "", Map("parameters" -> command2))
-    val device_index = params.getOrElse("device_index", "0")
-    val devices = params.getOrElse("devices", "-1")
-    val quantizationBit = params.getOrElse("quantizationBit", "false").toBoolean
-    val quantizationBitCode = if (quantizationBit) {
-      "quantization_bit=4,"
-    } else ""
+    val devices = params.getOrElse("devices", "0")
 
     val code =
-      s"""try:
+      s"""
+         |import os
+         |if ${devices} != -1:
+         |    os.environ["CUDA_VISIBLE_DEVICES"] = "${devices}"
+         |    
+         |try:
          |    import sys
          |    import logging
          |    import transformers
@@ -60,7 +53,6 @@ class Infer(params: Map[String, String]) extends Logging {
          |import time
          |from ray.util.client.common import ClientActorHandle, ClientObjectRef
          |import uuid
-         |import os
          |import json
          |from byzerllm.whisper.whisper_inference import Inference
          |from byzerllm import restore_model
@@ -75,10 +67,8 @@ class Infer(params: Map[String, String]) extends Logging {
          |
          |if "${localModelDir}":
          |    MODEL_DIR="${localModelDir}"
-         |if ${devices} != -1:
-         |    os.environ["CUDA_VISIBLE_DEVICES"] = "${devices}"
          |
-         |
+         |    
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
          |    if not "${localModelDir}":
          |      if "standalone" in conf and conf["standalone"]=="true":
@@ -86,12 +76,12 @@ class Infer(params: Map[String, String]) extends Logging {
          |      else:
          |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
          |                 
-         |    infer = Inference(MODEL_DIR, device_index=${device_index})
+         |    infer = Inference(MODEL_DIR,device_index=0)
          |    return infer
          |
          |def predict_func(model,v):
          |    data = [json.loads(item) for item in v]
-         |    results=[{"predict":model(item["rate"],np.array(item["voice"])),"labels":""} for item in data]
+         |    results=[{"predict": " ".join(model(item["rate"],np.array(item["voice"]))),"labels":""} for item in data]
          |    return {"value":[json.dumps(results,ensure_ascii=False,indent=4)]}
          |
          |UDFBuilder.build(ray_context,init_model,predict_func)
