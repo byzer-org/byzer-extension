@@ -1,4 +1,4 @@
-package tech.mlsql.plugins.llm.chatglm
+package tech.mlsql.plugins.llm.bark
 
 import org.apache.spark.sql.DataFrame
 import streaming.dsl.ScriptSQLExec
@@ -8,37 +8,33 @@ import tech.mlsql.ets.{PythonCommand, Ray}
 /**
  * 4/23/23 WilliamZhu(allwefantasy@gmail.com)
  */
-class PInfer(params: Map[String, String]) extends Logging {
+class Infer(params: Map[String, String]) extends Logging {
   def run(): DataFrame = {
     val session = ScriptSQLExec.context().execListener.sparkSession
     val localModelDir = params.getOrElse("localModelDir", "")
     val localPathPrefix = params.getOrElse("localPathPrefix", "/tmp")
-
-    val finetuningType = params.getOrElse("finetuningType", "lora")
-
     val trainer = new Ray()
 
     val modelTable = params.getOrElse("modelTable", params.getOrElse("model", ""))
     require(modelTable.nonEmpty, "modelTable/model is required")
     val udfName = params("udfName")
+    val pythonConf = new PythonCommand()
 
+    //        val num_gpus = params.getOrElse("num_gpus", params.getOrElse("numGPUs", "1"))
+    //        val maxConcurrency = params.getOrElse("maxConcurrency", "1")
+    //        val command = JSONTool.toJsonStr(List("conf", s"num_gpus=${num_gpus}"))
+    //        val command2 = JSONTool.toJsonStr(List("conf", s"maxConcurrency=${maxConcurrency}"))
+    //        pythonConf.train(df, "", Map("parameters" -> command))
+    //        pythonConf.train(df, "", Map("parameters" -> command2))
+    val device_index = params.getOrElse("device_index", "0")
     val devices = params.getOrElse("devices", "-1")
     val quantizationBit = params.getOrElse("quantizationBit", "false").toBoolean
-    val quantizationBitNum = params.getOrElse("quantizationBitNum", "4")
-
-    val maxLength = params.getOrElse("maxLength", "512")
-    val topP = params.getOrElse("topP", "0.95")
-    val temperature = params.getOrElse("temperature", "0.1")
-
     val quantizationBitCode = if (quantizationBit) {
-      s"quantization_bit=${quantizationBitNum},"
+      "quantization_bit=4,"
     } else ""
 
     val code =
-      s"""import os
-         |if ${devices} != -1:
-         |    os.environ["CUDA_VISIBLE_DEVICES"] = "${devices}"
-         |try:
+      s"""try:
          |    import sys
          |    import logging
          |    import transformers
@@ -64,11 +60,10 @@ class PInfer(params: Map[String, String]) extends Logging {
          |import time
          |from ray.util.client.common import ClientActorHandle, ClientObjectRef
          |import uuid
+         |import os
          |import json
-         |
-         |import byzerllm.chatglm6b.tunning.infer as infer
-         |from byzerllm.chatglm6b.finetune import restore_model,load_model
-         |
+         |from byzerllm.bark.bark_voice import build_void_infer, ZH_SPEAKER, EN_SPEAKER
+         |from byzerllm import restore_model
          |from pyjava.storage import streaming_tar
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
@@ -90,14 +85,15 @@ class PInfer(params: Map[String, String]) extends Logging {
          |          restore_model(conf,MODEL_DIR)
          |      else:
          |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
-         |
-         |    model = infer.init_model(MODEL_DIR)
-         |    return model
+         |                 
+         |    infer = build_void_infer(
+         |    model_dir=MODEL_DIR,
+         |    tokenizer_dir=f"{MODEL_DIR}/pretrain_tokenizer")
+         |    return infer
          |
          |def predict_func(model,v):
-         |    (trainer,tokenizer) = model
          |    data = [json.loads(item) for item in v]
-         |    results=[{"predict":infer.predict(item["instruction"],trainer,tokenizer,max_length=${maxLength}, top_p=${topP},temperature=${temperature},history=infer.extract_history(item)),"labels":""} for item in data]
+         |    results=[{"predict":model.text_to_voice(item["instruction"]).tolist(),"labels":""} for item in data]
          |    return {"value":[json.dumps(results,ensure_ascii=False,indent=4)]}
          |
          |UDFBuilder.build(ray_context,init_model,predict_func)
