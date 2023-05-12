@@ -5,6 +5,7 @@ import tech.mlsql.common.utils.classloader.ClassLoaderTool
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
+import tech.mlsql.plugins.llm.qa.ByzerLLMQABuilder
 import tech.mlsql.plugins.llm.tools.ModelAdmin
 import tech.mlsql.version.VersionCompatibility
 
@@ -14,6 +15,7 @@ import tech.mlsql.version.VersionCompatibility
 class LLMApp extends tech.mlsql.app.App with VersionCompatibility with Logging {
   override def run(args: Seq[String]): Unit = {
     ETRegister.register("LLM", classOf[LLM].getName)
+    ETRegister.register("LLMQABuilder", classOf[ByzerLLMQABuilder].getName)
     //    CommandCollection.refreshCommandMapping(Map("llm" ->
     //      """
     //        |run command as LLM.`` where parameters='''{:all}'''
