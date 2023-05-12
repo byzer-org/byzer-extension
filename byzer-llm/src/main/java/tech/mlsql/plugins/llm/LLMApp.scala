@@ -3,7 +3,9 @@ package tech.mlsql.plugins.llm
 import streaming.core.datasource.MLSQLRegistry
 import tech.mlsql.common.utils.classloader.ClassLoaderTool
 import tech.mlsql.common.utils.log.Logging
+import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
+import tech.mlsql.plugins.llm.tools.ModelAdmin
 import tech.mlsql.version.VersionCompatibility
 
 /**
@@ -18,6 +20,12 @@ class LLMApp extends tech.mlsql.app.App with VersionCompatibility with Logging {
     //        |""".stripMargin))
     registerDS(classOf[MLSQLModel].getName)
     registerDS(classOf[MLSQLModelFast].getName)
+
+    ETRegister.register("ModelAdmin", classOf[ModelAdmin].getName)
+    CommandCollection.refreshCommandMapping(Map("byzerllm" ->
+      """
+        |run command as ModelAdmin.`` where parameters='''{:all}'''
+        |""".stripMargin))
 
   }
 
