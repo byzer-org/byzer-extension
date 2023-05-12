@@ -68,7 +68,7 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |rd=str(uuid.uuid4())
          |
          |MODEL_DIR=os.path.join("${localPathPrefix}",rd,"infer_model")
-         |owner = context.conf["owner"]
+         |owner = context.conf.get("owner",context.conf["OWNER"])
          |
          |if "${localModelDir}":
          |    MODEL_DIR="${localModelDir}"
