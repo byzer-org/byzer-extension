@@ -17,6 +17,8 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val inputTable = params("inputTable")
     val outputTable = params("outputTable")
+    val localPathPrefix = params.getOrElse("localPathPrefix", "/tmp")
+    
     val command = new Ray()
     // run command as ByzerLLMQA where qaName="qa" and inputTable="";
     command.train(df, path, Map(
@@ -26,14 +28,15 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
            |from pyjava.storage import streaming_tar
            |import uuid
            |import ray
-           |from byzerllm.apps.qa import RayByzerLLMQA,ByzerLLMClient,ClientParams
+           |from byzerllm.apps.qa import RayByzerLLMQA,ByzerLLMClient,ClientParams,BuilderParams
            |
            |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
            |
-           |db_dir = "/tmp/model/{}".format(str(uuid.uuid4()))
-           |qa = RayByzerLLMQA.remote(db_dir,ByzerLLMClient(params=ClientParams(owner=context.conf["owner"])))
+           |qa = RayByzerLLMQA(db_dir,
+           |     ByzerLLMClient(params=ClientParams(owner=context.conf["owner"])),
+           |     BuilderParams(local_path_prefix="${localPathPrefix}"))
            |
-           |bb = ray.get(qa.save.remote(ray_context.data_servers()))
+           |bb = qa.save(ray_context.data_servers())
            |
            |ray_context.build_result(bb)
            |""".stripMargin,

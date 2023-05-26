@@ -80,8 +80,8 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |      else:
          |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
          |
-         |    from byzerllm.apps.qa import ByzerLLMQA,ByzerLLMClient,ClientParams
-         |    qa = ByzerLLMQA(MODEL_DIR,ByzerLLMClient(params=ClientParams(owner=owner)))
+         |    from byzerllm.apps.qa import ByzerLLMQA,ByzerLLMClient,ClientParams,QueryParams
+         |    qa = ByzerLLMQA(MODEL_DIR,ByzerLLMClient(params=ClientParams(owner=owner)),QueryParams(local_path_prefix="${localPathPrefix}"))
          |    return qa
          |
          |def predict_func(model,v):        
