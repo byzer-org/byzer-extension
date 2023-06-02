@@ -1,18 +1,20 @@
-package tech.mlsql.plugins.llm.whisper
+package tech.mlsql.plugins.llm.sass.chatglm
 
 import org.apache.spark.sql.DataFrame
 import streaming.dsl.ScriptSQLExec
 import tech.mlsql.common.utils.log.Logging
-import tech.mlsql.ets.{PythonCommand, Ray}
+import tech.mlsql.ets.Ray
 
-/**
- * 4/23/23 WilliamZhu(allwefantasy@gmail.com)
- */
-class Infer(params: Map[String, String]) extends Logging {
+class ChatGLMAPI(params: Map[String, String]) extends Logging {
   def run(): DataFrame = {
     val session = ScriptSQLExec.context().execListener.sparkSession
     val localModelDir = params.getOrElse("localModelDir", "")
     val localPathPrefix = params.getOrElse("localPathPrefix", "/tmp")
+
+    val apiKey = params("apiKey")
+    val publicKey = params("publicKey")
+
+
     val trainer = new Ray()
 
     val modelTable = params.getOrElse("modelTable", params.getOrElse("model", ""))
@@ -26,7 +28,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |import os
          |if ${devices} != -1:
          |    os.environ["CUDA_VISIBLE_DEVICES"] = "${devices}"
-         |    
+         |
          |try:
          |    import sys
          |    import logging
@@ -54,9 +56,8 @@ class Infer(params: Map[String, String]) extends Logging {
          |from ray.util.client.common import ClientActorHandle, ClientObjectRef
          |import uuid
          |import json
-         |from byzerllm.whisper.whisper_inference import Inference
-         |from byzerllm import restore_model
-         |from pyjava.storage import streaming_tar
+         |from byzerllm.saas.chatglm import ChatGLMAPI
+         |from byzerllm.utils.text_generator import ByzerLLMGenerator
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
          |
@@ -68,23 +69,19 @@ class Infer(params: Map[String, String]) extends Logging {
          |if "${localModelDir}":
          |    MODEL_DIR="${localModelDir}"
          |
-         |    
+         |
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
-         |    if not "${localModelDir}":
-         |      if "standalone" in conf and conf["standalone"]=="true":
-         |          restore_model(conf,MODEL_DIR)
-         |      else:
-         |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
-         |    else:
-         |      from byzerllm import consume_model
-         |      consume_model(conf)
-         |    infer = Inference(MODEL_DIR,device_index=0)
-         |    return infer
+         |    from byzerllm import consume_model
+         |    consume_model(conf)
+         |    infer = ChatGLMAPI("${apiKey}","${publicKey}")
+         |    return (infer,None)
          |
          |def predict_func(model,v):
+         |    (trainer,tokenizer) = model
+         |    llm = ByzerLLMGenerator(trainer,tokenizer)
          |    data = [json.loads(item) for item in v]
-         |    results=[{"predict": " ".join(model(item["rate"],np.array(item["voice"]))),"labels":""} for item in data]
-         |    return {"value":[json.dumps(results,ensure_ascii=False,indent=4)]}
+         |    results=[{"predict":llm.predict(item),"labels":""} for item in data]
+         |    return {"value":[json.dumps(results,ensure_ascii=False)]}
          |
          |UDFBuilder.build(ray_context,init_model,predict_func)
          |""".stripMargin

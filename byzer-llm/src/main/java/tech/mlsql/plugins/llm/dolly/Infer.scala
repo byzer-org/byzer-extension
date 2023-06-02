@@ -83,6 +83,9 @@ class Infer(params: Map[String, String]) extends Logging {
          |          restore_model(conf,MODEL_DIR)
          |      else:
          |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
+         |    else:
+         |      from byzerllm import consume_model
+         |      consume_model(conf)
          |    infer = Inference(MODEL_DIR ${quantizationBitCode})
          |    return infer
          |

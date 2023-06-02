@@ -25,6 +25,9 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
     require(modelTable.nonEmpty, "modelTable/model is required")
     val udfName = params("udfName")
 
+    val embeddingFunc = params.getOrElse("embeddingFunc","chat")
+    val chatFunc = params.getOrElse("chatFunc","chat")
+
     val devices = params.getOrElse("devices", "-1")
     
     val code =
@@ -81,7 +84,11 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
          |
          |    from byzerllm.apps.qa import ByzerLLMQA,ByzerLLMClient,ClientParams,QueryParams
-         |    qa = ByzerLLMQA(MODEL_DIR,ByzerLLMClient(params=ClientParams(owner=owner)),QueryParams(local_path_prefix="${localPathPrefix}"))
+         |    qa = ByzerLLMQA(MODEL_DIR,ByzerLLMClient(params=ClientParams(
+         |      owner=owner,
+         |      llm_embedding_func="${embeddingFunc}",
+         |      llm_chat_func="${chatFunc}"
+         |    )),QueryParams(local_path_prefix="${localPathPrefix}"))
          |    return qa
          |
          |def predict_func(model,v):        

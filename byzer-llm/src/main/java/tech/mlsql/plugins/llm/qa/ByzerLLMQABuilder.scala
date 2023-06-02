@@ -18,6 +18,10 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
     val inputTable = params("inputTable")
     val outputTable = params("outputTable")
     val localPathPrefix = params.getOrElse("localPathPrefix", "/tmp")
+
+    val batchSize = params.getOrElse("batchSize", "100")
+    val chunk_size = params.getOrElse("chunkSize", "600")
+    val chunk_overlap = params.getOrElse("chunkOverlap", "0")
     
     val command = new Ray()
     // run command as ByzerLLMQA where qaName="qa" and inputTable="";
@@ -28,15 +32,21 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
            |from pyjava.storage import streaming_tar
            |import uuid
            |import ray
+           |import os
            |from byzerllm.apps.qa import RayByzerLLMQA,ByzerLLMClient,ClientParams,BuilderParams
            |
            |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
            |
-           |qa = RayByzerLLMQA(db_dir,
-           |     ByzerLLMClient(params=ClientParams(owner=context.conf["owner"])),
-           |     BuilderParams(local_path_prefix="${localPathPrefix}"))
+           |qa = RayByzerLLMQA(
+           |     ByzerLLMClient(params=ClientParams(owner=context.conf["owner"]))
+           |     )
            |
-           |bb = qa.save(ray_context.data_servers())
+           |bb = qa.save(ray_context.data_servers(),BuilderParams(
+           |                                            local_path_prefix="${localPathPrefix}",
+           |                                            batch_size=${batchSize},
+           |                                            chunk_size=${chunk_size},
+           |                                            chunk_overlap=${chunk_overlap}
+           |                                            ))
            |
            |ray_context.build_result(bb)
            |""".stripMargin,

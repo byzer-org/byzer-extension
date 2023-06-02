@@ -25,6 +25,10 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
             import tech.mlsql.plugins.llm.chatglm.PInfer
             val infer = new PInfer(params)
             infer.run
+          case "saas/chatglm" =>
+            import tech.mlsql.plugins.llm.sass.chatglm.ChatGLMAPI
+            val infer = new ChatGLMAPI(params)
+            infer.run
           case "moss" =>
             import tech.mlsql.plugins.llm.moss.Infer
             val infer = new Infer(params)
