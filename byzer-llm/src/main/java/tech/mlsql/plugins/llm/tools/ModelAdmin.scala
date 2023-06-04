@@ -33,7 +33,7 @@ class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibil
               |ray.kill(a)
               |ray_context.build_result([])
               |""".stripMargin
-        ))
+        )).collect()
       case _ =>
         "No action found"
     }

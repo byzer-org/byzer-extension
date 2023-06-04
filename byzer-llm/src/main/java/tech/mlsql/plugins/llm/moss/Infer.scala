@@ -61,9 +61,10 @@ class Infer(params: Map[String, String]) extends Logging {
          |import uuid
          |import os
          |import json
-         |from byzerllm.moss.models.modeling_moss import MossForCausalLM
+         |import byzerllm.moss.moss_inference as moss
          |from byzerllm.moss.moss_inference import Inference,restore_model
          |from pyjava.storage import streaming_tar
+         |from byzerllm.utils.text_generator import ByzerLLMGenerator
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
          |
@@ -87,14 +88,16 @@ class Infer(params: Map[String, String]) extends Logging {
          |    else:
          |      from byzerllm import consume_model
          |      consume_model(conf)
-         |    model = MossForCausalLM.from_pretrained(MODEL_DIR).half().cuda()
-         |    infer = Inference(model, device_map="auto")
-         |    return infer
+         |
+         |    model = moss.init_model(MODEL_DIR)
+         |    return model
          |
          |def predict_func(model,v):
+         |    (trainer,tokenizer) = model
+         |    llm = ByzerLLMGenerator(trainer,tokenizer)
          |    data = [json.loads(item) for item in v]
-         |    results=[{"predict":model(item["instruction"]),"labels":""} for item in data]
-         |    return {"value":[json.dumps(results,ensure_ascii=False,indent=4)]}
+         |    results=[{"predict":llm.predict(item),"labels":""} for item in data]
+         |    return {"value":[json.dumps(results,ensure_ascii=False)]}
          |
          |UDFBuilder.build(ray_context,init_model,predict_func)
          |""".stripMargin
