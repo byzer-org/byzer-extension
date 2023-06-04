@@ -33,7 +33,9 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
            |import uuid
            |import ray
            |import os
-           |from byzerllm.apps.qa import RayByzerLLMQA,ByzerLLMClient,ClientParams,BuilderParams
+           |from byzerllm.apps.qa import RayByzerLLMQA
+           |from byzerllm.apps.client import ByzerLLMClient
+           |from byzerllm.apps import ClientParams,BuilderParams
            |
            |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
            |

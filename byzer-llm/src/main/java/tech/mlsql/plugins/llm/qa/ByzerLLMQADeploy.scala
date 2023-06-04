@@ -83,7 +83,11 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |      else:
          |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
          |
-         |    from byzerllm.apps.qa import ByzerLLMQA,ByzerLLMClient,ClientParams,QueryParams
+         |    from byzerllm.apps.qa import ByzerLLMQA
+         |    from byzerllm.apps.qa import RayByzerLLMQA
+         |    from byzerllm.apps.client import ByzerLLMClient
+         |    from byzerllm.apps import ClientParams,QueryParams
+         |
          |    qa = ByzerLLMQA(MODEL_DIR,ByzerLLMClient(params=ClientParams(
          |      owner=owner,
          |      llm_embedding_func="${embeddingFunc}",

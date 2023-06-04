@@ -1,5 +1,5 @@
 conda activate dev
-PROJECT=/Users/allwefantasy/projects/byzer-extension
+PROJECT=/Users/hailin.zhu/projects/byzer-extension
 
 MOUDLE_NAME=$1
 VERSION="0.1.0-SNAPSHOT"
