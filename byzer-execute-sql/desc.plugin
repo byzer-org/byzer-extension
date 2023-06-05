@@ -1,0 +1,15 @@
+moduleName=byzer-execute-sql-3.3
+mainClass=tech.mlsql.plugins.execsql.ExecSQLApp
+scala_version=2.12
+spark_version=3.3
+version=0.1.0-SNAPSHOT
+author=allwefantasy
+mlsqlVersions=""
+githubUrl=https://github.com/byzer-org/byzer-extension/tree/master/byzer-execute-sql
+mlsqlPluginType=app
+desc=byzer-execute-sql
+
+
+
+
+
