@@ -33,6 +33,10 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
             import tech.mlsql.plugins.llm.moss.Infer
             val infer = new Infer(params)
             infer.run
+          case "falcon" =>
+            import tech.mlsql.plugins.llm.falcon.Infer
+            val infer = new Infer(params)
+            infer.run
           case "dolly" =>
             import tech.mlsql.plugins.llm.dolly.Infer
             val infer = new Infer(params)
