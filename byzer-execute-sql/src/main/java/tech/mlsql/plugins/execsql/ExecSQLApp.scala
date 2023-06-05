@@ -41,6 +41,14 @@ object ExecSQLApp {
 
   private val connectionPool = new ConcurrentHashMap[String,java.sql.Connection]()
 
+
+  def executeQueryInDriverWithoutResult(session: SparkSession, connName: String, sql: String) = {
+    import scala.collection.JavaConverters._
+    val stat = ExecSQLApp.connectionPool.get(connName).prepareStatement(sql)
+    stat.execute()
+  }
+
+
   def executeQueryInDriver(session:SparkSession, connName:String, sql:String) = {
     import scala.collection.JavaConverters._
     val stat = ExecSQLApp.connectionPool.get(connName).prepareStatement(sql)

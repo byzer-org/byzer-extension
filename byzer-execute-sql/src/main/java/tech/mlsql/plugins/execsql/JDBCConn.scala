@@ -24,14 +24,15 @@ class JDBCConn(override val uid: String) extends SQLAlg with VersionCompatibilit
     // !conn gpconn "url=jdbc:postgresql://xxxx" "username=xxxx" "password=xxxx" "driver=org.postgresql.Driver";
     // !conn remove gpconn;
     args match {
+      case List("remove", connName) =>
+        ExecSQLApp.removeConnection(connName)
+
       case connName :: left =>
         val options = left.map { item =>
           val Array(key, value) = item.split("=", 2)
           (key, value)
         }.toMap
         ExecSQLApp.newConnection(connName, options)
-      case List("remove",connName) =>
-        ExecSQLApp.removeConnection(connName)
     }
 
     df.sparkSession.emptyDataFrame
