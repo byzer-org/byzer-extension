@@ -20,7 +20,7 @@ class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibil
     import df.sparkSession.implicits._
 
     // !byzerllm model remove id
-    val value = args.slice(0, 2) match {
+    args.slice(0, 2) match {
       case List("model", "remove",udfName) =>
         val command = new Ray()
         command.train(df,path,Map(
@@ -32,7 +32,9 @@ class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibil
               |a = ray.get_actor("${udfName}")
               |ray.kill(a)
               |ray_context.build_result([])
-              |""".stripMargin
+              |""".stripMargin,
+          "inputTable"->"command",
+          "outputTable"->"test"
         )).collect()
       case _ =>
         "No action found"
