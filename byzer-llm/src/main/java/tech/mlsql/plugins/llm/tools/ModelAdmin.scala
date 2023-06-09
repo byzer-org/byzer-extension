@@ -20,7 +20,7 @@ class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibil
     import df.sparkSession.implicits._
 
     // !byzerllm model remove id
-    args.slice(0, 2) match {
+    args match {
       case List("model", "remove",udfName) =>
         val command = new Ray()
         command.train(df,path,Map(
