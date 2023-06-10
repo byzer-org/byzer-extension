@@ -22,6 +22,9 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
     val batchSize = params.getOrElse("batchSize", "100")
     val chunk_size = params.getOrElse("chunkSize", "600")
     val chunk_overlap = params.getOrElse("chunkOverlap", "0")
+
+    val embeddingFunc = params.getOrElse("embeddingFunc", "chat")
+    val chatFunc = params.getOrElse("chatFunc", "chat")
     
     val command = new Ray()
     // run command as ByzerLLMQA where qaName="qa" and inputTable="";
@@ -40,7 +43,11 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
            |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
            |
            |qa = RayByzerLLMQA(
-           |     ByzerLLMClient(params=ClientParams(owner=context.conf["owner"]))
+           |     ByzerLLMClient(params=ClientParams(
+           |         owner=context.conf["owner"],
+           |         llm_embedding_func="${embeddingFunc}",
+           |         llm_chat_func="${chatFunc}"
+           |                   ))
            |     )
            |
            |bb = qa.save(ray_context.data_servers(),BuilderParams(

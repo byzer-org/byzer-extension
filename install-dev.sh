@@ -1,5 +1,6 @@
-conda activate dev
-PROJECT=/Users/hailin.zhu/projects/byzer-extension
+user_home=$(echo ~)
+PROJECT=${user_home}/projects/byzer-extension
+REMOTE_SERVER=${REMOTE_SERVER:-k8s}
 
 MOUDLE_NAME=$1
 VERSION="0.1.0-SNAPSHOT"
