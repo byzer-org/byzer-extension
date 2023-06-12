@@ -96,7 +96,7 @@ class PInfer(params: Map[String, String]) extends Logging {
          |
          |def predict_func(model,v):
          |    (trainer,tokenizer) = model
-         |    llm = ByzerLLMGenerator(trainer,tokenizer)
+         |    llm = ByzerLLMGenerator(trainer,tokenizer,use_feature_extraction=True)
          |    data = [json.loads(item) for item in v]
          |    results=[{"predict":llm.predict(item),"labels":""} for item in data]
          |    return {"value":[json.dumps(results,ensure_ascii=False)]}
