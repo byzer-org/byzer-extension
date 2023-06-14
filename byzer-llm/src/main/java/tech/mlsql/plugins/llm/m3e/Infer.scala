@@ -3,7 +3,7 @@ package tech.mlsql.plugins.llm.m3e
 import org.apache.spark.sql.DataFrame
 import streaming.dsl.ScriptSQLExec
 import tech.mlsql.common.utils.log.Logging
-import tech.mlsql.ets.{PythonCommand, Ray}
+import tech.mlsql.ets.Ray
 
 /**
  * 4/23/23 WilliamZhu(allwefantasy@gmail.com)
@@ -18,9 +18,8 @@ class Infer(params: Map[String, String]) extends Logging {
     val modelTable = params.getOrElse("modelTable", params.getOrElse("model", ""))
     require(modelTable.nonEmpty, "modelTable/model is required")
     val udfName = params("udfName")
-    
     val devices = params.getOrElse("devices", "-1")
-
+    
     val code =
       s"""try:
          |    import sys
@@ -45,14 +44,15 @@ class Infer(params: Map[String, String]) extends Logging {
          |
          |from pyjava.udf import UDFMaster,UDFWorker,UDFBuilder,UDFBuildInFunc
          |from typing import Any, NoReturn, Callable, Dict, List
-         |import time
          |from ray.util.client.common import ClientActorHandle, ClientObjectRef
+         |import time
          |import uuid
          |import os
          |import json
-         |import byzerllm.moss.moss_inference as moss
-         |from byzerllm.moss.moss_inference import Inference,restore_model
          |from pyjava.storage import streaming_tar
+         |
+         |from byzerllm import common_init_model
+         |import byzerllm.m3e as infer
          |from byzerllm.utils.text_generator import ByzerLLMGenerator
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
@@ -69,16 +69,8 @@ class Infer(params: Map[String, String]) extends Logging {
          |
          |
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
-         |    if not "${localModelDir}":
-         |      if "standalone" in conf and conf["standalone"]=="true":
-         |          restore_model(conf,MODEL_DIR)
-         |      else:
-         |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
-         |    else:
-         |      from byzerllm import consume_model
-         |      consume_model(conf)
-         |
-         |    model = moss.init_model(MODEL_DIR)
+         |    common_init_model(model_refs,conf,MODEL_DIR, is_load_from_local="${localModelDir}" != "")
+         |    model = infer.init_model(MODEL_DIR)
          |    return model
          |
          |def predict_func(model,v):
