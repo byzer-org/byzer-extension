@@ -2,11 +2,13 @@ package tech.mlsql.plugins.llm.tools
 
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import streaming.dsl.ScriptSQLExec
 import streaming.dsl.mmlib.SQLAlg
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
-import tech.mlsql.ets.Ray
+import tech.mlsql.ets.{PythonCommand, Ray}
+import tech.mlsql.session.SetSession
 import tech.mlsql.version.VersionCompatibility
 
 /**
@@ -15,32 +17,70 @@ import tech.mlsql.version.VersionCompatibility
 class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams {
   def this() = this(BaseParams.randomUID())
 
+
   override def train(df: DataFrame, path: String, params: Map[String, String]): DataFrame = {
     val args = JSONTool.parseJson[List[String]](params("parameters"))
-    import df.sparkSession.implicits._
+    val context = ScriptSQLExec.context()
+    val session = context.execListener.sparkSession
+    import session.implicits._
 
-    // !byzerllm model remove id
-    args match {
-      case List("model", "remove",udfName) =>
-        val command = new Ray()
-        command.train(df,path,Map(
-          "code"->
-            s"""
-              |from pyjava.api.mlsql import RayContext,PythonContext
-              |import ray
-              |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
-              |a = ray.get_actor("${udfName}")
-              |ray.kill(a)
-              |ray_context.build_result([])
-              |""".stripMargin,
-          "inputTable"->"command",
-          "outputTable"->"test"
-        )).collect()
-      case _ =>
-        "No action found"
+    def buildConf(key: String, value: String) = {
+      val pythonConf = new PythonCommand()
+      val command = JSONTool.toJsonStr(List("conf", s"${key}=${value}"))
+      pythonConf.train(df, "", Map("parameters" -> command)).collect()
     }
 
-     df.sparkSession.emptyDataFrame
+    def buildConfExpr(v: String) = {
+      val pythonConf = new PythonCommand()
+      val command = JSONTool.toJsonStr(List("conf", v))
+      pythonConf.train(df, "", Map("parameters" -> command)).collect()
+    }
+
+    val envSession = new SetSession(session, context.owner)
+
+    def setupDefaultConf = {
+      buildConfExpr("rayAddress=127.0.0.1:10001")
+      buildConfExpr("pythonExec=python")
+      buildConfExpr("dataMode=model")
+      buildConfExpr("runIn=driver")
+      buildConfExpr("num_gpus=1")
+      buildConfExpr("standalone=true")
+      buildConfExpr("maxConcurrency=1")
+      buildConfExpr(s"owner=${context.owner}")
+      buildConfExpr("schema=file")
+    }
+
+    // !byzerllm model remove id
+    val v = args match {
+      case List("setup", "single") =>
+        setupDefaultConf
+        envSession.fetchPythonRunnerConf.get.toDF()
+
+      case List("setup", value) =>
+        setupDefaultConf
+        buildConfExpr(value)
+        envSession.fetchPythonRunnerConf.get.toDF()
+
+      case List("model", "remove", udfName) =>
+        val command = new Ray()
+        command.train(df, path, Map(
+          "code" ->
+            s"""
+               |from pyjava.api.mlsql import RayContext,PythonContext
+               |import ray
+               |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
+               |a = ray.get_actor("${udfName}")
+               |ray.kill(a)
+               |ray_context.build_result([])
+               |""".stripMargin,
+          "inputTable" -> "command",
+          "outputTable" -> "test"
+        )).collect()
+        df.sparkSession.emptyDataFrame
+      case _ =>
+        df.sparkSession.emptyDataFrame
+    }
+    v
   }
 
 
