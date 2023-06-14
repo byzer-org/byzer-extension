@@ -57,6 +57,10 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
             import tech.mlsql.plugins.llm.whisper.Infer
             val infer = new Infer(params)
             infer.run
+          case "m3e" =>
+            import tech.mlsql.plugins.llm.m3e.Infer
+            val infer = new Infer(params)
+            infer.run
           case "qa" =>
             import tech.mlsql.plugins.llm.qa.ByzerLLMQADeploy
             val infer = new ByzerLLMQADeploy(params)
