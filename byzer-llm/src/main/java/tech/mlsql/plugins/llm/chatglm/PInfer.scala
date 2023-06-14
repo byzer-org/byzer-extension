@@ -67,10 +67,7 @@ class PInfer(params: Map[String, String]) extends Logging {
          |import json
          |
          |import byzerllm.chatglm6b.tunning.infer as infer
-         |from byzerllm.chatglm6b.finetune import restore_model,load_model
          |from byzerllm.utils.text_generator import ByzerLLMGenerator
-         |
-         |from pyjava.storage import streaming_tar
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
          |
@@ -83,14 +80,8 @@ class PInfer(params: Map[String, String]) extends Logging {
          |    MODEL_DIR="${localModelDir}"                  
          |
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
-         |    if not "${localModelDir}":
-         |      if "standalone" in conf and conf["standalone"]=="true":
-         |          restore_model(conf,MODEL_DIR)
-         |      else:
-         |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
-         |    else:
-         |      from byzerllm import consume_model
-         |      consume_model(conf)
+         |    from byzerllm import common_init_model
+         |    common_init_model(model_refs,conf,MODEL_DIR, is_load_from_local="${localModelDir}" != "")
          |    model = infer.init_model(MODEL_DIR)
          |    return model
          |

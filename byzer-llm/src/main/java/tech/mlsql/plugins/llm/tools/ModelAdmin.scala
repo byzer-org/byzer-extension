@@ -44,7 +44,7 @@ class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibil
       buildConfExpr("dataMode=model")
       buildConfExpr("runIn=driver")
       buildConfExpr("num_gpus=1")
-      buildConfExpr("standalone=true")
+      buildConfExpr("standalone=false")
       buildConfExpr("maxConcurrency=1")
       buildConfExpr(s"owner=${context.owner}")
       buildConfExpr("schema=file")
