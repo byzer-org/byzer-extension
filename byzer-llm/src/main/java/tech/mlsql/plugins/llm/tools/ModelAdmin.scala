@@ -57,7 +57,6 @@ class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibil
         envSession.fetchPythonRunnerConf.get.toDF()
 
       case List("setup", value) =>
-        setupDefaultConf
         buildConfExpr(value)
         envSession.fetchPythonRunnerConf.get.toDF()
 
