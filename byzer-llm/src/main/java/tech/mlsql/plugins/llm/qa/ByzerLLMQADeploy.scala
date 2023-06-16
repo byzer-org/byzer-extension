@@ -63,7 +63,7 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |import json
          |
          |from byzerllm.chatglm6b.finetune import restore_model,load_model
-         |
+         |from byzerllm.utils.text_generator import qa_predict_func
          |from pyjava.storage import streaming_tar
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
@@ -95,12 +95,8 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |    )),QueryParams(local_path_prefix="${localPathPrefix}"))
          |    return qa
          |
-         |def predict_func(model,v):        
-         |    data = [json.loads(item) for item in v]
-         |    results=[{"predict":model.predict(item),"labels":""} for item in data]
-         |    return {"value":[json.dumps(results,ensure_ascii=False)]}
          |
-         |UDFBuilder.build(ray_context,init_model,predict_func)
+         |UDFBuilder.build(ray_context,init_model,qa_predict_func)
          |""".stripMargin
     logInfo(code)
     trainer.predict(session, modelTable, udfName, Map(
