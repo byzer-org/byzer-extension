@@ -19,10 +19,30 @@ object LLMUDF {
       val predict = obj.getString("predict")
       val input = obj.getJSONObject("input")
       val instruction = input.getString("instruction")
+      
+      val his_instruction = s"${instruction}${predict}"
+      
+      val query = JSONTool.jParseJsonObj(newParams.head)
+
+      query.put("instruction", s"${his_instruction}\n${query.getString("instruction")}")
+
+      Seq(query.toString)
+    })
+  }
+
+  def llm_param(uDFRegistration: UDFRegistration) = {
+    uDFRegistration.register("llm_param", (input: Map[String, String]) => {
+
+      val instruction = input("instruction")
+      val system_msg = input.getOrElse("system_msg","")
       // system_role,user_role,assistant_role
-      var systemRole = input.optString("system_role", "")
-      var userRole = input.optString("user_role", "")
-      var assistantRole = input.optString("assistant_role", "")
+      var systemRole = input.getOrElse("system_role", "")
+      var userRole = input.getOrElse("user_role", "")
+      var assistantRole = input.getOrElse("assistant_role", "")
+
+      if (systemRole != "") {
+        systemRole = s"${systemRole}:"
+      }
 
       if (userRole != "") {
         userRole = s"${userRole}:"
@@ -32,34 +52,9 @@ object LLMUDF {
         assistantRole = s"${assistantRole}:"
       }
 
-      val his_instruction = s"${userRole}${instruction}\n${assistantRole}${predict}"
-      val query = JSONTool.jParseJsonObj(newParams.head)
+      val newMap = input ++ Map("instruction"-> s"${systemRole}${system_msg}${userRole}${instruction}\n${assistantRole}")
 
-      if (!query.has("system_role") && systemRole != "") {
-        query.put("system_role", systemRole)
-      }
-
-      if (!query.has("user_role") && userRole != "") {
-        query.put("user_role", userRole)
-      }
-
-      if (!query.has("assistant_role") && assistantRole != "") {
-        query.put("assistant_role", assistantRole)
-      }
-
-      systemRole = query.optString("system_role", "")
-      userRole = query.optString("user_role", "")
-      assistantRole = query.optString("assistant_role", "")
-
-      query.put("instruction", s"${his_instruction}\n${userRole}${query.getString("instruction")}\n${assistantRole}")
-
-      Seq(query.toString)
-    })
-  }
-
-  def llm_param(uDFRegistration: UDFRegistration) = {
-    uDFRegistration.register("llm_param", (calls: Map[String, String]) => {
-      Seq(JSONTool.toJsonStr(calls))
+      Seq(JSONTool.toJsonStr(newMap))
     })
   }
 
