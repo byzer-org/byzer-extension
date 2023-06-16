@@ -64,7 +64,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |import byzerllm.moss.moss_inference as moss
          |from byzerllm.moss.moss_inference import Inference,restore_model
          |from pyjava.storage import streaming_tar
-         |from byzerllm.utils.text_generator import ByzerLLMGenerator
+         |from byzerllm.utils.text_generator import simple_predict_func
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
          |
@@ -92,14 +92,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |    model = moss.init_model(MODEL_DIR)
          |    return model
          |
-         |def predict_func(model,v):
-         |    (trainer,tokenizer) = model
-         |    llm = ByzerLLMGenerator(trainer,tokenizer)
-         |    data = [json.loads(item) for item in v]
-         |    results=[{"predict":llm.predict(item),"labels":""} for item in data]
-         |    return {"value":[json.dumps(results,ensure_ascii=False)]}
-         |
-         |UDFBuilder.build(ray_context,init_model,predict_func)
+         |UDFBuilder.build(ray_context,init_model,simple_predict_func)
          |""".stripMargin
     logInfo(code)
     trainer.predict(session, modelTable, udfName, Map(

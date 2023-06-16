@@ -60,7 +60,7 @@ class SparkDeskAPI(params: Map[String, String]) extends Logging {
          |import uuid
          |import json
          |from byzerllm.saas.sparkdesk import SparkDeskAPI
-         |from byzerllm.utils.text_generator import ByzerLLMGenerator
+         |from byzerllm.utils.text_generator import simple_predict_func
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
          |
@@ -79,14 +79,7 @@ class SparkDeskAPI(params: Map[String, String]) extends Logging {
          |    infer = SparkDeskAPI("${appID}","${apiKey}","${apiSecret}")
          |    return (infer,None)
          |
-         |def predict_func(model,v):
-         |    (trainer,tokenizer) = model
-         |    llm = ByzerLLMGenerator(trainer,tokenizer)
-         |    data = [json.loads(item) for item in v]
-         |    results=[{"predict":llm.predict(item),"labels":""} for item in data]
-         |    return {"value":[json.dumps(results,ensure_ascii=False)]}
-         |
-         |UDFBuilder.build(ray_context,init_model,predict_func)
+         |UDFBuilder.build(ray_context,init_model,simple_predict_func)
          |""".stripMargin
     logInfo(code)
     trainer.predict(session, modelTable, udfName, Map(

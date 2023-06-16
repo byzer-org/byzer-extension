@@ -67,7 +67,7 @@ class PInfer(params: Map[String, String]) extends Logging {
          |import json
          |
          |import byzerllm.chatglm6b.tunning.infer as infer
-         |from byzerllm.utils.text_generator import ByzerLLMGenerator
+         |from byzerllm.utils.text_generator import chatglm_predict_func
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
          |
@@ -85,14 +85,7 @@ class PInfer(params: Map[String, String]) extends Logging {
          |    model = infer.init_model(MODEL_DIR)
          |    return model
          |
-         |def predict_func(model,v):
-         |    (trainer,tokenizer) = model
-         |    llm = ByzerLLMGenerator(trainer,tokenizer,use_feature_extraction=True)
-         |    data = [json.loads(item) for item in v]
-         |    results=[{"predict":llm.predict(item),"labels":""} for item in data]
-         |    return {"value":[json.dumps(results,ensure_ascii=False)]}
-         |
-         |UDFBuilder.build(ray_context,init_model,predict_func)
+         |UDFBuilder.build(ray_context,init_model,chatglm_predict_func)
          |""".stripMargin
     logInfo(code)
     trainer.predict(session, modelTable, udfName, Map(

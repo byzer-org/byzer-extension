@@ -53,7 +53,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |
          |from byzerllm import common_init_model
          |import byzerllm.m3e as infer
-         |from byzerllm.utils.text_generator import ByzerLLMGenerator
+         |from byzerllm.utils.text_generator import simple_predict_func
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
          |
@@ -73,14 +73,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |    model = infer.init_model(MODEL_DIR)
          |    return model
          |
-         |def predict_func(model,v):
-         |    (trainer,tokenizer) = model
-         |    llm = ByzerLLMGenerator(trainer,tokenizer)
-         |    data = [json.loads(item) for item in v]
-         |    results=[{"predict":llm.predict(item),"labels":""} for item in data]
-         |    return {"value":[json.dumps(results,ensure_ascii=False)]}
-         |
-         |UDFBuilder.build(ray_context,init_model,predict_func)
+         |UDFBuilder.build(ray_context,init_model,simple_predict_func)
          |""".stripMargin
     logInfo(code)
     trainer.predict(session, modelTable, udfName, Map(
