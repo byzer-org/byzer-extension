@@ -52,7 +52,7 @@ object LLMUDF {
         assistantRole = s"${assistantRole}:"
       }
 
-      val newMap = input ++ Map("instruction"-> s"${systemRole}\n${system_msg}${userRole}${instruction}\n${assistantRole}")
+      val newMap = input ++ Map("instruction"-> s"${systemRole}\n${system_msg}\n${userRole}${instruction}\n${assistantRole}")
 
       Seq(JSONTool.toJsonStr(newMap))
     })
