@@ -3,6 +3,7 @@ package tech.mlsql.plugins.llm.llama
 import org.apache.spark.sql.DataFrame
 import streaming.dsl.ScriptSQLExec
 import tech.mlsql.common.utils.log.Logging
+import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.ets.Ray
 
 /**
@@ -19,6 +20,8 @@ class Infer(params: Map[String, String]) extends Logging {
     require(modelTable.nonEmpty, "modelTable/model is required")
     val udfName = params("udfName")
     val devices = params.getOrElse("devices", "-1")
+
+    val infer_params = JSONTool.toJsonStr(params)
     
     val code =
       s"""try:
@@ -69,8 +72,9 @@ class Infer(params: Map[String, String]) extends Logging {
          |
          |
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
+         |    infer_params = json.loads('''${infer_params}''')
          |    common_init_model(model_refs,conf,MODEL_DIR, is_load_from_local="${localModelDir}" != "")
-         |    model = infer.init_model(MODEL_DIR)
+         |    model = infer.init_model(MODEL_DIR,infer_params)
          |    return model
          |
          |UDFBuilder.build(ray_context,init_model,simple_predict_func)
