@@ -3,6 +3,7 @@ package tech.mlsql.plugins.llm.sass.chatglm
 import org.apache.spark.sql.DataFrame
 import streaming.dsl.ScriptSQLExec
 import tech.mlsql.common.utils.log.Logging
+import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.ets.Ray
 
 class ChatGLMAPI(params: Map[String, String]) extends Logging {
@@ -11,8 +12,8 @@ class ChatGLMAPI(params: Map[String, String]) extends Logging {
     val localModelDir = params.getOrElse("localModelDir", "")
     val localPathPrefix = params.getOrElse("localPathPrefix", "/tmp")
 
-    val apiKey = params("apiKey")
-    val publicKey = params("publicKey")
+    val apiKey = params.getOrElse("apiKey", "")
+    val publicKey = params.getOrElse("publicKey", "")
 
 
     val trainer = new Ray()
@@ -22,6 +23,7 @@ class ChatGLMAPI(params: Map[String, String]) extends Logging {
     val udfName = params("udfName")
 
     val devices = params.getOrElse("devices", "0")
+    val infer_params = JSONTool.toJsonStr(params)
 
     val code =
       s"""
@@ -73,7 +75,8 @@ class ChatGLMAPI(params: Map[String, String]) extends Logging {
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
          |    from byzerllm import consume_model
          |    consume_model(conf)
-         |    infer = ChatGLMAPI("${apiKey}","${publicKey}")
+         |    infer_params = json.loads('''${infer_params}''')
+         |    infer = ChatGLMAPI("${apiKey}","${publicKey}",infer_params)
          |    return (infer,None)
          |
          |UDFBuilder.build(ray_context,init_model,simple_predict_func)

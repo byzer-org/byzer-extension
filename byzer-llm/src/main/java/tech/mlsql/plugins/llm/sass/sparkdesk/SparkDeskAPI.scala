@@ -5,6 +5,7 @@ package tech.mlsql.plugins.llm.sass.sparkdesk
 import org.apache.spark.sql.DataFrame
 import streaming.dsl.ScriptSQLExec
 import tech.mlsql.common.utils.log.Logging
+import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.ets.Ray
 
 class SparkDeskAPI(params: Map[String, String]) extends Logging {
@@ -13,9 +14,9 @@ class SparkDeskAPI(params: Map[String, String]) extends Logging {
     val localModelDir = params.getOrElse("localModelDir", "")
     val localPathPrefix = params.getOrElse("localPathPrefix", "/tmp")
 
-    val appID = params("appID")
-    val apiKey = params("apiKey")
-    val apiSecret = params("apiSecret")
+    val appID = params.getOrElse("appID","")
+    val apiKey = params.getOrElse("apiKey","")
+    val apiSecret = params.getOrElse("apiSecret","")
 
 
     val trainer = new Ray()
@@ -25,6 +26,7 @@ class SparkDeskAPI(params: Map[String, String]) extends Logging {
     val udfName = params("udfName")
 
     val devices = params.getOrElse("devices", "0")
+    val infer_params = JSONTool.toJsonStr(params)
 
     val code =
       s"""
@@ -76,7 +78,8 @@ class SparkDeskAPI(params: Map[String, String]) extends Logging {
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
          |    from byzerllm import consume_model
          |    consume_model(conf)
-         |    infer = SparkDeskAPI("${appID}","${apiKey}","${apiSecret}")
+         |    infer_params = json.loads('''${infer_params}''')
+         |    infer = SparkDeskAPI("${appID}","${apiKey}","${apiSecret}",infer_params)
          |    return (infer,None)
          |
          |UDFBuilder.build(ray_context,init_model,simple_predict_func)
