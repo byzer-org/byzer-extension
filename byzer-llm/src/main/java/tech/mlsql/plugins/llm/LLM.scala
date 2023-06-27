@@ -25,14 +25,6 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
             import tech.mlsql.plugins.llm.chatglm.PInfer
             val infer = new PInfer(params)
             infer.run
-          case "saas/chatglm" =>
-            import tech.mlsql.plugins.llm.sass.chatglm.ChatGLMAPI
-            val infer = new ChatGLMAPI(params)
-            infer.run
-          case "saas/sparkdesk" =>
-            import tech.mlsql.plugins.llm.sass.sparkdesk.SparkDeskAPI
-            val infer = new SparkDeskAPI(params)
-            infer.run
           case "moss" =>
             import tech.mlsql.plugins.llm.moss.Infer
             val infer = new Infer(params)
@@ -65,6 +57,20 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
             import tech.mlsql.plugins.llm.qa.ByzerLLMQADeploy
             val infer = new ByzerLLMQADeploy(params)
             infer.run()
+          case "saas/chatglm" =>
+            import tech.mlsql.plugins.llm.sass.chatglm.ChatGLMAPI
+            val infer = new ChatGLMAPI(params)
+            infer.run
+          case "saas/sparkdesk" =>
+            import tech.mlsql.plugins.llm.sass.sparkdesk.SparkDeskAPI
+            val infer = new SparkDeskAPI(params)
+            infer.run
+
+          case s if s.startsWith("saas/") =>
+            import tech.mlsql.plugins.llm.sass.CustomSaasAPI
+            val infer = new CustomSaasAPI(params)
+            infer.run
+
           case s if s.startsWith("custom/") =>
             import tech.mlsql.plugins.llm.custom.Infer
             val infer = new Infer(params)
