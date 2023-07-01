@@ -46,7 +46,7 @@ class SFFT(params: Map[String, String]) extends Logging {
          |
          |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
          |train_params = json.loads('''${train_params}''')
-         |model_binary = sft_train(ray_context.data_servers(),train_params,ray_context.conf())
+         |model_binary = sfft_train(ray_context.data_servers(),train_params,ray_context.conf())
          |ray_context.build_result(model_binary)""".stripMargin
     logInfo(code)
     trainer.train(session.emptyDataFrame, "", Map(
