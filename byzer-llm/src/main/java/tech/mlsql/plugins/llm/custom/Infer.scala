@@ -26,6 +26,12 @@ class Infer(params: Map[String, String]) extends Logging {
     val realPretrainedModelType = pretrainedModelType.split("/").last
 
     val infer_params = JSONTool.toJsonStr(params)
+
+    val predict_func = realPretrainedModelType match {
+      case "chatglm2" => "chatglm_predict_func"
+      case _ =>  "simple_predict_func"
+    }
+
     val code =
       s"""try:
          |    import sys
@@ -59,7 +65,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |
          |from byzerllm import common_init_model
          |import byzerllm.${realPretrainedModelType} as infer
-         |from byzerllm.utils.text_generator import simple_predict_func
+         |from byzerllm.utils.text_generator import ${predict_func}
          |
          |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
          |
@@ -80,7 +86,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |    model = infer.init_model(MODEL_DIR,infer_params)
          |    return model
          |
-         |UDFBuilder.build(ray_context,init_model,simple_predict_func)
+         |UDFBuilder.build(ray_context,init_model,${predict_func})
          |""".stripMargin
     logInfo(code)
     trainer.predict(session, modelTable, udfName, Map(
