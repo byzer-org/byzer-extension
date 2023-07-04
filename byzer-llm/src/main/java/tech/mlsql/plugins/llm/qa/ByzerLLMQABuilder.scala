@@ -25,6 +25,8 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
 
     val embeddingFunc = params.getOrElse("embeddingFunc", "chat")
     val chatFunc = params.getOrElse("chatFunc", "chat")
+
+    val byzerUrl = params.getOrElse("url","http://127.0.0.1:9003/model/predict")
     
     val command = new Ray()
     // run command as ByzerLLMQA where qaName="qa" and inputTable="";
@@ -43,7 +45,7 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
            |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
            |
            |qa = RayByzerLLMQA(
-           |     ByzerLLMClient(params=ClientParams(
+           |     ByzerLLMClient(url="${byzerUrl}",params=ClientParams(
            |         owner=context.conf["owner"],
            |         llm_embedding_func="${embeddingFunc}",
            |         llm_chat_func="${chatFunc}"

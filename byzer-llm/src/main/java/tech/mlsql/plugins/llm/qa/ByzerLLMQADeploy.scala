@@ -89,9 +89,8 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |    from byzerllm.apps.client import ByzerLLMClient
          |    from byzerllm.apps import ClientParams,QueryParams
          |
-         |    qa = ByzerLLMQA(MODEL_DIR,ByzerLLMClient(params=ClientParams(
+         |    qa = ByzerLLMQA(MODEL_DIR,ByzerLLMClient(url="${byzerUrl}",params=ClientParams(
          |      owner=owner,
-         |      url="${byzerUrl}",
          |      llm_embedding_func="${embeddingFunc}",
          |      llm_chat_func="${chatFunc}"
          |    )),QueryParams(local_path_prefix="${localPathPrefix}"))
