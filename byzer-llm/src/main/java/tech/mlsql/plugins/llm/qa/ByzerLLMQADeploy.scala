@@ -7,6 +7,7 @@ import streaming.dsl.mmlib.SQLAlg
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.log.Logging
+import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.ets.Ray
 import tech.mlsql.version.VersionCompatibility
 
@@ -28,7 +29,10 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
     val embeddingFunc = params.getOrElse("embeddingFunc","chat")
     val chatFunc = params.getOrElse("chatFunc","chat")
 
+    val byzerUrl = params.getOrElse("url","http://127.0.0.1:9003/model/predict")
+
     val devices = params.getOrElse("devices", "-1")
+    val infer_params = JSONTool.toJsonStr(params)
     
     val code =
       s"""import os
@@ -62,7 +66,7 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |import uuid
          |import json
          |
-         |from byzerllm.chatglm6b.finetune import restore_model,load_model
+         |from byzerllm import common_init_model
          |from byzerllm.utils.text_generator import qa_predict_func
          |from pyjava.storage import streaming_tar
          |
@@ -77,11 +81,8 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |    MODEL_DIR="${localModelDir}"
          |
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
-         |    if not "${localModelDir}":
-         |      if "standalone" in conf and conf["standalone"]=="true":
-         |          restore_model(conf,MODEL_DIR)
-         |      else:
-         |          streaming_tar.save_rows_as_file((ray.get(ref) for ref in model_refs),MODEL_DIR)
+         |    infer_params = json.loads('''${infer_params}''')
+         |    common_init_model(model_refs,conf,MODEL_DIR, is_load_from_local="${localModelDir}" != "")
          |
          |    from byzerllm.apps.qa import ByzerLLMQA
          |    from byzerllm.apps.qa import RayByzerLLMQA
@@ -90,6 +91,7 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |
          |    qa = ByzerLLMQA(MODEL_DIR,ByzerLLMClient(params=ClientParams(
          |      owner=owner,
+         |      url="${byzerUrl}",
          |      llm_embedding_func="${embeddingFunc}",
          |      llm_chat_func="${chatFunc}"
          |    )),QueryParams(local_path_prefix="${localPathPrefix}"))
