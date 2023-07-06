@@ -76,6 +76,13 @@ object LLMUDF {
     })
   }
 
+  def llm_result(uDFRegistration: UDFRegistration) = {
+    uDFRegistration.register("llm_response_predict", (calls: Seq[String]) => {
+      val obj = JSONTool.jParseJsonArray(calls.head).getJSONObject(0)
+      obj.getString("predict")
+    })
+  }
+
   // llm_prompt('hello {0}',array('world')
   def llm_prompt(uDFRegistration: UDFRegistration) = {
     uDFRegistration.register("llm_prompt", (template: String, keys: Seq[String]) => {
