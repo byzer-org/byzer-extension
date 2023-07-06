@@ -3,7 +3,7 @@ PROJECT=${user_home}/projects/byzer-extension
 REMOTE_SERVER=${REMOTE_SERVER:-k8s}
 
 MOUDLE_NAME=$1
-VERSION={VERSION:-"0.1.0-SNAPSHOT"}
+VERSION=${VERSION:-"0.1.0-SNAPSHOT"}
 V=${2:-3.3}
 MIDDLE="2.4_2.11"
 

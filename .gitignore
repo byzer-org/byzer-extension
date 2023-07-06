@@ -5,3 +5,5 @@ target
 /**/build
 logs/
 ./install-dev.sh
+./install-llm.sh
+./publish-llm.sh
