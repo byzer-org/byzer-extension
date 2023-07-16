@@ -83,7 +83,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
          |    infer_params = json.loads('''${infer_params}''')
          |    common_init_model(model_refs,conf,MODEL_DIR, is_load_from_local="${localModelDir}" != "")
-         |    model = infer.init_model(MODEL_DIR,infer_params)
+         |    model = infer.init_model(MODEL_DIR,infer_params,conf)
          |    return model
          |
          |UDFBuilder.build(ray_context,init_model,${predict_func})
