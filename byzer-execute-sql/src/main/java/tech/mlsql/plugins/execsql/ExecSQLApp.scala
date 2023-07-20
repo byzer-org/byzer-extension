@@ -10,7 +10,6 @@ import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.version.VersionCompatibility
 
 import java.util.concurrent.ConcurrentHashMap
-import scala.jdk.CollectionConverters.mapAsJavaMapConverter
 
 /**
  * 4/4/23 WilliamZhu(allwefantasy@gmail.com)
@@ -51,6 +50,7 @@ object ExecSQLApp {
 
 
   def executeQueryInDriver(session: SparkSession, connName: String, sql: String) = {
+    import scala.collection.JavaConverters._
     val connect = ExecSQLApp.connectionPool.get(connName)
     val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
     val rs = stat.executeQuery()
