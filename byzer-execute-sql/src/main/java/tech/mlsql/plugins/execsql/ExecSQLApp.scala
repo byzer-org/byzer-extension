@@ -1,6 +1,6 @@
 package tech.mlsql.plugins.execsql
 
-import net.sf.json.JSONObject
+import com.alibaba.fastjson.{JSON, JSONObject}
 import org.apache.spark.sql.SparkSession
 import streaming.core.datasource.JDBCUtils
 import streaming.core.datasource.JDBCUtils.formatOptions
@@ -10,6 +10,7 @@ import tech.mlsql.ets.register.ETRegister
 import tech.mlsql.version.VersionCompatibility
 
 import java.util.concurrent.ConcurrentHashMap
+import scala.jdk.CollectionConverters.mapAsJavaMapConverter
 
 /**
  * 4/4/23 WilliamZhu(allwefantasy@gmail.com)
@@ -39,7 +40,7 @@ class ExecSQLApp extends tech.mlsql.app.App with VersionCompatibility with Loggi
 object ExecSQLApp {
   val versions = Seq(">=2.0.1")
 
-  private val connectionPool = new ConcurrentHashMap[String,java.sql.Connection]()
+  private val connectionPool = new ConcurrentHashMap[String, java.sql.Connection]()
 
 
   def executeQueryInDriverWithoutResult(session: SparkSession, connName: String, sql: String) = {
@@ -49,13 +50,17 @@ object ExecSQLApp {
   }
 
 
-  def executeQueryInDriver(session:SparkSession, connName:String, sql:String) = {
-    import scala.collection.JavaConverters._
-    val stat = ExecSQLApp.connectionPool.get(connName).prepareStatement(sql)
+  def executeQueryInDriver(session: SparkSession, connName: String, sql: String) = {
+    val connect = ExecSQLApp.connectionPool.get(connName)
+    val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
     val rs = stat.executeQuery()
     val res = JDBCUtils.rsToMaps(rs)
     stat.close()
-    val rdd = session.sparkContext.parallelize(res.map(item => JSONObject.fromObject(item.asJava).toString()))
+    val rdd = session.sparkContext.parallelize(res.map(item => {
+      val javaMap: java.util.Map[String, Any] = item.asJava
+      val jsonObject = JSON.toJSON(javaMap).asInstanceOf[JSONObject]
+      jsonObject.toString
+    }))
     session.read.json(rdd)
   }
 
