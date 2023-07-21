@@ -9,7 +9,7 @@ import streaming.dsl.mmlib.SQLAlg
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
-import tech.mlsql.ets.Ray
+//import tech.mlsql.ets.Ray
 import tech.mlsql.plugins.execsql
 import tech.mlsql.version.VersionCompatibility
 
