@@ -1,6 +1,8 @@
 package tech.mlsql.plugins.execsql
 
-import net.sf.json.JSONObject
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.spark.sql.SparkSession
 import streaming.core.datasource.JDBCUtils
 import streaming.core.datasource.JDBCUtils.formatOptions
@@ -39,7 +41,7 @@ class ExecSQLApp extends tech.mlsql.app.App with VersionCompatibility with Loggi
 object ExecSQLApp {
   val versions = Seq(">=2.0.1")
 
-  private val connectionPool = new ConcurrentHashMap[String,java.sql.Connection]()
+  private val connectionPool = new ConcurrentHashMap[String, java.sql.Connection]()
 
 
   def executeQueryInDriverWithoutResult(session: SparkSession, connName: String, sql: String) = {
@@ -49,13 +51,17 @@ object ExecSQLApp {
   }
 
 
-  def executeQueryInDriver(session:SparkSession, connName:String, sql:String) = {
+  def executeQueryInDriver(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
-    val stat = ExecSQLApp.connectionPool.get(connName).prepareStatement(sql)
+    val connect = ExecSQLApp.connectionPool.get(connName)
+    val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
     val rs = stat.executeQuery()
     val res = JDBCUtils.rsToMaps(rs)
     stat.close()
-    val rdd = session.sparkContext.parallelize(res.map(item => JSONObject.fromObject(item.asJava).toString()))
+    val objectMapper = new ObjectMapper()
+    objectMapper.registerModule(DefaultScalaModule)
+    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    val rdd = session.sparkContext.parallelize(res.map(item => {objectMapper.writeValueAsString(item.asJava)}))
     session.read.json(rdd)
   }
 
