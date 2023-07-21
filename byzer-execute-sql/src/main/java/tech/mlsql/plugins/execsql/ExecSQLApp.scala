@@ -1,6 +1,8 @@
 package tech.mlsql.plugins.execsql
 
-import com.alibaba.fastjson.{JSON, JSONObject}
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.spark.sql.SparkSession
 import streaming.core.datasource.JDBCUtils
 import streaming.core.datasource.JDBCUtils.formatOptions
@@ -56,11 +58,10 @@ object ExecSQLApp {
     val rs = stat.executeQuery()
     val res = JDBCUtils.rsToMaps(rs)
     stat.close()
-    val rdd = session.sparkContext.parallelize(res.map(item => {
-      val javaMap: java.util.Map[String, Any] = item.asJava
-      val jsonObject = JSON.toJSON(javaMap).asInstanceOf[JSONObject]
-      jsonObject.toString
-    }))
+    val objectMapper = new ObjectMapper()
+    objectMapper.registerModule(DefaultScalaModule)
+    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    val rdd = session.sparkContext.parallelize(res.map(item => {objectMapper.writeValueAsString(item.asJava)}))
     session.read.json(rdd)
   }
 
