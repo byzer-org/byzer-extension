@@ -4,7 +4,7 @@ package tech.mlsql.plugins.mllib.app
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
-import tech.mlsql.plugins.mllib.ets.fe.{DataTranspose, OnehotExt, PSIExt, SQLDataSummaryV2, SQLDescriptiveMetrics, SQLDigitalColumnConvert, SQLMissingValueProcess, SQLPatternDistribution, SQLUniqueIdentifier}
+import tech.mlsql.plugins.mllib.ets.fe.{DataTranspose, OnehotExt, PSIExt, SQLColumnsAnalysis, SQLDataSummaryV2, SQLDescriptiveMetrics, SQLDigitalColumnConvert, SQLMissingValueProcess, SQLPatternDistribution, SQLUniqueIdentifier}
 import tech.mlsql.plugins.mllib.ets.fintech.scorecard.{SQLBinning, SQLScoreCard}
 import tech.mlsql.plugins.mllib.ets.{ClassificationEvaluator, ColumnsExt, RegressionEvaluator, SampleDatasetExt, TakeRandomSampleExt}
 import tech.mlsql.version.VersionCompatibility
@@ -33,6 +33,7 @@ class MLSQLMllib extends tech.mlsql.app.App with VersionCompatibility with Loggi
     ETRegister.register("PatternDistribution", classOf[SQLPatternDistribution].getName)
     ETRegister.register("UniqueIdentifier", classOf[SQLUniqueIdentifier].getName)
     ETRegister.register("DigitalColumnConvert", classOf[SQLDigitalColumnConvert].getName)
+    ETRegister.register("ColumnsAnalysis", classOf[SQLColumnsAnalysis].getName)
 
     // !columns drop fields from tableName;
     CommandCollection.refreshCommandMapping(Map("columns" ->
