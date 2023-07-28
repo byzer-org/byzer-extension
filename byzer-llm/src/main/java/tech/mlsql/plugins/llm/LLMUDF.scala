@@ -2,6 +2,7 @@ package tech.mlsql.plugins.llm
 
 import org.apache.spark.sql.UDFRegistration
 import tech.mlsql.common.utils.serder.json.JSONTool
+import tech.mlsql.plugins.llm.utils.LLMUtils.content_split
 import tech.mlsql.tool.Templates2
 
 import scala.collection.JavaConverters._
@@ -87,6 +88,19 @@ object LLMUDF {
   def llm_prompt(uDFRegistration: UDFRegistration) = {
     uDFRegistration.register("llm_prompt", (template: String, keys: Seq[String]) => {
       Templates2.evaluate(template, keys)
+    })
+  }
+
+  /**
+   *
+   * @param content split content
+   * @param splits split chars
+   * @param limits max split length
+   *
+   */
+  def llm_split(uDFRegistration: UDFRegistration) = {
+    uDFRegistration.register("llm_split", (content: String, splits: Seq[String], limits: Int) => {
+      content_split(content, splits, limits)
     })
   }
 }
