@@ -3,7 +3,8 @@ PROJECT=${user_home}/projects/byzer-extension
 REMOTE_SERVER=${REMOTE_SERVER:-k8s}
 
 MOUDLE_NAME=$1
-VERSION=${VERSION:-"0.1.0-SNAPSHOT"}
+VERSION=${VERSION:-"0.1.1"}
+OLD_VERSION=${OLD_VERSION:-"0.1.0"}
 V=${2:-3.3}
 MIDDLE="2.4_2.11"
 
@@ -49,6 +50,11 @@ echo "scp ${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.ja
 scp ${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar ${REMOTE_SERVER}:/home/winubuntu/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.6/plugin/
 scp ${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar H:/home/byzerllm/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.7/plugin/
 scp ${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar H3:/home/byzerllm/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.8/plugin/
+
+echo "clean old version byzer-llm extension"
+ssh -t  ssh ${REMOTE_SERVER} "rm  /home/winubuntu/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.6/plugin/${MOUDLE_NAME}-${MIDDLE}-${OLD_VERSION}.jar"
+ssh -t  ssh H "rm  /home/winubuntu/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.7/plugin/${MOUDLE_NAME}-${MIDDLE}-${OLD_VERSION}.jar"
+ssh -t  ssh H3 "rm  /home/winubuntu/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.8/plugin/${MOUDLE_NAME}-${MIDDLE}-${OLD_VERSION}.jar"
 #curl --progress-bar \
 #    -F "${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar=@${PROJECT}/${MOUDLE_NAME}/build/${MOUDLE_NAME}-${MIDDLE}-${VERSION}.jar" \
 #  "${BYZER_UPLOADER_URL}&overwrite=true&pathPrefix=${prefix}" | cat
