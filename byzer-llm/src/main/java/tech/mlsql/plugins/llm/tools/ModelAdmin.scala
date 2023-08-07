@@ -62,6 +62,11 @@ class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibil
         buildConfExpr("runIn=executor")
         envSession.fetchPythonRunnerConf.get.toDF()
 
+      case List("setup", "sfft") =>
+        setupDefaultConf
+        buildConfExpr("runIn=executor")
+        envSession.fetchPythonRunnerConf.get.toDF()
+
       case List("setup", "data") =>
         setupDefaultConf
         buildConfExpr("dataMode=data")
