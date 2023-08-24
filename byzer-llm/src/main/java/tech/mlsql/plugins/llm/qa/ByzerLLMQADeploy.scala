@@ -28,6 +28,9 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
 
     val embeddingFunc = params.getOrElse("embeddingFunc","chat")
     val chatFunc = params.getOrElse("chatFunc","chat")
+    val strategy = params.getOrElse("strategy", "fullDoc") match {
+      case _ => "full_doc"
+    }
 
     val byzerUrl = params.getOrElse("url","http://127.0.0.1:9003/model/predict")
 
@@ -93,7 +96,7 @@ class ByzerLLMQADeploy(params: Map[String, String]) extends Logging {
          |      owner=owner,
          |      llm_embedding_func="${embeddingFunc}",
          |      llm_chat_func="${chatFunc}"
-         |    )),QueryParams(local_path_prefix="${localPathPrefix}"))
+         |    )),QueryParams(local_path_prefix="${localPathPrefix}", strategy="${strategy}"))
          |    return qa
          |
          |
