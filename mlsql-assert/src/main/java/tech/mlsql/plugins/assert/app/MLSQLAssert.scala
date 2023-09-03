@@ -3,7 +3,7 @@ package tech.mlsql.plugins.assert.app
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
-import tech.mlsql.plugins.assert.ets.{Assert, AssertNotNull, AssertNotNullThrow, AssertUniqueKey, AssertUniqueKeyThrow, AssertUniqueKeys, AssertUniqueKeysThrow, MLSQLThrow}
+import tech.mlsql.plugins.assert.ets.{Assert, AssertCondition, AssertConditionThrow, AssertNotNull, AssertNotNullThrow, AssertUniqueKey, AssertUniqueKeyThrow, AssertUniqueKeys, AssertUniqueKeysThrow, MLSQLThrow}
 import tech.mlsql.version.VersionCompatibility
 
 /**
@@ -19,6 +19,8 @@ class MLSQLAssert extends tech.mlsql.app.App with VersionCompatibility with Logg
     ETRegister.register("AssertUniqueKeyThrow", classOf[AssertUniqueKeyThrow].getName)
     ETRegister.register("AssertUniqueKeys", classOf[AssertUniqueKeys].getName)
     ETRegister.register("AssertUniqueKeysThrow", classOf[AssertUniqueKeysThrow].getName)
+    ETRegister.register("AssertCondition", classOf[AssertCondition].getName)
+    ETRegister.register("AssertConditionThrow", classOf[AssertConditionThrow].getName)
     CommandCollection.refreshCommandMapping(Map("assertNotNull" ->
       """
         |run command as AssertNotNull.`` where parameters='''{:all}'''
@@ -42,6 +44,14 @@ class MLSQLAssert extends tech.mlsql.app.App with VersionCompatibility with Logg
     CommandCollection.refreshCommandMapping(Map("assertUniqueKeysThrow" ->
       """
         |run command as AssertUniqueKeysThrow.`` where parameters='''{:all}'''
+        |""".stripMargin))
+    CommandCollection.refreshCommandMapping(Map("assertCondition" ->
+      """
+        |run command as AssertCondition.`` where parameters='''{:all}'''
+        |""".stripMargin))
+    CommandCollection.refreshCommandMapping(Map("assertConditionThrow" ->
+      """
+        |run command as AssertConditionThrow.`` where parameters='''{:all}'''
         |""".stripMargin))
     CommandCollection.refreshCommandMapping(Map("assert" ->
       """

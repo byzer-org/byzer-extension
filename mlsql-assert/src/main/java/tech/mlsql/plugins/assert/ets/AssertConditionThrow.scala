@@ -13,7 +13,7 @@ import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod
 import tech.mlsql.plugins.assert.app.MLSQLAssert
 import tech.mlsql.version.VersionCompatibility
 
-class AssertUniqueKeysThrow(override val uid: String) extends SQLAlg
+class AssertConditionThrow(override val uid: String) extends SQLAlg
   with VersionCompatibility with Functions with WowParams with ETAuth {
 
   def this() = this(BaseParams.randomUID())
@@ -23,14 +23,19 @@ class AssertUniqueKeysThrow(override val uid: String) extends SQLAlg
     var args = JSONTool.parseJson[List[String]](params("parameters"))
 
     args match {
-      case List(tableName, columns) =>
+      case List(tableName, expression) =>
         val session = df.sparkSession
-        val dataFrame = session.sql(s"select ${columns} from ${tableName} group by ${columns} having count(*) > 1")
-        if (dataFrame.count() > 0) {
-          throw new MLSQLException(s"Assert Failed: conflict key: ${columns}")
+        val table = session.table(tableName)
+        // 根据用户给的条件查询过滤数据，不符合条件的那部分
+        val usageData = table.filter(expression)
+        // 从table中排出usageData
+        val validateData = table.exceptAll(usageData)
+        val dirtyCount = validateData.count()
+        if (dirtyCount > 0) {
+          throw new MLSQLException(s"Assert Failed: '$tableName' dirty count: ${dirtyCount}")
         }
       case _ =>
-        throw new MLSQLException("AssertUniqueKeysThrow only support !assertUniqueKeysThrow {table} '{columns}'")
+        throw new MLSQLException("AssertConditionThrow only support !assertConditionThrow {table} '{expression}'")
     }
     df.sparkSession.emptyDataFrame
   }
@@ -48,5 +53,4 @@ class AssertUniqueKeysThrow(override val uid: String) extends SQLAlg
     List()
   }
 }
-
 

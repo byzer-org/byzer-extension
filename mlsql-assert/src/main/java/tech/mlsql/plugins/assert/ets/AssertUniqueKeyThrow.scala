@@ -38,7 +38,7 @@ class AssertUniqueKeyThrow(override val uid: String) extends SQLAlg
           throw new MLSQLException(s"Assert Failed: conflict key: ${validateResult.mkString(",")}")
         }
       case _ =>
-        throw new MLSQLException("AssertUniqueKey only support !assertUniqueKey {table} '{columns}'")
+        throw new MLSQLException("AssertUniqueKeyThrow only support !assertUniqueKeyThrow {table} '{columns}'")
     }
     df.sparkSession.emptyDataFrame
   }
