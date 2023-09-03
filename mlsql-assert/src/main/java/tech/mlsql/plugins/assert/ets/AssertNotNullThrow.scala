@@ -2,7 +2,7 @@ package tech.mlsql.plugins.assert.ets
 
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.mlsql.session.MLSQLException
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import streaming.dsl.auth.TableAuthResult
 import streaming.dsl.mmlib.SQLAlg
 import streaming.dsl.mmlib.algs.Functions
@@ -30,11 +30,12 @@ class AssertNotNullThrow(override val uid: String) extends SQLAlg
         // 选出这几列中有null的数据
         val nullData = validateData.filter(row => row.anyNull)
         // 如果有null的数据，抛出异常
-        if (nullData.count() > 0) {
-          throw new MLSQLException(s"Assert Failed: '$tableName' dirty count: ${nullData.count()}")
+        val dirtyCount = nullData.count()
+        if (dirtyCount > 0) {
+          throw new MLSQLException(s"Assert Failed: '$tableName' dirty count: ${dirtyCount}")
         }
       case _ =>
-        throw new MLSQLException("AssertNotNull only support !assertNotNull {table} '{columns}'")
+        throw new MLSQLException("AssertNotNullThrow only support !assertNotNullThrow {table} '{columns}'")
     }
 
     df.sparkSession.emptyDataFrame
