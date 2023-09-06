@@ -5,6 +5,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import streaming.dsl.mmlib.SQLAlg
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
+import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.ets.Ray
 import tech.mlsql.version.VersionCompatibility
 
@@ -27,6 +28,8 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
     val chatFunc = params.getOrElse("chatFunc", "chat")
 
     val byzerUrl = params.getOrElse("url","http://127.0.0.1:9003/model/predict")
+
+    val builder_params = JSONTool.toJsonStr(params)
     
     val command = new Ray()
     // run command as ByzerLLMQA where qaName="qa" and inputTable="";
@@ -38,6 +41,7 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
            |import uuid
            |import ray
            |import os
+           |import json
            |from byzerllm.apps.qa import RayByzerLLMQA
            |from byzerllm.apps.client import ByzerLLMClient
            |from byzerllm.apps import ClientParams,BuilderParams
@@ -51,13 +55,13 @@ class ByzerLLMQABuilder(override val uid: String) extends SQLAlg with VersionCom
            |         llm_chat_func="${chatFunc}"
            |                   ))
            |     )
-           |
+           |builder_params = json.loads('''${builder_params}''')
            |bb = qa.save(ray_context.data_servers(),BuilderParams(
            |                                            local_path_prefix="${localPathPrefix}",
            |                                            batch_size=${batchSize},
            |                                            chunk_size=${chunk_size},
            |                                            chunk_overlap=${chunk_overlap}
-           |                                            ))
+           |                                            ),builder_params=builder_params)
            |
            |ray_context.build_result(bb)
            |""".stripMargin,
