@@ -101,6 +101,16 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
             throw new RuntimeException(s"Finetune ${pretrainedModelType} is not supported yet")
         }
 
+      case "merge" =>
+        pretrainedModelType match {
+          case s if s.startsWith("lora/") =>
+            import tech.mlsql.plugins.llm.custom.LoraMerge
+            val merge = new LoraMerge(params)
+            merge.run
+          case _ =>
+            throw new RuntimeException(s"Merge ${pretrainedModelType} is not supported yet")
+        }
+
 
     }
 
