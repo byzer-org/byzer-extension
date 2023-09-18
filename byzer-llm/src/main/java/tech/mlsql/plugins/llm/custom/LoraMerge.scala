@@ -44,7 +44,7 @@ class LoraMerge (params: Map[String, String]) extends Logging {
          |from pyjava import RayContext
          |try:
          |  from byzerllm.${realPretrainedModelType} import merge_lora_to_base_model
-         |except:
+         |except ImportError:
          |  from byzerllm.utils.sft.merge_lora import merge_lora_to_base_model
          |
          |
@@ -54,7 +54,10 @@ class LoraMerge (params: Map[String, String]) extends Logging {
          |ray_context.build_result(model_binary)""".stripMargin
     logInfo(code)
     trainer.train(session.emptyDataFrame, "", Map(
-      "code" -> code
+      "code" -> code,
+      "inputTable" -> "command",
+      "outputTable" -> "output",
+      "modelTable" -> "command"
     ) ++ params)
   }
 }
