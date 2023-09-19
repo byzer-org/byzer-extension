@@ -47,6 +47,7 @@ class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibil
       buildConfExpr("standalone=false")
       buildConfExpr("maxConcurrency=1")
       buildConfExpr("infer_backend=transformers")
+      buildConfExpr("masterMaxConcurrency=1000")
       buildConfExpr("workerMaxConcurrency=1")
       buildConfExpr(s"owner=${context.owner}")
       buildConfExpr("schema=file")
@@ -78,6 +79,26 @@ class ModelAdmin(override val uid: String) extends SQLAlg with VersionCompatibil
       case List("setup", value) =>
         buildConfExpr(value)
         envSession.fetchPythonRunnerConf.get.toDF()
+
+      case List("model", "exists", udfName) =>
+        buildConfExpr("schema=st(field(value,boolean))")
+        val command = new Ray()
+        command.train(df, path, Map(
+          "code" ->
+            s"""
+               |from pyjava.api.mlsql import RayContext,PythonContext
+               |import ray
+               |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
+               |try:
+               |  ray.get_actor("${udfName}")
+               |  exists = True
+               |except Exception as e:
+               |  exists = False
+               |ray_context.build_result([{"value":exists}])
+               |""".stripMargin,
+          "inputTable" -> "command",
+          "outputTable" -> "test"
+        ))
 
       case List("model", "remove", udfName) =>
         val command = new Ray()
