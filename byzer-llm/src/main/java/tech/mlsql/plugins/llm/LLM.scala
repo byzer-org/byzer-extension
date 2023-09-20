@@ -111,6 +111,16 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
             throw new RuntimeException(s"Merge ${pretrainedModelType} is not supported yet")
         }
 
+      case "convert" =>
+        pretrainedModelType match {
+          case s if s.startsWith("deepspeed/") =>
+            import tech.mlsql.plugins.llm.custom.ConvertDeepspeed
+            val runner = new ConvertDeepspeed(params)
+            runner.run
+          case _ =>
+            throw new RuntimeException(s"Convert ${pretrainedModelType} from deepspeed checkpoint to huggingface model is not supported yet")
+        }
+
 
     }
 
