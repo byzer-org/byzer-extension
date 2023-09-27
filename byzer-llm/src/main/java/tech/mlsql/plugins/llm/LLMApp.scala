@@ -22,6 +22,7 @@ import java.lang.reflect.Modifier
  */
 class LLMApp extends tech.mlsql.app.App with VersionCompatibility with Logging {
   override def run(args: Seq[String]): Unit = {
+    MLSQLConfig.run()
     ETRegister.register("LLM", classOf[LLM].getName)
     ETRegister.register("LLMQABuilder", classOf[ByzerLLMQABuilder].getName)
     //    CommandCollection.refreshCommandMapping(Map("llm" ->
