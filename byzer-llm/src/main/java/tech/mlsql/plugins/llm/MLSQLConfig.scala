@@ -1,7 +1,8 @@
 package tech.mlsql.plugins.llm
 
-import streaming.core.strategy.platform.PlatformManager
-import streaming.dsl.ScriptSQLExec
+import org.apache.spark.sql.{Row, SparkSession}
+import streaming.core.strategy.platform.{PlatformManager, SparkRuntime}
+import streaming.dsl.{MLSQLExecuteContext, ScriptSQLExec, ScriptSQLExecListener}
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.common.utils.serder.json.JSONTool
 import tech.mlsql.ets.{PythonCommand, Ray}
@@ -13,19 +14,45 @@ import scala.collection.JavaConverters._
  * 9/27/23 WilliamZhu(allwefantasy@gmail.com)
  */
 object MLSQLConfig extends Logging{
-  def run() = {
+  def runtime = PlatformManager.getRuntime.asInstanceOf[SparkRuntime]
 
-    val context = ScriptSQLExec.context()
-    val byzerParams = PlatformManager.getOrCreate.config.get().getParamsMap
-    val byzerInstanceName = byzerParams.getOrDefault("streaming.name","default")
+  private def createScriptSQLExecListener(sparkSession: SparkSession, groupId: String) = {
+
+    val allPathPrefix = Map[String,String]()
+    val defaultPathPrefix = ""
+    val context = new ScriptSQLExecListener(sparkSession, defaultPathPrefix, allPathPrefix)
+    val ownerOption = Some("admin")
+    val userDefineParams = Map[String,String]()
+    ScriptSQLExec.setContext(new MLSQLExecuteContext(context, ownerOption.get,
+      context.pathPrefix(None), groupId,
+      userDefineParams ++ Map("__PARAMS__" -> "{}")
+    ))
+    context.initFromSessionEnv
+    context.addEnv("SKIP_AUTH", "true")
+    context.addEnv("HOME", context.pathPrefix(None))
+    context.addEnv("OWNER", ownerOption.getOrElse("anonymous"))
+    context
+  }
+  def run():Array[Row] = {
+
+    val session =  runtime.sparkSession
+    // mock context
+    createScriptSQLExecListener(session,"0")
+    val byzerParams = runtime.params.asScala.map(f => (f._1.toString, f._2.toString)).toMap
+    val byzerInstanceName = byzerParams.getOrElse("streaming.name","default")
+
+    val configServiceEnabledInRay = byzerParams.getOrElse("spark.mlsql.ray.config.service.enabled", "false").toBoolean
+
+    if(!configServiceEnabledInRay){
+      return session.emptyDataFrame.collect()
+    }
 
     logInfo(s"__MLSQL_CONFIG__${byzerInstanceName} ")
-
-    val session = context.execListener.sparkSession
+    
     val trainer = new Ray()
     val params = mutable.HashMap[String,String]()
 
-    byzerParams.asScala.foreach { case (k, v) =>
+    byzerParams.foreach { case (k, v) =>
       params.put(k, v)
     }
 
@@ -62,7 +89,7 @@ object MLSQLConfig extends Logging{
       buildConfExpr("infer_backend=transformers")
       buildConfExpr("masterMaxConcurrency=1000")
       buildConfExpr("workerMaxConcurrency=1")
-      buildConfExpr(s"owner=${context.owner}")
+      buildConfExpr(s"owner=admin")
       buildConfExpr("schema=file")
     }
 
@@ -73,7 +100,7 @@ object MLSQLConfig extends Logging{
          |import os
          |import json                  
          |from pyjava import RayContext
-         |from pyjava.utils.config import create_mlsql_config
+         |from byzerllm.utils.config import create_mlsql_config
          |
          |ray_context = RayContext.connect(globals(),context.conf["rayAddress"])
          |sys_conf = ray_context.conf()
@@ -83,7 +110,9 @@ object MLSQLConfig extends Logging{
     
     trainer.train(session.emptyDataFrame, "", Map(
       "code" -> code,
-      "confTable" -> "conf_params"
+      "confTable" -> "conf_params",
+      "inputTable"->"command",
+      "outputTable"->"output",
     ) ++ params).collect()
   }
 }

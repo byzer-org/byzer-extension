@@ -1,1 +1,1 @@
-REMOTE_SERVER=remote VERSION=0.1.4 ./install-dev.sh byzer-llm 3.3
+VERSION=0.1.4 ./install-dev.sh byzer-llm 3.3
