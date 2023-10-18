@@ -245,7 +245,8 @@ class Retrieval(override val uid: String) extends SQLAlg with VersionCompatibili
           "inputTable" -> inputTable,
           "outputTable" -> "output",
           "modelTable" -> "command"
-        ))
+        )).collect()
+        session.emptyDataFrame
 
       case "table/commit" =>
         val clusterName = params("clusterName")

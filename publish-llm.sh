@@ -1,0 +1,1 @@
+VERSION=0.1.5 ./install.sh byzer-llm 3.3
