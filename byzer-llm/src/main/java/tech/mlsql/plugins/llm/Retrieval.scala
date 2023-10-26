@@ -156,8 +156,8 @@ class Retrieval(override val uid: String) extends SQLAlg with VersionCompatibili
           "outputTable" -> "output",
           "modelTable" -> "command"
         ))
-      case s if s.startsWith("table/create") =>
-        val clusterName = s.split("/").last
+      case "table/create" =>
+        val clusterName = params("clusterName")
         val tableSettings = TableSettings.fromMap(params)
         val session = ScriptSQLExec.context().execListener.sparkSession
         val code =
@@ -178,7 +178,7 @@ class Retrieval(override val uid: String) extends SQLAlg with VersionCompatibili
              |        TableSettings(
              |            database="${tableSettings.database}",
              |            table="${tableSettings.table}",
-             |            schema="${tableSettings.schema}",
+             |            schema='''${tableSettings.schema}''',
              |            location="${tableSettings.location}",
              |            num_shards=${tableSettings.num_shards}
              |        )
@@ -194,7 +194,7 @@ class Retrieval(override val uid: String) extends SQLAlg with VersionCompatibili
           "outputTable" -> "output",
           "modelTable" -> "command"
         ))
-      case s if s.startsWith("table/data") =>
+      case "table/data" =>
         val clusterName = params("clusterName")
         val database = params("database")
         val table = params("table")
@@ -278,6 +278,69 @@ class Retrieval(override val uid: String) extends SQLAlg with VersionCompatibili
           "outputTable" -> "output",
           "modelTable" -> "command"
         ))
+
+      case "table/closeAndDeleteFile" =>
+        val clusterName = params("clusterName")
+        val database = params("database")
+        val table = params("table")
+        val session = ScriptSQLExec.context().execListener.sparkSession
+        val code =
+          s"""
+             |import ray
+             |import json
+             |from pyjava import RayContext
+             |from byzerllm.utils.retrieval import ByzerRetrieval
+             |
+             |ray_context = RayContext.connect(globals(),context.conf["rayAddress"],job_config=ray.job_config.JobConfig(code_search_path=[context.conf["code_search_path"]],runtime_env={"env_vars": {"JAVA_HOME":context.conf["JAVA_HOME"],"PATH":context.conf["PATH"]}}))
+             |
+             |
+             |byzer = ByzerRetrieval()
+             |byzer.launch_gateway()
+             |
+             |v = byzer.closeAndDeleteFile("${clusterName}","${database}","${table}")
+             |
+             |ray_context.build_result([{"value":json.dumps({"status": v })}])
+             |""".stripMargin
+        logInfo(code)
+        val trainer = new Ray()
+        trainer.train(session.emptyDataFrame, "", Map(
+          "code" -> code,
+          "inputTable" -> "command",
+          "outputTable" -> "output",
+          "modelTable" -> "command"
+        ))
+
+      case "table/truncate" =>
+        val clusterName = params("clusterName")
+        val database = params("database")
+        val table = params("table")
+        val session = ScriptSQLExec.context().execListener.sparkSession
+        val code =
+          s"""
+             |import ray
+             |import json
+             |from pyjava import RayContext
+             |from byzerllm.utils.retrieval import ByzerRetrieval
+             |
+             |ray_context = RayContext.connect(globals(),context.conf["rayAddress"],job_config=ray.job_config.JobConfig(code_search_path=[context.conf["code_search_path"]],runtime_env={"env_vars": {"JAVA_HOME":context.conf["JAVA_HOME"],"PATH":context.conf["PATH"]}}))
+             |
+             |
+             |byzer = ByzerRetrieval()
+             |byzer.launch_gateway()
+             |
+             |v = byzer.truncate("${clusterName}","${database}","${table}")
+             |
+             |ray_context.build_result([{"value":json.dumps({"status": v })}])
+             |""".stripMargin
+        logInfo(code)
+        val trainer = new Ray()
+        trainer.train(session.emptyDataFrame, "", Map(
+          "code" -> code,
+          "inputTable" -> "command",
+          "outputTable" -> "output",
+          "modelTable" -> "command"
+        ))
+
 
       case "register" =>
         val session = ScriptSQLExec.context().execListener.sparkSession
