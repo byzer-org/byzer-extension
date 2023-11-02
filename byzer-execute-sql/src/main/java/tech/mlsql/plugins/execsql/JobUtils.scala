@@ -14,6 +14,7 @@ import streaming.core.datasource.JDBCUtils.formatOptions
 import tech.mlsql.common.utils.cache.{CacheBuilder, RemovalListener, RemovalNotification}
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.tool.HDFSOperatorV2
+import com.alibaba.druid.util.{JdbcConstants, JdbcUtils}
 
 import java.util
 import java.util.concurrent.atomic.AtomicReference
@@ -25,8 +26,10 @@ import scala.collection.JavaConverters._
 class JobUtils extends Logging {
 }
 
+case class ConnectionHolder(val name: String, val options: Map[String, String], val connection:java.sql.Connection)
+
 object JobUtils extends Logging {
-  private val connectionPool = new ConcurrentHashMap[String, java.sql.Connection]()
+  private val connectionPool = new ConcurrentHashMap[String, ConnectionHolder]()
   private val cacheFiles = CacheBuilder.newBuilder().
     maximumSize(100000).removalListener(new RemovalListener[String, java.util.List[String]]() {
       override def onRemoval(notification: RemovalNotification[String, util.List[String]]): Unit = {
@@ -86,7 +89,7 @@ object JobUtils extends Logging {
 
   def executeQueryInDriverWithoutResult(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
-    val stat = JobUtils.connectionPool.get(connName).prepareStatement(sql)
+    val stat = JobUtils.connectionPool.get(connName).connection.prepareStatement(sql)
     stat.execute()
   }
 
@@ -103,7 +106,7 @@ object JobUtils extends Logging {
 
   def executeQueryInDriver(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
-    val connect = JobUtils.connectionPool.get(connName)
+    val connect = JobUtils.connectionPool.get(connName).connection
     val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
     val rs = stat.executeQuery()
     val res = JDBCUtils.rsToMaps(rs)
@@ -119,9 +122,19 @@ object JobUtils extends Logging {
 
   def executeQueryWithDiskCache(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
-    val connect = JobUtils.connectionPool.get(connName)
+    val connectionHolder = JobUtils.connectionPool.get(connName)
+    val connect = connectionHolder.connection
+
+    val isMySqlDriver = JdbcUtils.isMySqlDriver(connectionHolder.options("driver"))
+
+
     val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
     val rs = stat.executeQuery()
+    if (isMySqlDriver) {
+      // Integer.MIN_VALUE
+      rs.setFetchSize(-2147483648)
+    }
+
 
     val objectMapper = new ObjectMapper()
     objectMapper.registerModule(DefaultScalaModule)
@@ -198,13 +211,13 @@ object JobUtils extends Logging {
     if (JobUtils.connectionPool.containsKey(name)) {
       removeConnection(name)
     }
-    JobUtils.connectionPool.put(name, connection)
+    JobUtils.connectionPool.put(name, ConnectionHolder(name,options,connection))
     JobUtils.connectionPool.get(name)
   }
 
   def removeConnection(name: String) = synchronized {
     if (JobUtils.connectionPool.containsKey(name)) {
-      val connection = JobUtils.connectionPool.get(name)
+      val connection = JobUtils.connectionPool.get(name).connection
       try_close(() => {
         connection.close()
       })
