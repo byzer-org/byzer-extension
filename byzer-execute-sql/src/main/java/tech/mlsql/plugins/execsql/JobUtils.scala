@@ -129,13 +129,12 @@ object JobUtils extends Logging {
 
 
     val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
-    val rs = stat.executeQuery()
     if (isMySqlDriver) {
       // Integer.MIN_VALUE
-      rs.setFetchSize(-2147483648)
+      stat.setFetchSize(-2147483648)
     }
-
-
+    val rs = stat.executeQuery()
+    
     val objectMapper = new ObjectMapper()
     objectMapper.registerModule(DefaultScalaModule)
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
