@@ -24,7 +24,7 @@ class JDBCExec(override val uid: String) extends SQLAlg with VersionCompatibilit
         ExecSQLApp.executeQueryInDriver(session, connName, sql)
 
       case List( tableName, "from", sql, "by", connName) =>
-        val newDF = ExecSQLApp.executeQueryInDriver(session, connName, sql)
+        val newDF = ExecSQLApp.executeQueryWithDiskCache(session, connName, sql)
         newDF.createOrReplaceTempView(tableName)
       case _ =>
         throw new RuntimeException("!exec_sql connName ''' select * from xxxx ''';")

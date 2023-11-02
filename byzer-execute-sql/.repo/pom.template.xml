@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>byzer-execute-sql-{{spark_binary_version}}_{{scala_binary_version}}</artifactId>
+    <version>0.1.0</version>
     <properties>
         <hadoop.version>3.3.2</hadoop.version>
         <jackson.version>2.10.3</jackson.version>

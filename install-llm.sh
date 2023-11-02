@@ -1,1 +1,1 @@
-VERSION=0.1.6 ./install-dev.sh byzer-llm 3.3
+VERSION=0.1.7 ./install-dev.sh byzer-llm 3.3
