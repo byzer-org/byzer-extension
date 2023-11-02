@@ -1,7 +1,7 @@
 package tech.mlsql.plugins.execsql
 
 import java.util.UUID
-import java.util.concurrent.{ConcurrentHashMap, Executors}
+import java.util.concurrent.{Callable, ConcurrentHashMap, Executors, TimeUnit}
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
@@ -11,10 +11,13 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat.forPattern
 import streaming.core.datasource.JDBCUtils
 import streaming.core.datasource.JDBCUtils.formatOptions
+import tech.mlsql.common.utils.cache.CacheBuilder
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.tool.HDFSOperatorV2
 
+import java.util
 import java.util.concurrent.atomic.AtomicReference
+import scala.collection.JavaConverters._
 
 /**
  * 11/2/23 WilliamZhu(allwefantasy@gmail.com)
@@ -24,13 +27,15 @@ class JobUtils extends Logging {
 
 object JobUtils extends Logging {
   private val connectionPool = new ConcurrentHashMap[String, java.sql.Connection]()
+  private val cacheFiles = CacheBuilder.newBuilder().maximumSize(100000).expireAfterWrite(7, TimeUnit.DAYS).build[String, java.util.List[String]]()
+
   private lazy val cacheDir = {
     var tmpPath = HDFSOperatorV2.hadoopConfiguration.get("hadoop.tmp.dir")
     if (tmpPath == null || tmpPath.isEmpty) {
       logInfo(s"hadoop.tmp.dir is not set")
       tmpPath = "/tmp"
     }
-    
+
     val cachePath = new Path(tmpPath, "execsql_cache")
     val fs = FileSystem.get(HDFSOperatorV2.hadoopConfiguration)
     if (!fs.exists(cachePath)) {
@@ -46,7 +51,7 @@ object JobUtils extends Logging {
     override def run(): Unit = {
       try {
         logInfo("try to clean old files...")
-        if(cacheDir.get() != null){
+        if (cacheDir.get() != null) {
           cleanOldFiles(new Path(cacheDir.get()))
         }
       } catch {
@@ -101,13 +106,22 @@ object JobUtils extends Logging {
       while (rs.next()) {
         val row = JDBCUtils.rsToMap(rs, JDBCUtils.getRsCloumns(rs))
         val line = objectMapper.writeValueAsString(row.asJava)
-        dos.write((line+"\n").getBytes("UTF-8"))
+        dos.write((line + "\n").getBytes("UTF-8"))
       }
     } finally {
       dos.close()
       rs.close()
       stat.close()
     }
+
+    // put the cache file path into cacheFiles, so when the user
+    // remove the connection, we can delete the cache file
+    val files = cacheFiles.get(connName, new Callable[java.util.List[String]] {
+      override def call(): java.util.List[String] = {
+        new util.LinkedList[String]()
+      }
+    })
+    files.add(new Path(cacheDir.get(), fileName).toString)
     session.read.json(new Path(cacheDir.get(), fileName).toString)
   }
 
@@ -154,6 +168,17 @@ object JobUtils extends Logging {
       val connection = JobUtils.connectionPool.get(name)
       connection.close()
       JobUtils.connectionPool.remove(name)
+      val files = JobUtils.cacheFiles.getIfPresent(name)
+      cacheFiles.invalidate(name)
+      if (files != null) {
+        val fs = FileSystem.get(HDFSOperatorV2.hadoopConfiguration)
+        files.asScala.foreach { file =>
+          logInfo(s"remove cache file ${file}")
+          fs.delete(new Path(file), true)
+          // delete the .crc file
+          fs.delete(new Path("." + file + ".crc"), true)
+        }
+      }
     }
   }
 }
