@@ -37,10 +37,16 @@ object JobUtils extends Logging {
         if (files != null) {
           val fs = FileSystem.get(HDFSOperatorV2.hadoopConfiguration)
           files.asScala.foreach { file =>
-            logInfo(s"remove cache file ${file}")
-            fs.delete(new Path(file), true)
-            // delete the .crc file
-            fs.delete(new Path("." + file + ".crc"), true)
+            try {
+              logInfo(s"remove cache file ${file}")
+              fs.delete(new Path(file), true)
+              // delete the .crc file
+              fs.delete(new Path("." + file + ".crc"), true)
+            }catch {
+              case e:Exception=>
+                logError(s"remove cache file ${file} failed",e)
+            }
+
           }
         }
       }
