@@ -11,7 +11,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat.forPattern
 import streaming.core.datasource.JDBCUtils
 import streaming.core.datasource.JDBCUtils.formatOptions
-import tech.mlsql.common.utils.cache.CacheBuilder
+import tech.mlsql.common.utils.cache.{CacheBuilder, RemovalListener, RemovalNotification}
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.tool.HDFSOperatorV2
 
@@ -27,8 +27,25 @@ class JobUtils extends Logging {
 
 object JobUtils extends Logging {
   private val connectionPool = new ConcurrentHashMap[String, java.sql.Connection]()
-  private val cacheFiles = CacheBuilder.newBuilder().maximumSize(100000).expireAfterWrite(7, TimeUnit.DAYS).build[String, java.util.List[String]]()
+  private val cacheFiles = CacheBuilder.newBuilder().
+    maximumSize(100000).removalListener(new RemovalListener[String, java.util.List[String]]() {
+      override def onRemoval(notification: RemovalNotification[String, util.List[String]]): Unit = {
+        val files = notification.getValue
+        if (files != null) {
+          val fs = FileSystem.get(HDFSOperatorV2.hadoopConfiguration)
+          files.asScala.foreach { file =>
+            logInfo(s"remove cache file ${file}")
+            fs.delete(new Path(file), true)
+            // delete the .crc file
+            fs.delete(new Path("." + file + ".crc"), true)
+          }
+        }
+      }
+    }).
+    expireAfterWrite(7, TimeUnit.DAYS).
+    build[String, java.util.List[String]]()
 
+  // by default we use the hadoop.tmp.dir to store the cache file
   private lazy val cacheDir = {
     var tmpPath = HDFSOperatorV2.hadoopConfiguration.get("hadoop.tmp.dir")
     if (tmpPath == null || tmpPath.isEmpty) {
@@ -46,6 +63,12 @@ object JobUtils extends Logging {
     v.set(cachePath.toString)
     v
   }
+
+  // the cache file will be cleaned by user manually, when the user remove
+  // the connection, we will remove the cache file either.
+  // This clean thread is used to make sure when the user forget to clean or the
+  // system restart which caused the loss of the cache file track information, so
+  // we can still clean the old cache file.
   private val cleanThread = Executors.newSingleThreadScheduledExecutor()
   cleanThread.schedule(new Runnable {
     override def run(): Unit = {
@@ -65,6 +88,16 @@ object JobUtils extends Logging {
     import scala.collection.JavaConverters._
     val stat = JobUtils.connectionPool.get(connName).prepareStatement(sql)
     stat.execute()
+  }
+
+  // try catch without exception
+  def try_close(func: () => Unit) = {
+    try {
+      func()
+    } catch {
+      case e: Exception =>
+        logError("execute func failed", e)
+    }
   }
 
 
@@ -109,9 +142,15 @@ object JobUtils extends Logging {
         dos.write((line + "\n").getBytes("UTF-8"))
       }
     } finally {
-      dos.close()
-      rs.close()
-      stat.close()
+      try_close(() => {
+        dos.close()
+      })
+      try_close(() => {
+        rs.close()
+      })
+      try_close(() => {
+        stat.close()
+      })
     }
 
     // put the cache file path into cacheFiles, so when the user
@@ -157,7 +196,7 @@ object JobUtils extends Logging {
     Class.forName(driver)
     val connection = java.sql.DriverManager.getConnection(url, formatOptions(options))
     if (JobUtils.connectionPool.containsKey(name)) {
-      JobUtils.connectionPool.get(name).close()
+      removeConnection(name)
     }
     JobUtils.connectionPool.put(name, connection)
     JobUtils.connectionPool.get(name)
@@ -166,19 +205,11 @@ object JobUtils extends Logging {
   def removeConnection(name: String) = synchronized {
     if (JobUtils.connectionPool.containsKey(name)) {
       val connection = JobUtils.connectionPool.get(name)
-      connection.close()
+      try_close(() => {
+        connection.close()
+      })
       JobUtils.connectionPool.remove(name)
-      val files = JobUtils.cacheFiles.getIfPresent(name)
       cacheFiles.invalidate(name)
-      if (files != null) {
-        val fs = FileSystem.get(HDFSOperatorV2.hadoopConfiguration)
-        files.asScala.foreach { file =>
-          logInfo(s"remove cache file ${file}")
-          fs.delete(new Path(file), true)
-          // delete the .crc file
-          fs.delete(new Path("." + file + ".crc"), true)
-        }
-      }
     }
   }
 }
