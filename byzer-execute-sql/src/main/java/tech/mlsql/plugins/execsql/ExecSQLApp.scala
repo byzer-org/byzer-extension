@@ -107,13 +107,8 @@ object ExecSQLApp extends Logging {
   def newConnection(name: String, options: Map[String, String]) = synchronized {
     val driver = options("driver")
     val url = options("url")
-
-    println(s"load driver ${driver}")
-
     Class.forName(driver)
-    println(s"create connection ${name} ${url} ${driver}")
     val connection = java.sql.DriverManager.getConnection(url, formatOptions(options))
-    println(s"finish connection ${name} ${url} ${driver}")
     if (ExecSQLApp.connectionPool.containsKey(name)) {
       ExecSQLApp.connectionPool.get(name).close()
     }

@@ -2,15 +2,11 @@ package tech.mlsql.plugins.execsql
 
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.mlsql.session.MLSQLException
-import streaming.core.datasource.JDBCUtils
-import streaming.core.datasource.JDBCUtils.formatOptions
 import streaming.dsl.mmlib.SQLAlg
 import streaming.dsl.mmlib.algs.Functions
 import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}
 import tech.mlsql.common.utils.serder.json.JSONTool
-//import tech.mlsql.ets.Ray
-import tech.mlsql.plugins.execsql
+
 import tech.mlsql.version.VersionCompatibility
 
 class JDBCConn(override val uid: String) extends SQLAlg with VersionCompatibility with Functions with WowParams {
