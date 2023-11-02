@@ -7,3 +7,4 @@ logs/
 ./install-dev.sh
 ./install-llm.sh
 ./publish-llm.sh
+./new_install.sh
