@@ -15,6 +15,7 @@ import tech.mlsql.common.utils.cache.{CacheBuilder, RemovalListener, RemovalNoti
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.tool.HDFSOperatorV2
 import com.alibaba.druid.util.{JdbcConstants, JdbcUtils}
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.util
 import java.util.concurrent.atomic.AtomicReference
@@ -95,8 +96,10 @@ object JobUtils extends Logging {
 
   def executeQueryInDriverWithoutResult(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
-    val stat = JobUtils.connectionPool.get(connName).connection.prepareStatement(sql)
+    val connect = JobUtils.connectionPool.get(connName)
+    val stat = if (connect != null) connect.connection.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
     stat.execute()
+    stat.close()
   }
 
   // try catch without exception
@@ -112,8 +115,8 @@ object JobUtils extends Logging {
 
   def executeQueryInDriver(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
-    val connect = JobUtils.connectionPool.get(connName).connection
-    val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
+    val connect = JobUtils.connectionPool.get(connName)
+    val stat = if (connect != null) connect.connection.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
     val rs = stat.executeQuery()
     val res = JDBCUtils.rsToMaps(rs)
     stat.close()
@@ -144,6 +147,7 @@ object JobUtils extends Logging {
     val objectMapper = new ObjectMapper()
     objectMapper.registerModule(DefaultScalaModule)
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .registerModule(new JavaTimeModule())
 
     // get the time with format yyyy-MM-dd-HH-mm-ss
     val time = DateTime.now().toString("yyyyMMddHHmmss")
