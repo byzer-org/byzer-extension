@@ -52,7 +52,7 @@ object JobUtils extends Logging {
         }
       }
     }).
-    expireAfterWrite(7, TimeUnit.DAYS).
+    expireAfterWrite(2, TimeUnit.DAYS).
     build[String, java.util.List[String]]()
 
   // by default we use the hadoop.tmp.dir to store the cache file
@@ -197,9 +197,8 @@ object JobUtils extends Logging {
         val time = fileName.split("-").last
         val fileTime = DateTime.parse(time, forPattern("yyyyMMddHHmmss"))
         val diff = now.getMillis - fileTime.getMillis
-        // clean files 24h ago
-
-        if (diff > 1000 * 60 * 60 * 24) {
+        // clean files 48h ago
+        if (diff > 1000 * 60 * 60 * 24 * 2) {
           logInfo(s"clean file ${file.getPath.toString}")
           fs.delete(file.getPath, true)
           // delete the .crc file
