@@ -27,7 +27,7 @@ import scala.collection.JavaConverters._
 class JobUtils extends Logging {
 }
 
-case class ConnectionHolder(val name: String, val options: Map[String, String], val connection:java.sql.Connection)
+case class ConnectionHolder(val name: String, val options: Map[String, String], val connection: java.sql.Connection)
 
 object JobUtils extends Logging {
   private val connectionPool = new ConcurrentHashMap[String, ConnectionHolder]()
@@ -43,9 +43,9 @@ object JobUtils extends Logging {
               fs.delete(new Path(file), true)
               // delete the .crc file
               fs.delete(new Path("." + file + ".crc"), true)
-            }catch {
-              case e:Exception=>
-                logError(s"remove cache file ${file} failed",e)
+            } catch {
+              case e: Exception =>
+                logError(s"remove cache file ${file} failed", e)
             }
 
           }
@@ -96,7 +96,7 @@ object JobUtils extends Logging {
 
   def executeQueryInDriverWithoutResult(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
-    val connect = JobUtils.connectionPool.get(connName)
+    val connect = fetchConnection(connName)
     val stat = if (connect != null) connect.connection.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
     stat.execute()
     stat.close()
@@ -115,7 +115,7 @@ object JobUtils extends Logging {
 
   def executeQueryInDriver(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
-    val connect = JobUtils.connectionPool.get(connName)
+    val connect = fetchConnection(connName)
     val stat = if (connect != null) connect.connection.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
     val rs = stat.executeQuery()
     val res = JDBCUtils.rsToMaps(rs)
@@ -129,10 +129,27 @@ object JobUtils extends Logging {
     session.read.json(rdd)
   }
 
-  def executeQueryWithDiskCache(session: SparkSession, connName: String, sql: String) = {
-    import scala.collection.JavaConverters._
+  private def fetchConnection(connName: String) = {
     val connectionHolder = JobUtils.connectionPool.get(connName)
     val connect = connectionHolder.connection
+
+    if (connect.isClosed || !connect.isValid(5)) {
+      logInfo(s"connection ${connName} is closed or invalid, try to reconnect")
+      removeConnection(connName)
+      newConnection(connName, connectionHolder.options)
+      val connectionHolder2 = JobUtils.connectionPool.get(connName)
+      connectionHolder2
+    } else {
+      connectionHolder
+    }
+
+  }
+
+  def executeQueryWithDiskCache(session: SparkSession, connName: String, sql: String) = {
+    import scala.collection.JavaConverters._
+    val connectionHolder = fetchConnection(connName)
+    val connect = connectionHolder.connection
+
 
     val isMySqlDriver = JdbcUtils.isMySqlDriver(connectionHolder.options("driver"))
 
@@ -143,7 +160,7 @@ object JobUtils extends Logging {
       stat.setFetchSize(-2147483648)
     }
     val rs = stat.executeQuery()
-    
+
     val objectMapper = new ObjectMapper()
     objectMapper.registerModule(DefaultScalaModule)
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -219,7 +236,7 @@ object JobUtils extends Logging {
     if (JobUtils.connectionPool.containsKey(name)) {
       removeConnection(name)
     }
-    JobUtils.connectionPool.put(name, ConnectionHolder(name,options,connection))
+    JobUtils.connectionPool.put(name, ConnectionHolder(name, options, connection))
     JobUtils.connectionPool.get(name)
   }
 
