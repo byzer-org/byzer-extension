@@ -212,7 +212,7 @@ object JobUtils extends Logging {
     for (file <- files) {
       val fileName = file.getPath.getName
       if (fileName.endsWith(".json")) {
-        val time = fileName.split("-").last
+        val time = fileName.split("-").last.stripSuffix(".json")
         val fileTime = DateTime.parse(time, forPattern("yyyyMMddHHmmss"))
         val diff = now.getMillis - fileTime.getMillis
         // clean files 48h ago
