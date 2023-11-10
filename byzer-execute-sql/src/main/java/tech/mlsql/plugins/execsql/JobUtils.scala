@@ -97,7 +97,7 @@ object JobUtils extends Logging {
   def executeQueryInDriverWithoutResult(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
     val connect = fetchConnection(connName)
-    val stat = if (connect != null) connect.connection.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
+    val stat = if (connect != null) connect.connection.prepareStatement(sql) else throw new RuntimeException(s"connection ${connName} no found!")
     stat.execute()
     stat.close()
   }
@@ -116,7 +116,7 @@ object JobUtils extends Logging {
   def executeQueryInDriver(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
     val connect = fetchConnection(connName)
-    val stat = if (connect != null) connect.connection.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
+    val stat = if (connect != null) connect.connection.prepareStatement(sql) else throw new RuntimeException(s"connection ${connName} no found!")
     val rs = stat.executeQuery()
     val res = JDBCUtils.rsToMaps(rs)
     stat.close()
@@ -131,6 +131,7 @@ object JobUtils extends Logging {
 
   private def fetchConnection(connName: String) = {
     val connectionHolder = JobUtils.connectionPool.get(connName)
+    if (connectionHolder == null) throw new RuntimeException(s"connection ${connName} no found!")
     val connect = connectionHolder.connection
 
     if (connect.isClosed || !connect.isValid(5)) {
@@ -154,7 +155,7 @@ object JobUtils extends Logging {
     val isMySqlDriver = JdbcUtils.isMySqlDriver(connectionHolder.options("driver"))
 
 
-    val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException("connection name no found!")
+    val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException(s"connection ${connName} no found!")
     if (isMySqlDriver) {
       // Integer.MIN_VALUE
       stat.setFetchSize(-2147483648)
