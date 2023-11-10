@@ -42,7 +42,7 @@ object JobUtils extends Logging {
               logInfo(s"remove cache file ${file}")
               fs.delete(new Path(file), true)
               // delete the .crc file
-              fs.delete(new Path("." + file + ".crc"), true)
+              deleteCRCFile(file)
             } catch {
               case e: Exception =>
                 logError(s"remove cache file ${file} failed", e)
@@ -110,6 +110,15 @@ object JobUtils extends Logging {
       case e: Exception =>
         logError("execute func failed", e)
     }
+  }
+
+  def deleteCRCFile(path: String) = {
+    val fs = FileSystem.get(HDFSOperatorV2.hadoopConfiguration)
+    // get file name from path
+    val fileName = path.split("/").last
+    val crcFileName = "." + path + ".crc"
+    val crcFile = path.stripSuffix(s"${fileName}") + crcFileName
+    fs.delete(new Path(crcFile), true)
   }
 
 
@@ -220,7 +229,7 @@ object JobUtils extends Logging {
           logInfo(s"clean file ${file.getPath.toString}")
           fs.delete(file.getPath, true)
           // delete the .crc file
-          fs.delete(new Path("." + file.getPath.toString + ".crc"), true)
+          deleteCRCFile(file.getPath.toString)
         }
       }
 
