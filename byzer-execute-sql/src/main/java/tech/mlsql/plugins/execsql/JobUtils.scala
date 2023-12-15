@@ -158,7 +158,7 @@ object JobUtils extends Logging {
     import scala.collection.JavaConverters._
     val connectionHolder = fetchConnection(connName)
     val connect = connectionHolder.connection
-
+    connect.setAutoCommit(false)
 
     val isMySqlDriver = JdbcUtils.isMySqlDriver(connectionHolder.options("driver"))
 
