@@ -1,0 +1,44 @@
+<p align="center">
+LLM Extension for Byzer-SQL
+</p>
+
+<h3 align="center">
+Make you works with LLM by SQL.
+</h3>
+
+<p align="center">
+| <a href="#"><b>Documentation</b></a> | <a href="#"><b>Blog</b></a> | | <a href="#"><b>Discord</b></a> |
+
+</p>
+
+---
+
+*Latest News* 🔥
+
+- [2024/01] Release LLM Extension for Byzer-SQL 0.1.17
+
+
+---
+
+This is the LLM Extension for Byzer-SQL, which is a SQL-like language for LLM. It is designed to make it easy to work with LLM by SQL.
+
+---
+
+* [Versions](#Versions)
+* [Installation](#Installation)
+* [Quick Start](#Quick-Start)
+
+* [Contributing](#Contributing)
+
+---
+
+## Versions
+- 0.1.7： Support Byzer-Retrieval and Byzer-LLM
+
+---
+
+## Installation
+
+---
+
+## Quick Start
