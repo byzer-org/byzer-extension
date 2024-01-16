@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat.forPattern
 import streaming.core.datasource.JDBCUtils
@@ -15,11 +15,18 @@ import tech.mlsql.common.utils.cache.{CacheBuilder, RemovalListener, RemovalNoti
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.tool.HDFSOperatorV2
 import com.alibaba.druid.util.{JdbcConstants, JdbcUtils}
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import java.util
 import java.util.concurrent.atomic.AtomicReference
+
+import org.apache.parquet.hadoop.ParquetFileWriter
+
 import scala.collection.JavaConverters._
+import org.apache.parquet.avro.AvroParquetWriter
+import org.apache.avro.generic.GenericData
+import org.apache.avro.SchemaBuilder
+import org.apache.parquet.hadoop.ParquetWriter
+import org.apache.parquet.hadoop.metadata.CompressionCodecName
 
 /**
  * 11/2/23 WilliamZhu(allwefantasy@gmail.com)
@@ -57,7 +64,7 @@ object JobUtils extends Logging {
 
   // by default we use the hadoop.tmp.dir to store the cache file
   private lazy val cacheDir = {
-    var tmpPath = HDFSOperatorV2.hadoopConfiguration.get("hadoop.tmp.dir")
+    var tmpPath = ExecSQLApp.getTmpPath
     if (tmpPath == null || tmpPath.isEmpty) {
       logInfo(s"hadoop.tmp.dir is not set")
       tmpPath = "/tmp"
@@ -80,7 +87,7 @@ object JobUtils extends Logging {
   // system restart which caused the loss of the cache file track information, so
   // we can still clean the old cache file.
   private val cleanThread = Executors.newSingleThreadScheduledExecutor()
-  cleanThread.schedule(new Runnable {
+  cleanThread.scheduleWithFixedDelay(new Runnable {
     override def run(): Unit = {
       try {
         logInfo("try to clean old files...")
@@ -92,7 +99,7 @@ object JobUtils extends Logging {
           logError("clean old files failed", e)
       }
     }
-  }, 30, java.util.concurrent.TimeUnit.MINUTES)
+  }, 30, 30, java.util.concurrent.TimeUnit.MINUTES)
 
   def executeQueryInDriverWithoutResult(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
@@ -168,6 +175,10 @@ object JobUtils extends Logging {
       // Integer.MIN_VALUE
       stat.setFetchSize(-2147483648)
     }
+    if (connectionHolder.options("driver").equals("org.postgresql.Driver")) {
+      stat.setFetchSize(10000)
+      connect.setAutoCommit(false)
+    }
     val rs = stat.executeQuery()
 
     val objectMapper = new ObjectMapper()
@@ -212,6 +223,98 @@ object JobUtils extends Logging {
     session.read.json(new Path(cacheDir.get(), fileName).toString)
   }
 
+
+  def executeQueryWithDiskCacheParquet(session: SparkSession, connName: String, sql: String): DataFrame = {
+    val connectionHolder = fetchConnection(connName)
+    val connect = connectionHolder.connection
+
+    val isMySqlDriver = JdbcUtils.isMySqlDriver(connectionHolder.options("driver"))
+
+    val stat = if (connect != null) connect.prepareStatement(sql) else throw new RuntimeException(s"connection ${connName} no found!")
+    if (isMySqlDriver) {
+      // Integer.MIN_VALUE
+      stat.setFetchSize(-2147483648)
+    }
+    if (connectionHolder.options("driver").equals("org.postgresql.Driver")) {
+      stat.setFetchSize(10000)
+      connect.setAutoCommit(false)
+    }
+    val rs = stat.executeQuery()
+
+    // Define the Parquet schema dynamically based on ResultSet metadata
+    val metaData = rs.getMetaData
+    // 创建Avro的SchemaBuilder
+    val avroSchemaBuilder = SchemaBuilder.record("record").fields()
+
+    // 遍历ResultSet的元数据，为Avro Schema添加字段
+    for (i <- 1 to metaData.getColumnCount) {
+      val columnName = metaData.getColumnLabel(i)
+      val dataType = metaData.getColumnType(i)
+
+      val avroFieldType = dataType match {
+        case java.sql.Types.INTEGER => SchemaBuilder.builder().intType()
+        case java.sql.Types.BIGINT => SchemaBuilder.builder().longType()
+        case java.sql.Types.DOUBLE => SchemaBuilder.builder().doubleType()
+        case java.sql.Types.FLOAT => SchemaBuilder.builder().floatType()
+        case java.sql.Types.VARCHAR | java.sql.Types.CHAR => SchemaBuilder.builder().stringType()
+        case java.sql.Types.BINARY => SchemaBuilder.builder().bytesType()
+        case java.sql.Types.BOOLEAN => SchemaBuilder.builder().booleanType()
+        case java.sql.Types.DATE => SchemaBuilder.builder().intType() // 根据实际情况调整
+        // 其他数据类型的处理，将不支持的类型映射为 Avro 的字符串类型
+        case _ => SchemaBuilder.builder().stringType()
+      }
+
+      avroSchemaBuilder.name(columnName).`type`(avroFieldType).noDefault()
+    }
+    // 构建最终的Avro Schema
+    val avroSchema = avroSchemaBuilder.endRecord()
+
+    // get the time with format yyyy-MM-dd-HH-mm-ss
+    val time = DateTime.now().toString("yyyyMMddHHmmss")
+    val fileName = s"${UUID.randomUUID().toString}-${time}.parquet"
+    val filePath = new Path(cacheDir.get(), fileName)
+    val compressionCodec = CompressionCodecName.SNAPPY
+
+    // 创建Parquet文件的Writer
+    val writer: ParquetWriter[GenericData.Record] = AvroParquetWriter.builder[GenericData.Record](filePath)
+      .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
+      .withCompressionCodec(compressionCodec).withSchema(avroSchema)
+      .build()
+    val record = new GenericData.Record(avroSchema)
+    try {
+      while (rs.next()) {
+
+        for (i <- 1 to metaData.getColumnCount) {
+          val columnName = metaData.getColumnLabel(i)
+          val columnValue = rs.getObject(i)
+          record.put(columnName, columnValue)
+        }
+        writer.write(record)
+
+      }
+    } finally {
+      try_close(() => {
+        writer.close()
+      })
+      try_close(() => {
+        rs.close()
+      })
+      try_close(() => {
+        stat.close()
+      })
+    }
+    // put the cache file path into cacheFiles, so when the user
+    // remove the connection, we can delete the cache file
+    val files = cacheFiles.get(connName, new Callable[java.util.List[String]] {
+      override def call(): java.util.List[String] = {
+        new util.LinkedList[String]()
+      }
+    })
+    files.add(new Path(cacheDir.get(), fileName).toString)
+    session.read.parquet(new Path(cacheDir.get(), fileName).toString)
+  }
+
+
   def cleanOldFiles(path: Path): Unit = {
     val fs = FileSystem.get(HDFSOperatorV2.hadoopConfiguration)
     // list all files in path and remove them according to the time
@@ -219,8 +322,8 @@ object JobUtils extends Logging {
     val now = DateTime.now()
     for (file <- files) {
       val fileName = file.getPath.getName
-      if (fileName.endsWith(".json")) {
-        val time = fileName.split("-").last.stripSuffix(".json")
+      if (fileName.endsWith(".json") || fileName.endsWith(".parquet")) {
+        val time = fileName.split("-").last.stripSuffix(if (fileName.endsWith(".json")) ".json" else ".parquet")
         val fileTime = DateTime.parse(time, forPattern("yyyyMMddHHmmss"))
         val diff = now.getMillis - fileTime.getMillis
         // clean files 48h ago

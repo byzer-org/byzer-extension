@@ -1,10 +1,13 @@
 package tech.mlsql.plugins.execsql
 
 
+import streaming.core.strategy.platform.{PlatformManager, SparkRuntime}
 import tech.mlsql.common.utils.log.Logging
 import tech.mlsql.dsl.CommandCollection
 import tech.mlsql.ets.register.ETRegister
+import tech.mlsql.tool.HDFSOperatorV2
 
+import scala.collection.JavaConverters._
 import tech.mlsql.version.VersionCompatibility
 
 
@@ -35,6 +38,12 @@ class ExecSQLApp extends tech.mlsql.app.App with VersionCompatibility with Loggi
 }
 
 object ExecSQLApp extends Logging {
+  def getTmpPath: String = {
+    val runtime = PlatformManager.getRuntime.asInstanceOf[SparkRuntime]
+    val byzerParams = runtime.params.asScala.map(f => (f._1.toString, f._2.toString)).toMap
+    byzerParams.getOrElse("spark.mlsql.execsql.config.tmp.path", HDFSOperatorV2.hadoopConfiguration.get("hadoop.tmp.dir"))
+  }
+
   val versions = Seq(">=2.0.1")
 
 }
