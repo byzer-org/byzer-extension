@@ -44,6 +44,7 @@
         <module>byzer-expand-include</module>
         <module>byzer-llm</module>
         <module>byzer-execute-sql</module>
+        <module>byzer-sas-files</module>
     </modules>
     <name>MLSQL Plugins</name>
     <url>https://github.com/allwefantasy/mlsql-plugins.git</url>
@@ -343,6 +344,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
