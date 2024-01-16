@@ -27,18 +27,27 @@ This is the LLM Extension for Byzer-SQL, which is a SQL-like language for LLM. I
 * [Versions](#Versions)
 * [Installation](#Installation)
 * [Quick Start](#Quick-Start)
-
 * [Contributing](#Contributing)
 
 ---
 
 ## Versions
-- 0.1.7： Support Byzer-Retrieval and Byzer-LLM
+- [0.1.7](https://download.byzer.org/byzer-extensions/nightly-build/)： Support Byzer-Retrieval and Byzer-LLM 
 
 ---
 
 ## Installation
 
+1. Download the latest version from [here](https://download.byzer.org/byzer-extensions/nightly-build/).
+2. Copy the jar file to the `plugin` folder of Byzer-SQL.
+3. Add the following configuration to the `conf/byzer.properties.override` file of Byzer-SQL:
+
+```properties
+streaming.plugin.clzznames=tech.mlsql.plugins.llm.LLMApp,[YOUR_OTHER_PLUGINS_LIST]
+```
+
 ---
 
 ## Quick Start
+
+todo
