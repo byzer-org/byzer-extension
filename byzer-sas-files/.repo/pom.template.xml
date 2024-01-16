@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>mlsql-plugins-{{spark_binary_version}}_{{scala_binary_version}}</artifactId>
+        <groupId>tech.mlsql</groupId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>byzer-sas-files-{{spark_binary_version}}_{{scala_binary_version}}</artifactId>
+    <properties>
+        <hadoop.version>3.3.2</hadoop.version>
+        <scala.version>2.12.15</scala.version>
+        <scala.binary.version>2.12</scala.binary.version>
+    </properties>
+    <dependencies>
+
+    </dependencies>
+    <profiles>
+        <profile>
+            <id>spark-package-repo</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <!-- list of other repositories -->
+                <repository>
+                    <id>SparkPackagesRepo</id>
+                    <url>https://repos.spark-packages.org/</url>
+                </repository>
+            </repositories>
+        </profile>
+        <profile>
+            <id>shade</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <relocations>
+
+                            </relocations>
+                        </configuration>
+
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
