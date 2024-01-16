@@ -33,24 +33,7 @@ class Infer(params: Map[String, String]) extends Logging {
     }
 
     val code =
-      s"""try:
-         |    import sys
-         |    import logging
-         |    import transformers
-         |    import datasets
-         |    logging.basicConfig(
-         |    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-         |    datefmt="%m/%d/%Y %H:%M:%S",
-         |    handlers=[logging.StreamHandler(sys.stdout)],)
-         |    transformers.utils.logging.set_verbosity_info()
-         |    datasets.utils.logging.set_verbosity(logging.INFO)
-         |    transformers.utils.logging.set_verbosity(logging.INFO)
-         |    transformers.utils.logging.enable_default_handler()
-         |    transformers.utils.logging.enable_explicit_format()
-         |except ImportError:
-         |    pass
-         |
-         |import ray
+      s"""import ray
          |import numpy as np
          |from pyjava.api.mlsql import RayContext,PythonContext
          |
@@ -67,7 +50,11 @@ class Infer(params: Map[String, String]) extends Logging {
          |import byzerllm.${realPretrainedModelType} as infer
          |from byzerllm.utils.text_generator import ${predict_func}
          |
-         |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
+         |job_config = None
+         |if "code_search_path" in context.conf:
+         |    job_config = ray.job_config.JobConfig(code_search_path=[context.conf["code_search_path"]],
+         |                                        runtime_env={"env_vars": {"JAVA_HOME":context.conf["JAVA_HOME"],"PATH":context.conf["PATH"]}})
+         |ray_context = RayContext.connect(globals(), context.conf["rayAddress"],job_config=job_config)
          |
          |rd=str(uuid.uuid4())
          |
@@ -89,8 +76,23 @@ class Infer(params: Map[String, String]) extends Logging {
          |UDFBuilder.build(ray_context,init_model,${predict_func})
          |""".stripMargin
     logInfo(code)
+
+    val predictCode = """
+        |import ray
+        |from pyjava.api.mlsql import RayContext
+        |from pyjava.udf import UDFMaster,UDFWorker,UDFBuilder,UDFBuildInFunc
+        |
+        |job_config = None
+        |if "code_search_path" in context.conf:
+        |    job_config = ray.job_config.JobConfig(code_search_path=[context.conf["code_search_path"]],
+        |                                        runtime_env={"env_vars": {"JAVA_HOME":context.conf["JAVA_HOME"],"PATH":context.conf["PATH"]}})
+        |ray_context = RayContext.connect(globals(), context.conf["rayAddress"],job_config=job_config)
+        |UDFBuilder.apply(ray_context)
+        |""".stripMargin
+    
     trainer.predict(session, modelTable, udfName, Map(
       "registerCode" -> code,
+      "predictCode" -> predictCode,
       "sourceSchema" -> "st(field(value,string))",
       "outputSchema" -> "st(field(value,array(string)))"
     ) ++ params)

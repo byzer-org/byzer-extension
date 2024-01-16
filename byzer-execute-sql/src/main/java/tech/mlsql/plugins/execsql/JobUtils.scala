@@ -104,6 +104,7 @@ object JobUtils extends Logging {
   def executeQueryInDriverWithoutResult(session: SparkSession, connName: String, sql: String) = {
     import scala.collection.JavaConverters._
     val connect = fetchConnection(connName)
+    connect.connection.setAutoCommit(true)
     val stat = if (connect != null) connect.connection.prepareStatement(sql) else throw new RuntimeException(s"connection ${connName} no found!")
     stat.execute()
     stat.close()
@@ -165,7 +166,7 @@ object JobUtils extends Logging {
     import scala.collection.JavaConverters._
     val connectionHolder = fetchConnection(connName)
     val connect = connectionHolder.connection
-
+    connect.setAutoCommit(false)
 
     val isMySqlDriver = JdbcUtils.isMySqlDriver(connectionHolder.options("driver"))
 

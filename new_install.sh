@@ -81,4 +81,6 @@ if [[ $RELEASE == "true" ]]; then
     curl --progress-bar \
         -F "${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar=@${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}}-${VERSION}.jar" \
       "${BYZER_UPLOADER_URL}&overwrite=true&pathPrefix=${prefix}" | cat
+    git tag v$VERSION
+    git push gitee v$VERSION
 fi
