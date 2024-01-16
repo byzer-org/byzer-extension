@@ -1,9 +1,9 @@
-<p align="center">
+<H1 align="center">
 LLM Extension for Byzer-SQL
-</p>
+</H1>
 
 <h3 align="center">
-Make you works with LLM by SQL.
+Make LLM easy to use by SQL
 </h3>
 
 <p align="center">
