@@ -15,7 +15,7 @@ Make LLM easy to use by SQL
 
 *Latest News* 🔥
 
-- [2024/01] Release LLM Extension for Byzer-SQL 0.1.17
+- [2024/01] Release LLM Extension 0.1.17 for Byzer-SQL 
 
 
 ---
