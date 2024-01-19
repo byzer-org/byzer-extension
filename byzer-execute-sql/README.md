@@ -15,7 +15,7 @@ Make MPP easy to use by Byzer-SQL
 
 *Latest News* 🔥
 
-- [2024/01] Release MPP-JDBC Extension 0.1.1 for Byzer-SQL
+- [2024/01] Release MPP-JDBC Extension [0.1.1]((https://download.byzer.org/byzer-extensions/nightly-build/byzer-execute-sql-3.3_2.12-0.1.1-SNAPSHOT.jar)) for Byzer-SQL
 - Old Version: [0.1.0](https://download.byzer.org/byzer-extensions/nightly-build/byzer-execute-sql-3.3_2.12-0.1.0-SNAPSHOT.jar) 
 
 

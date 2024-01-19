@@ -16,7 +16,7 @@ while [[ "$#" -gt 0 ]]; do
         -module) MODULE="$2"; shift ;;
         -version) VERSION="$2"; shift ;;
         -spark) SPARK="$2"; shift ;;
-        -release) RELEASE="false" ;;
+        -release) RELEASE="true" ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -64,7 +64,7 @@ else
     echo "Release: No"
 fi
 
-mvn clean install -DskipTests -pl ${MODULE}
+mvn clean install -Pshade -DskipTests -pl ${MODULE}
 
 scp ${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar ${REMOTE_SERVER}:/home/winubuntu/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.6/plugin/
 scp ${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar H:/home/byzerllm/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.7/plugin/
