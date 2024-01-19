@@ -66,8 +66,8 @@ fi
 
 mvn clean install -Pshade -DskipTests -pl ${MODULE}
 
-scp ${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar ${REMOTE_SERVER}:/home/winubuntu/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.6/plugin/
-scp ${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar H:/home/byzerllm/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.7/plugin/
+# scp ${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar ${REMOTE_SERVER}:/home/winubuntu/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.6/plugin/
+# scp ${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar H:/home/byzerllm/softwares/byzer-lang-all-in-one-linux-amd64-3.3.0-2.3.7/plugin/
 
 if [[ $RELEASE == "true" ]]; then
     object_store_name=$(echo ${MOUDLE} | sed 's/byzer-objectstore-//g')
@@ -78,8 +78,9 @@ if [[ $RELEASE == "true" ]]; then
     fi
 
     echo "upload ${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar to ${prefix}"
+    echo "${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar=@${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar"
     curl --progress-bar \
-        -F "${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar=@${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}}-${VERSION}.jar" \
+        -F "${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar=@${EXTENSION_HOME}/${MODULE}/target/${MODULE}-${SPARK}_${SCALA}-${VERSION}.jar" \
       "${BYZER_UPLOADER_URL}&overwrite=true&pathPrefix=${prefix}" | cat
     git tag v$VERSION
     git push gitee v$VERSION
