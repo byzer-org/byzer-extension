@@ -251,18 +251,18 @@ object JobUtils extends Logging {
     for (i <- 1 to metaData.getColumnCount) {
       val columnName = metaData.getColumnLabel(i)
       val dataType = metaData.getColumnType(i)
-
+      val SchemaBuilderNullable = SchemaBuilder.builder().nullable()
       val avroFieldType = dataType match {
-        case java.sql.Types.INTEGER => SchemaBuilder.builder().intType()
-        case java.sql.Types.BIGINT => SchemaBuilder.builder().longType()
-        case java.sql.Types.DOUBLE => SchemaBuilder.builder().doubleType()
-        case java.sql.Types.FLOAT => SchemaBuilder.builder().floatType()
-        case java.sql.Types.VARCHAR | java.sql.Types.CHAR => SchemaBuilder.builder().stringType()
-        case java.sql.Types.BINARY => SchemaBuilder.builder().bytesType()
-        case java.sql.Types.BOOLEAN => SchemaBuilder.builder().booleanType()
-        case java.sql.Types.DATE => SchemaBuilder.builder().intType() // 根据实际情况调整
+        case java.sql.Types.INTEGER => SchemaBuilderNullable.intType()
+        case java.sql.Types.BIGINT => SchemaBuilderNullable.longType()
+        case java.sql.Types.DOUBLE => SchemaBuilderNullable.doubleType()
+        case java.sql.Types.FLOAT => SchemaBuilderNullable.floatType()
+        case java.sql.Types.VARCHAR | java.sql.Types.CHAR => SchemaBuilderNullable.stringType()  // 使用 nullable() 处理可能为 null 的字段
+        case java.sql.Types.BINARY => SchemaBuilderNullable.bytesType()
+        case java.sql.Types.BOOLEAN => SchemaBuilderNullable.booleanType()
+        case java.sql.Types.DATE => SchemaBuilderNullable.intType() // 根据实际情况调整
         // 其他数据类型的处理，将不支持的类型映射为 Avro 的字符串类型
-        case _ => SchemaBuilder.builder().stringType()
+        case _ => SchemaBuilderNullable.stringType()
       }
 
       avroSchemaBuilder.name(columnName).`type`(avroFieldType).noDefault()
