@@ -9,40 +9,20 @@ import tech.mlsql.ets.Ray
 class CustomSaasAPI(params: Map[String, String]) extends Logging {
   def run(): DataFrame = {
     val session = ScriptSQLExec.context().execListener.sparkSession
-    val pretrainedModelType = params("pretrainedModelType")
-    val Array(_,model) = pretrainedModelType.split("/")
     val infer_params = JSONTool.toJsonStr(params)
     val trainer = new Ray()
-    val modelTable = params.getOrElse("modelTable", params.getOrElse("model", ""))
-    require(modelTable.nonEmpty, "modelTable/model is required")
     val udfName = params("udfName")
     val code =
-      s"""
-         |import os
+      s"""from pyjava.api.mlsql import RayContext
+         |from byzerllm.apps.byzer_sql import deploy
          |
-         |import ray
-         |import numpy as np
-         |from pyjava.api.mlsql import RayContext,PythonContext
-         |
-         |from pyjava.udf import UDFMaster,UDFWorker,UDFBuilder,UDFBuildInFunc
-         |from typing import Any, NoReturn, Callable, Dict, List
-         |import time
-         |from ray.util.client.common import ClientActorHandle, ClientObjectRef
-         |import uuid
-         |import json
-         |from byzerllm.saas.${model} import CustomSaasAPI
-         |from byzerllm.utils.text_generator import simple_predict_func
-         |
-         |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
-         |
-         |def init_model(model_refs: List[ClientObjectRef], conf: Dict[str, str]) -> Any:
-         |    from byzerllm import consume_model
-         |    consume_model(conf)
-         |    infer_params = json.loads('''${infer_params}''')
-         |    infer = CustomSaasAPI(infer_params)
-         |    return (infer,None)
-         |
-         |UDFBuilder.build(ray_context,init_model,simple_predict_func)
+         |job_config = None
+         |if "code_search_path" in context.conf:
+         |    job_config = ray.job_config.JobConfig(code_search_path=[context.conf["code_search_path"]],
+         |                                        runtime_env={"env_vars": {"JAVA_HOME":context.conf["JAVA_HOME"],"PATH":context.conf["PATH"]}})
+         |ray_context = RayContext.connect(globals(), context.conf["rayAddress"],job_config=job_config)
+         |infer_params='''${infer_params}'''
+         |deploy(infer_params=infer_params,conf=ray_context.conf())
          |""".stripMargin
 
     val predictCode = """
