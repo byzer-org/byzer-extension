@@ -45,14 +45,18 @@ class CustomSaasAPI(params: Map[String, String]) extends Logging {
          |UDFBuilder.build(ray_context,init_model,simple_predict_func)
          |""".stripMargin
 
-    val predictCode = params.getOrElse("predictCode",
-      """
+    val predictCode = """
         |import ray
         |from pyjava.api.mlsql import RayContext
         |from byzerllm.apps.byzer_sql import chat
-        |ray_context = RayContext.connect(globals(), context.conf["rayAddress"])
+        |
+        |job_config = None
+        |if "code_search_path" in context.conf:
+        |    job_config = ray.job_config.JobConfig(code_search_path=[context.conf["code_search_path"]],
+        |                                        runtime_env={"env_vars": {"JAVA_HOME":context.conf["JAVA_HOME"],"PATH":context.conf["PATH"]}})
+        |ray_context = RayContext.connect(globals(), context.conf["rayAddress"],job_config=job_config)
         |chat(ray_context)
-        |""".stripMargin)
+        |""".stripMargin
 
     trainer.predict(session, modelTable, udfName, Map(
       "registerCode" -> code,
