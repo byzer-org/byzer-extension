@@ -7,7 +7,7 @@ Make LLM easy to use by SQL
 </h3>
 
 <p align="center">
-| <a href="#"><b>Documentation</b></a> | <a href="#"><b>Blog</b></a> | | <a href="#"><b>Discord</b></a> |
+| <a href="https://docs.byzer.org/#/byzer-lang/zh-cn/byzer-llm/quick-tutorial"><b>Documentation</b></a> | <a href="#"><b>Blog</b></a> | | <a href="#"><b>Discord</b></a> |
 
 </p>
 

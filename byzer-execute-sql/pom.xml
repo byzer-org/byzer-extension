@@ -10,25 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>byzer-execute-sql-3.3_2.12</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.0</version>
     <properties>
         <hadoop.version>3.3.2</hadoop.version>
         <jackson.version>2.10.3</jackson.version>
     </properties>
     <dependencies>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.parquet</groupId>
-            <artifactId>parquet-avro</artifactId>
-            <version>1.12.0</version>
-        </dependency>
-
-</dependencies>
+    </dependencies>
 
     <profiles>
         <profile>

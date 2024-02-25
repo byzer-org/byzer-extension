@@ -61,11 +61,6 @@ class LLM(override val uid: String) extends SQLAlg with VersionCompatibility wit
             import tech.mlsql.plugins.llm.sass.chatglm.ChatGLMAPI
             val infer = new ChatGLMAPI(params)
             infer.run
-          case "saas/sparkdesk" =>
-            import tech.mlsql.plugins.llm.sass.sparkdesk.SparkDeskAPI
-            val infer = new SparkDeskAPI(params)
-            infer.run
-
           case s if s.startsWith("saas/") =>
             import tech.mlsql.plugins.llm.sass.CustomSaasAPI
             val infer = new CustomSaasAPI(params)

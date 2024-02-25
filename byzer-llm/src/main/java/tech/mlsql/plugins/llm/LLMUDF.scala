@@ -17,70 +17,38 @@ object LLMUDF {
     // llm_stack(chat(array(...)))
     uDFRegistration.register("llm_stack", (calls: Seq[String], newParams: Seq[String]) => {
 
-      val obj = JSONTool.jParseJsonArray(calls.head).getJSONObject(0)
-      val predict = obj.getString("predict")
-      val input = obj.getJSONObject("input")
-      val instruction = input.getString("instruction")
-
-      val his_instruction = s"${instruction}${predict}"
-
-      val query = JSONTool.jParseJsonObj(newParams.head)
-
-      query.put("instruction", s"${his_instruction}\n${query.getString("instruction")}")
-
-      Seq(query.toString)
+      val obj = JSONTool.jParseJsonObj(calls.head)
+      val history = obj.getJSONArray("history")
+      var query = new mutable.HashMap[String,String]()
+      query += ("history" -> history.toString)
+      val temp = JSONTool.jParseJsonObj(newParams.head)
+      temp.keySet().asScala.foreach { key =>
+        query += (key.toString -> temp.getString(key.toString))
+      }
+      Seq(JSONTool.toJsonStr(query.toMap))
     })
   }
 
   def llm_param(uDFRegistration: UDFRegistration) = {
+    // select ins,
+    //qianwen_chat(array(to_json(map("instruction",ins)))) as story
+    //from table1 as table2;
     uDFRegistration.register("llm_param", (input: Map[String, String]) => {
-
-      val instruction = input("instruction")
-      val system_msg = input.getOrElse("system_msg", "")
-      // system_role,user_role,assistant_role
-      var systemRole = input.getOrElse("system_role", "")
-      var userRole = input.getOrElse("user_role", "")
-      var assistantRole = input.getOrElse("assistant_role", "")
-
-      if (systemRole != "") {
-        systemRole = s"${systemRole}:"
-      }
-
-      if (userRole != "") {
-        userRole = s"${userRole}:"
-      }
-
-      if (assistantRole != "") {
-        assistantRole = s"${assistantRole}:"
-      }
-
-      val newMap = input ++ Map("instruction" -> s"${systemRole}\n${system_msg}\n${userRole}${instruction}\n${assistantRole}")
-
-      Seq(JSONTool.toJsonStr(newMap))
+      Seq(JSONTool.toJsonStr(input))
     })
   }
 
-  def llm_response_full(uDFRegistration: UDFRegistration) = {
-    uDFRegistration.register("llm_response_full", (calls: Seq[String]) => {
-      val obj = JSONTool.jParseJsonArray(calls.head).getJSONObject(0)
-      val predict = obj.getString("predict")
-      val input = obj.getJSONObject("input")
-      val instruction = input.getString("instruction")
-      s"${instruction}${predict}"
+  def llm_result(uDFRegistration: UDFRegistration) = {
+    uDFRegistration.register("llm_result", (calls: Seq[String]) => {
+      val obj = JSONTool.jParseJsonObj(calls.head)
+      obj.getString("output")
     })
   }
 
   def llm_response_predict(uDFRegistration: UDFRegistration) = {
     uDFRegistration.register("llm_response_predict", (calls: Seq[String]) => {
-      val obj = JSONTool.jParseJsonArray(calls.head).getJSONObject(0)
-      obj.getString("predict")
-    })
-  }
-
-  def llm_result(uDFRegistration: UDFRegistration) = {
-    uDFRegistration.register("llm_response_predict", (calls: Seq[String]) => {
-      val obj = JSONTool.jParseJsonArray(calls.head).getJSONObject(0)
-      obj.getString("predict")
+      val obj = JSONTool.jParseJsonObj(calls.head)
+      obj.getString("output")
     })
   }
 
