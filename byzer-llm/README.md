@@ -33,8 +33,8 @@ This is the LLM Extension for Byzer-SQL, which is a SQL-like language for LLM. I
 ---
 
 ## Versions
-- [0.1.8](https://download.byzer.org/byzer-extensions/nightly-build/): Use python project byzer-llm as the default client for LLM.
-- [0.1.7](https://download.byzer.org/byzer-extensions/nightly-build/)： Support Byzer-Retrieval and Byzer-LLM 
+- [0.1.8](https://download.byzer.org/byzer-extensions/nightly-build/byzer-llm-3.3_2.12-0.1.8.jar): Use python project byzer-llm as the default client for LLM.
+- [0.1.7](https://download.byzer.org/byzer-extensions/nightly-build/byzer-llm-3.3_2.12-0.1.7.jar)： Support Byzer-Retrieval and Byzer-LLM 
 
 ---
 
