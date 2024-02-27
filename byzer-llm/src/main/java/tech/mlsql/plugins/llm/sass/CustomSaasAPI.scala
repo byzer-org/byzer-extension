@@ -11,6 +11,7 @@ class CustomSaasAPI(params: Map[String, String]) extends Logging {
     val session = ScriptSQLExec.context().execListener.sparkSession
     val infer_params = JSONTool.toJsonStr(params)
     val trainer = new Ray()
+    val modelTable = params.getOrElse("modelTable", params.getOrElse("model", "command"))
     val udfName = params("udfName")
     val code =
       s"""from pyjava.api.mlsql import RayContext

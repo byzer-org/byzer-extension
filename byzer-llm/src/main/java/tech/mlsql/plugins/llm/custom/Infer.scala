@@ -12,7 +12,9 @@ import tech.mlsql.ets.Ray
 class Infer(params: Map[String, String]) extends Logging {
   def run(): DataFrame = {
     val session = ScriptSQLExec.context().execListener.sparkSession
-    
+    val modelTable = params.getOrElse("modelTable", params.getOrElse("model", "command"))
+    val udfName = params("udfName")
+    val trainer = new Ray()     
     val infer_params = JSONTool.toJsonStr(params)
 
     val code =
@@ -27,6 +29,7 @@ class Infer(params: Map[String, String]) extends Logging {
          |infer_params='''${infer_params}'''
          |deploy(infer_params=infer_params,conf=ray_context.conf())
          |""".stripMargin
+    logInfo(code)
 
     val predictCode = """
         |import ray

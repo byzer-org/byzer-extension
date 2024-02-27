@@ -15,7 +15,8 @@ Make LLM easy to use by SQL
 
 *Latest News* 🔥
 
-- [2024/01] Release LLM Extension 0.1.17 for Byzer-SQL 
+- [2024/02] Release LLM Extension 0.1.18 for Byzer-SQL. 
+- [2024/01] Release LLM Extension 0.1.17 for Byzer-SQL. 
 
 
 ---
@@ -32,6 +33,7 @@ This is the LLM Extension for Byzer-SQL, which is a SQL-like language for LLM. I
 ---
 
 ## Versions
+- [0.1.8](https://download.byzer.org/byzer-extensions/nightly-build/): Use python project byzer-llm as the default client for LLM.
 - [0.1.7](https://download.byzer.org/byzer-extensions/nightly-build/)： Support Byzer-Retrieval and Byzer-LLM 
 
 ---
