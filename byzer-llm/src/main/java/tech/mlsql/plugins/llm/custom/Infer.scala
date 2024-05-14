@@ -19,29 +19,19 @@ class Infer(params: Map[String, String]) extends Logging {
 
     val code =
       s"""from pyjava.api.mlsql import RayContext
-         |from byzerllm.apps.byzer_sql import deploy
-         |
-         |job_config = None
-         |if "code_search_path" in context.conf:
-         |    job_config = ray.job_config.JobConfig(code_search_path=[context.conf["code_search_path"]],
-         |                                        runtime_env={"env_vars": {"JAVA_HOME":context.conf["JAVA_HOME"],"PATH":context.conf["PATH"]}})
-         |ray_context = RayContext.connect(globals(), context.conf["rayAddress"],job_config=job_config)
+         |from byzerllm.apps.byzer_sql import prepare_env,deploy
+         |env = prepare_env(globals_info=globals(),context=context)
          |infer_params='''${infer_params}'''
-         |deploy(infer_params=infer_params,conf=ray_context.conf())
+         |deploy(infer_params=infer_params,conf=env.ray_context.conf())
          |""".stripMargin
     logInfo(code)
 
     val predictCode = """
         |import ray
         |from pyjava.api.mlsql import RayContext
-        |from byzerllm.apps.byzer_sql import chat
-        |
-        |job_config = None
-        |if "code_search_path" in context.conf:
-        |    job_config = ray.job_config.JobConfig(code_search_path=[context.conf["code_search_path"]],
-        |                                        runtime_env={"env_vars": {"JAVA_HOME":context.conf["JAVA_HOME"],"PATH":context.conf["PATH"]}})
-        |ray_context = RayContext.connect(globals(), context.conf["rayAddress"],job_config=job_config)
-        |chat(ray_context)
+        |from byzerllm.apps.byzer_sql import prepare_env, chat
+        |env = prepare_env(globals_info=globals(),context=context)
+        |chat(env.ray_context)
         |""".stripMargin
     
     trainer.predict(session, modelTable, udfName, Map(
