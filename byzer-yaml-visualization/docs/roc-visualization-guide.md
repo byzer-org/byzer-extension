@@ -14,7 +14,7 @@ Here's how to configure the YAML for generating an ROC curve:
 
 ```yaml
 runtime:
-   env: source /opt/miniconda3/bin/activate ray-1.12.0
+   env: 
    cache: true
    output: roc_output
 control:
@@ -40,7 +40,7 @@ from model_output;
 
 !visualize model_output '''
 runtime:
-   env: source /opt/miniconda3/bin/activate ray-1.12.0
+   env: 
    cache: true
    output: roc_output
 control:
