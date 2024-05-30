@@ -1,0 +1,1184 @@
+{
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/LSContext.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/LSContext.java",
+    "symbols": " 函数：parse\n变量：initParams\n类：LSContext\n导入语句：import net.sf.json.JSONObject,import java.util.HashMap,import java.util.Map\n\n请注意，这个输出是基于您提供的源码示例生成的，实际的符号提取可能需要使用特定的代码分析工具或库来处理。",
+    "last_modified": 1685926268.2176878,
+    "md5": "3959d3ea5f06da2a0e56d450048057aa"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/MLSQLWorkspaceService.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/MLSQLWorkspaceService.java",
+    "symbols": " 函数：didChangeConfiguration, didChangeWatchedFiles\n变量：\n类：MLSQLWorkspaceService\n导入语句：import org.eclipse.lsp4j.DidChangeConfigurationParams, import org.eclipse.lsp4j.DidChangeWatchedFilesParams, import org.eclipse.lsp4j.services.WorkspaceService\n\n请注意，由于Java语言的特性，函数通常是类的一部分，因此在这里我将类的方法视为函数。同时，Java中的变量通常在类的内部声明，但由于代码片段中没有提供类的完整内容，因此无法确定是否有变量存在。",
+    "last_modified": 1685926268.2218785,
+    "md5": "ffab9b508de4c985b1e9212df96c0b1b"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/MLSQLLanguageServer.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/MLSQLLanguageServer.java",
+    "symbols": " 函数：initialize, shutdown, exit, getTextDocumentService, getWorkspaceService, connect\n类：MLSQLLanguageServer, MLSQLDocumentService, MLSQLWorkspaceService\n变量：logger\n导入语句：import net.csdn.common.logging.CSLogger, import net.csdn.common.logging.Loggers, import org.eclipse.lsp4j.*, import org.eclipse.lsp4j.services.*, import tech.mlsql.plugins.langserver.launchers.stdio.MLSQLDesktopApp, import java.util.ArrayList, import java.util.List, import java.util.concurrent.CompletableFuture",
+    "last_modified": 1685926268.220907,
+    "md5": "bfe05ab143829f1954a6b33ad4ec77d5"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/FileTracker.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/FileTracker.java",
+    "symbols": " 函数：isOpen, getOpenFiles, openFile, closeFile, changeFile, getReader, getText, patch, getOffsetFromPosition, getPathFromLanguageServerURI\n变量：sourceByPath\n类：FileTracker\n导入语句：import org.apache.commons.io.IOUtils, import org.eclipse.lsp4j.Position, import org.eclipse.lsp4j.Range, import org.eclipse.lsp4j.TextDocumentContentChangeEvent, import java.io.*, import java.net.URI, import java.nio.file.Path, import java.nio.file.Paths, import java.util.*, import java.util.Optional\n\n请注意，这里的输出是基于提供的Java代码示例，并且假设代码中没有其他隐藏的或私有成员。在实际的代码分析中，可能需要更复杂的工具来确保所有相关的符号都被正确识别。",
+    "last_modified": 1685926268.2164955,
+    "md5": "58e5bfba6f529a4c8cf5893c75a2c039"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/commons/client/Message.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/commons/client/Message.java",
+    "symbols": " 函数：setId, getId, getDirection, getHeaders, getHttpMethod, getPath, getContentType, getPayload, getHeaderType\n变量：id, direction, headers, httpMethod, path, contentType, payload, headerType\n类：Message\n导入语句：\n\n请注意，由于Java语言的特性，导入语句通常在文件的顶部，但在这个示例中，没有提供完整的文件内容，因此无法确定是否有导入语句。如果文件顶部有import语句，它们也应该被包含在“导入语句”部分中。",
+    "last_modified": 1685926268.2230434,
+    "md5": "cc7d389e8cd296aa8abd2a684f5abd20"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/MLSQLDocumentService.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/MLSQLDocumentService.java",
+    "symbols": " 函数：didOpen, didChange, didClose, didSave, completion, resolveCompletionItem\n变量：logger, fileTracker\n类：MLSQLDocumentService, FileTracker, AutoSuggestWrapper\n导入语句：import net.csdn.common.logging.CSLogger, import net.csdn.common.logging.Loggers, import org.eclipse.lsp4j.*, import org.eclipse.lsp4j.jsonrpc.messages.Either, import org.eclipse.lsp4j.services.TextDocumentService, import tech.mlsql.autosuggest.statement.SuggestItem, import java.util.HashMap, import java.util.List, import java.util.Map, import java.util.concurrent.CompletableFuture",
+    "last_modified": 1685926268.2196524,
+    "md5": "80b147609c7fde402765525c840a27e2"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/launchers/stdio/Launcher.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/launchers/stdio/Launcher.java",
+    "symbols": " 函数：exitOnClose, exitIfNegative\n变量：server, lspInspectorTrace, launcher, client\n类：Launcher\n导入语句：import org.eclipse.lsp4j.services.LanguageClient, import tech.mlsql.plugins.langserver.MLSQLLanguageServer, import java.io.IOException, import java.io.InputStream, import java.io.PrintWriter, import java.util.concurrent.ExecutionException",
+    "last_modified": 1685926268.225549,
+    "md5": "3eab89c4ad4374be5b4660eddada9bc8"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/commons/client/TraceRecord.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/commons/client/TraceRecord.java",
+    "symbols": " 函数：getRawMessage, getLogger, getSequence, getThread, getMillis, getSourceMethod, getSourceClass, getMessage, getId\n变量：message, rawMessage, id, millis, sequence, logger, sourceClass, sourceMethod, thread\n类：TraceRecord\n导入语句：import com.google.gson.JsonObject, import java.util.UUID, package tech.mlsql.plugins.langserver.commons.client\n\n请注意，由于Java代码中通常不显式声明变量，而是通过类的成员变量隐式声明，因此上述变量列表包含了类TraceRecord的所有成员变量。此外，Java中的包声明（package）在语义上不同于导入语句（import），但在此处为了完整性也列出了包声明。",
+    "last_modified": 1685926268.2240148,
+    "md5": "e4c8ca9c11a794041d55df7c0fd21dde"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/JavaDoc.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/JavaDoc.java",
+    "symbols": " 类：JavaDoc\n函数：\n变量：\n导入语句：\n\n根据您提供的Java源码，我们可以看到只有一个类`JavaDoc`，没有函数、变量或导入语句。因此，输出结果中这些部分为空。",
+    "last_modified": 1685926268.0754883,
+    "md5": "9f54cd7f7194db5460c88e8902255890"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/Main.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/Main.java",
+    "symbols": " 类：Main\n函数：main\n变量：\n导入语句：\n\n解释：\n- 在给定的Java代码中，我们找到了一个类 `Main`。\n- 类 `Main` 中包含一个静态方法 `main`，这是Java程序的入口点。\n- 没有显式定义的变量。\n- 没有导入语句，因为Java代码中没有使用 `import` 关键字来导入任何外部类或包。`System` 和 `println` 是Java标准库的一部分，不需要显式导入。",
+    "last_modified": 1685945524.240779,
+    "md5": "4409a5cd0f70ece4dda37b6d81fb8ec8"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/MLSQLCmd.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/MLSQLCmd.java",
+    "symbols": " 函数：execute, getName, printLongDesc, printUsage, setParentCmdParser, getCommandUsageInfo, readFileAsString\n变量：\n类：MLSQLCmd\n导入语句：import picocli.CommandLine,import java.io.BufferedReader,import java.io.IOException,import java.io.InputStream,import java.io.InputStreamReader,import java.nio.charset.StandardCharsets\n\n请注意，由于输入的代码是Java语言，而Java中的接口（interface）定义了方法但不包含实现，因此这里列出的“函数”实际上是接口MLSQLCmd中声明的方法。在Java中，接口的方法通常被称为方法声明，而不是函数。",
+    "last_modified": 1685926268.141166,
+    "md5": "6dea7ab124bf2aaf519f6e726a21abae"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/CliException.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/CliException.java",
+    "symbols": " 类：CliException\n变量：detailedMessages\n导入语句：import java.util.ArrayList,import java.util.List\n函数：getDetailedMessages, addMessage, getMessages\n\n请注意，这里的输出是基于提供的Java代码片段的直接分析。在实际的代码分析中，可能需要使用专门的工具或库来准确地提取这些信息。",
+    "last_modified": 1685926268.137929,
+    "md5": "b67d5c9340bf092f080f5a504a973ca2"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/MLSQLCli.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/MLSQLCli.java",
+    "symbols": " 函数：printUsageInfo, printVersionInfo\n变量：errStream, outStream, argList\n类：MLSQLCli, DefaultCmd\n导入语句：import picocli.CommandLine, import tech.mlsql.core.version.MLSQLVersion, import tech.mlsql.core.version.VersionInfo, import java.io.PrintStream, import java.util.ArrayList, import java.util.List",
+    "last_modified": 1685926268.1401289,
+    "md5": "f5f95d1dcfa1c2538c0aff382296ae03"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/CliExceptionUtils.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/CliExceptionUtils.java",
+    "symbols": " 函数：createUsageExceptionWithHelp\n类：CliExceptionUtils, CliException\n变量：\n导入语句：\n\n请注意，由于Java代码中没有显式的导入语句（因为它们通常在文件的顶部），并且变量通常在类的内部声明，因此在这种情况下没有列出变量。此外，Java中的类和方法通常在同一个类声明中，因此它们被一起列出。",
+    "last_modified": 1685926268.1390622,
+    "md5": "598929cf2b8ee47f1d10acc6ba054bb4"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/CliCommands.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-cli/src/main/java/tech/mlsql/plugin/cli/app/CliCommands.java",
+    "symbols": " 类：CliCommands\n变量：DEFAULT, HELP, VERSION, RUN, HOME\n函数：\n导入语句：\n\n请注意，由于Java文件中通常不包含显式的导入语句（因为它们通常由IDE或编译器自动处理），因此这里没有列出导入语句。此外，Java中的静态final字段通常被视为常量，但在这个上下文中，它们被视为变量。",
+    "last_modified": 1685926268.1366756,
+    "md5": "d462cef8f3fe1244251137a240162f2a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/mysql/MysqlType.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/mysql/MysqlType.java",
+    "symbols": " 函数：\n变量：\n类：MysqlType\n导入语句：import java.math.BigDecimal,import java.math.BigInteger,import java.sql.Date,import java.sql.SQLType,import java.sql.Time,import java.sql.Timestamp,import java.sql.Types\n\n请注意，这段代码是Java代码，而不是Python代码。在Java中，`enum`（枚举）是一种特殊的类，因此`MysqlType`被识别为一个类。由于没有显式的函数定义，所以没有列出函数。变量也没有在代码中显式定义，因此也没有列出变量。导入语句是根据代码中的`import`关键字识别的。\n 函数：isSigned, getName, getJdbcType, isAllowed, getClassName, isDecimal, getPrecision, getCreateParams\n变量：name, jdbcType, javaClass, flagsMask, isDecimal, precision, createParams\n类：MysqlType\n导入语句：\n\n请注意，由于这段代码是Java代码，而不是Python代码，因此没有导入语句。在Java中，通常不需要显式地导入类，因为Java编译器会自动导入java.lang包中的所有类。此外，这段代码中没有显式的import语句，因为所有的类和方法都是在这个文件中定义的。",
+    "last_modified": 1685926268.1233675,
+    "md5": "accd6805fc67902d9ac25572f5eddf30"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/binlog2delta/src/main/java/tech/mlsql/plugins/binlog2delta/JavaDoc.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/binlog2delta/src/main/java/tech/mlsql/plugins/binlog2delta/JavaDoc.java",
+    "symbols": " 类：JavaDoc\n函数：\n变量：\n导入语句：\n\n解释：\n在这段Java代码中，我们只看到了一个类定义`public class JavaDoc`，没有函数定义、变量声明或导入语句。因此，按照要求的格式，我们返回了类名`JavaDoc`，而函数、变量和导入语句部分均为空。",
+    "last_modified": 1685926267.834351,
+    "md5": "48caf8d91c4a66d295c5b53bff2bc290"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/FileNameFilter.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/FileNameFilter.java",
+    "symbols": " 类：FileNameFilter\n函数：accept\n变量：\n导入语句：\n\n解释：\n- 在给定的Java代码中，我们找到了一个类 `FileNameFilter`。\n- 该类中定义了一个方法（在Java中，接口中的方法声明被视为函数）`accept`。\n- 没有找到任何变量声明。\n- 由于Java代码中没有导入语句（因为它们通常在文件的顶部，而这段代码是从类定义开始的），所以没有导入语句。",
+    "last_modified": 1685926267.9167936,
+    "md5": "42aa2fd311bda69f6f70e3015bab0cfb"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/TarfileUtilsWrapper.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/TarfileUtilsWrapper.java",
+    "symbols": " 函数：walk, createTarFileStream\n类：TarfileUtilsWrapper\n变量：logger\n导入语句：import org.apache.commons.lang3.StringUtils, import org.apache.hadoop.fs.FSDataInputStream, import org.apache.hadoop.fs.FileStatus, import org.apache.hadoop.fs.FileSystem, import org.apache.hadoop.fs.Path, import org.kamranzafar.jtar.TarOutputStream, import org.slf4j.Logger, import org.slf4j.LoggerFactory, import streaming.core.HDFSTarEntry, import tech.mlsql.tool.HDFSOperatorV2, import java.io.BufferedOutputStream, import java.io.IOException, import java.io.OutputStream, import java.net.URI, import java.util.ArrayList, import java.util.List\n\n请注意，这里的“变量”指的是在类或函数作用域内声明的变量，而不是类成员变量。在这个例子中，`logger` 是类 `TarfileUtilsWrapper` 的一个静态成员变量，因此被视为一个变量。",
+    "last_modified": 1685926324.4091635,
+    "md5": "59015d3428271a8dbbe37ff3cf9c4f2e"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/TarfileUtilsWrapper2.java": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/TarfileUtilsWrapper2.java",
+    "symbols": " 函数：walk, createTarFileStream\n类：TarfileUtilsWrapper2\n变量：\n导入语句：import org.apache.commons.compress.archivers.tar.TarArchiveEntry, import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream, import org.apache.commons.lang3.StringUtils, import org.apache.hadoop.fs.FSDataInputStream, import org.apache.hadoop.fs.FileStatus, import org.apache.hadoop.fs.FileSystem, import org.apache.hadoop.fs.Path, import org.slf4j.Logger, import org.slf4j.LoggerFactory, import tech.mlsql.tool.HDFSOperatorV2\n\n请注意，这里的“变量”指的是全局变量，由于Java代码中通常不声明全局变量，而是通过类的成员变量或局部变量来使用，因此这里没有列出变量。如果需要列出类的成员变量，则需要更详细的代码分析。",
+    "last_modified": 1685926324.4105873,
+    "md5": "7cbf67f6fe75899e12f89ac885b7a2d6"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-blob/src/main/java/tech/mlsql/plugins/objectstore/blob/ByzerAzureBlob.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-blob/src/main/java/tech/mlsql/plugins/objectstore/blob/ByzerAzureBlob.scala",
+    "symbols": " 函数：run, supportedVersions\n变量：versions\n类：ByzerAzureBlob\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.9349382,
+    "md5": "eece4794ec537198beb504997717a421"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-analysis-toolkit/src/main/java/tech/mlsql/plugins/analysis/AnalysisApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-analysis-toolkit/src/main/java/tech/mlsql/plugins/analysis/AnalysisApp.scala",
+    "symbols": " 函数：run\n类：AnalysisApp\n变量：\n导入语句：import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.0977736,
+    "md5": "3f283dc91c98452619cb45ce6c8f6263"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-analysis-toolkit/src/main/java/tech/mlsql/plugins/analysis/ApproxQuantile.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-analysis-toolkit/src/main/java/tech/mlsql/plugins/analysis/ApproxQuantile.scala",
+    "symbols": " 函数：compute, train, batchPredict, load, predict\n变量：tableName\n类：ApproxQuantile\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.ScriptSQLExec,import streaming.dsl.mmlib.SQLAlg,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.0988457,
+    "md5": "d619077061a39557bd15b1bebe5c2145"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-cos/src/main/java/tech/mlsql/plugins/objectstore/cos/ByzerCos.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-cos/src/main/java/tech/mlsql/plugins/objectstore/cos/ByzerCos.scala",
+    "symbols": " 函数：run, supportedVersions\n类：ByzerCos\n变量：versions\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的输出是基于提供的源码文本进行的分析，实际的代码分析可能需要使用特定的工具或库来处理。",
+    "last_modified": 1685926267.9420443,
+    "md5": "cd18e25a4779bdb7f23f89cd59a86157"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-analysis-toolkit/src/main/java/tech/mlsql/plugins/analysis/DFTool.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-analysis-toolkit/src/main/java/tech/mlsql/plugins/analysis/DFTool.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n变量：df, path, params, command, newdf\n类：DFTool\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.mmlib.SQLAlg,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的输出是基于提供的代码示例，并且假设代码中没有其他隐藏的函数、变量或类。在实际的代码分析中，可能需要更详细的代码解析工具来准确识别所有的符号。",
+    "last_modified": 1685926268.1002347,
+    "md5": "0e4e5a3bbc8486f88072a5b10274c0bf"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/save-then-load/src/main/java/tech/mlsql/plugins/et/SaveThenLoad.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/save-then-load/src/main/java/tech/mlsql/plugins/et/SaveThenLoad.scala",
+    "symbols": " 函数：train, auth, supportedVersions, doc, codeExample, batchPredict, load, predict\n类：SaveThenLoad\n变量：无（未直接定义变量）\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}, import streaming.core.datasource.impl.MLSQLDelta, import streaming.core.datasource.{DataSinkConfig, DataSourceConfig}, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926269.738418,
+    "md5": "6fa43b03752adb2fb0f8ca608d9213d2"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/test/java/tech/mlsql/plugins/auth/simple/test/YamlParseTest.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/test/java/tech/mlsql/plugins/auth/simple/test/YamlParseTest.scala",
+    "symbols": " 函数：YamlParseTest\n类：AnyFunSuite, ByzerSimpleAuth, MLSQLTable, OperateType, TableAuthResult, TableTypeMeta\n变量：ByzerSimpleAuth.v_spark_mlsql_auth_simple_dir\n导入语句：import org.scalatest.funsuite.AnyFunSuite, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth.{MLSQLTable, OperateType, TableAuthResult, TableTypeMeta}, import tech.mlsql.plugins.auth.simple.app.ByzerSimpleAuth, import java.io.File",
+    "last_modified": 1685926268.0020502,
+    "md5": "ba361056778aab224c32b22901ab97d9"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/pojos.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/pojos.scala",
+    "symbols": " 函数：object_to_json, json_to_object, object_to_yaml, yaml_to_object\n变量：\n类：UserRule, UserRuleWrapper, UserBlock, ResourceRule, ResourceRuleWrapper, ResourceBlock, User, UserUnit, Resource, ResourceUnit, Metadata, AuthConfig\n导入语句：import com.fasterxml.jackson.databind.ObjectMapper, import com.fasterxml.jackson.dataformat.yaml.YAMLFactory, import com.fasterxml.jackson.module.scala.DefaultScalaModule",
+    "last_modified": 1685926267.9994047,
+    "md5": "d808741626b045e8e3e31325c10c2df8"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/ByzerAuthAdmin.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/ByzerAuthAdmin.scala",
+    "symbols": " 函数：train, load, predict, auth\n变量：value\n类：ByzerAuthAdmin\n导入语句：import org.apache.spark.sql.{DataFrame, SparkSession}, import org.apache.spark.sql.expressions.UserDefinedFunction, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.auth.simple.app.action.{ResourceAddAction, ResourceDeleteAction, ResourceQueryAction}, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.9911058,
+    "md5": "4f8566032121c2d3a9f582f8b7b8282d"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/ByzerSimpleAuthApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/ByzerSimpleAuthApp.scala",
+    "symbols": " 函数：run\n类：ByzerSimpleAuthApp, ByzerAuthAdmin\n变量：versions\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.995251,
+    "md5": "4f0ffec96764173b87cb83bec79edb32"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/ByzerSimpleAuth.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/ByzerSimpleAuth.scala",
+    "symbols": " 函数：auth, load, parse\n变量：owner, configRef, config, resourceRules, SUCCESS, result, denies, v_spark_mlsql_auth_simple_dir\n类：ByzerSimpleAuth, ByzerSimpleAuthConfig\n导入语句：import streaming.core.strategy.platform.{PlatformManager, SparkRuntime}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth.{MLSQLTable, TableAuth, TableAuthResult}, import streaming.log.WowLog, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.tool.HDFSOperatorV2",
+    "last_modified": 1685926267.993184,
+    "md5": "d1e1f7dcdd87a07e66a54ca895aabd74"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/action/ResourceAction.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-simple-auth/src/main/java/tech/mlsql/plugins/auth/simple/app/action/ResourceAction.scala",
+    "symbols": " 函数：getDir, createAuthConfig, run, run, run\n变量：session, authConfig, content, dir\n类：ResourceQueryAction, ResourceAddAction, ResourceDeleteAction\n导入语句：import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.PathFun, import tech.mlsql.common.utils.Md5, import tech.mlsql.common.utils.shell.command.ParamsUtil, import tech.mlsql.plugins.auth.simple.app.{AuthConfig, ByzerSimpleAuth, Json_Yaml, Metadata, ResourceBlock, ResourceRule, ResourceRuleWrapper, ResourceUnit, User, UserBlock, UserUnit}, import tech.mlsql.tool.HDFSOperatorV2",
+    "last_modified": 1685926267.997445,
+    "md5": "77468d0aab80c807cc7b46ad34dc5925"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/echo-controller/src/main/java/tech/mlsql/plugins/mllib/echocontroller/StreamApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/echo-controller/src/main/java/tech/mlsql/plugins/mllib/echocontroller/StreamApp.scala",
+    "symbols": " 函数：run, supportedVersions\n变量：\n类：StreamApp, EchoController\n导入语句：import tech.mlsql.app.CustomController, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.runtime.AppRuntimeStore, import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的“函数”指的是类中的方法，而“类”指的是定义的类。由于Scala是一种面向对象的编程语言，类和方法在Scala中非常常见。在这个示例中，我们没有看到任何独立的函数或变量声明，所有的方法都是作为类的一部分定义的。",
+    "last_modified": 1685926268.0831454,
+    "md5": "ec0ebba2dd6e43bf35511af27d051aaa"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/AutoSuggestWrapper.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/AutoSuggestWrapper.scala",
+    "symbols": " 函数：run\n变量：restRequest, restReponse, controller, jsonStr\n类：AutoSuggestWrapper\n导入语句：import net.csdn.common.exception.RenderFinish, import net.csdn.common.jline.ANSI.Renderer.RenderException, import net.csdn.modules.http.DefaultRestRequest, import net.csdn.modules.mock.MockRestResponse, import streaming.rest.RestController, import tech.mlsql.autosuggest.statement.SuggestItem, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import scala.collection.JavaConverters._\n\n请注意，由于我没有实际执行代码分析，这些结果是基于提供的代码文本直接识别的。在实际的代码分析中，可能需要使用特定的工具或库来准确识别这些符号。",
+    "last_modified": 1685926268.2156525,
+    "md5": "8be78a6a9562be4bf4cd568984c107e8"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/launchers/stdio/MLSQLDesktopApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-language-server/src/main/java/tech/mlsql/plugins/langserver/launchers/stdio/MLSQLDesktopApp.scala",
+    "symbols": " 函数：main, arrayToMap, mapToArray\n变量：defaultMap, extraMap\n类：MLSQLDesktopApp\n导入语句：import streaming.core.StreamingApp, import tech.mlsql.common.utils.path.PathFun, import scala.collection.mutable.ArrayBuffer\n\n请注意，这里的输出是基于提供的源码文本进行分析得出的。在实际的代码分析中，可能需要使用特定的工具或库来解析代码文件，以确保准确性和完整性。",
+    "last_modified": 1685926268.2265792,
+    "md5": "7d225d044f2fa560e8cb653afbf39e03"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-doris/src/main/scala/tech/mlsql/plugins/doris/MLSQLDorisApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-doris/src/main/scala/tech/mlsql/plugins/doris/MLSQLDorisApp.scala",
+    "symbols": " 函数：run, registerDS, supportedVersions\n类：MLSQLDorisApp\n变量：versions\n导入语句：import streaming.core.datasource.MLSQLRegistry, import tech.mlsql.common.utils.classloader.ClassLoaderTool, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.8527198,
+    "md5": "d2d631b0aa51ea2fdf811b8d022e7aae"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/connect-persist/src/main/java/tech/mlsql/plugins/connectpersist/ConnectPersistCommand.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/connect-persist/src/main/java/tech/mlsql/plugins/connectpersist/ConnectPersistCommand.scala",
+    "symbols": " 函数：train, auth, supportedVersions, doc, codeExample, batchPredict, load, predict\n类：ConnectPersistCommand, ConnectMetaItem\n变量：connectTableName\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.ConnectMeta, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.store.DBStore, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.0596797,
+    "md5": "d478fcdefac025491d8d020d7b769ea1"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-doris/src/main/scala/tech/mlsql/plugins/doris/MLSQLDoris.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-doris/src/main/scala/tech/mlsql/plugins/doris/MLSQLDoris.scala",
+    "symbols": " 函数：load, save, sourceInfo, register\n变量：fullFormat, shortFormat, dorisFenodes, dorisUser, dorisPassword\n类：MLSQLDoris\n导入语句：import org.apache.spark.ml.param.Param, import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter, Row}, import streaming.core.datasource._, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import streaming.log.WowLog, import tech.mlsql.common.form.{Extra, FormParams, Text}, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.adaptor.DslTool, import tech.mlsql.plugins.doris.MLSQLDoris.{DORIS_FENODES, DORIS_PASSWORD, DORIS_USER, TABLE_IDENTIFIER}",
+    "last_modified": 1685926267.8504775,
+    "md5": "3a5be1a18346745bfdfebb2ee89e18cc"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/connect-persist/src/main/java/tech/mlsql/plugins/connectpersist/ConnectPersistApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/connect-persist/src/main/java/tech/mlsql/plugins/connectpersist/ConnectPersistApp.scala",
+    "symbols": " 函数：run, runtime\n变量：root, streams, item\n类：ConnectPersistApp\n导入语句：import _root_.streaming.core.strategy.platform.{PlatformManager, SparkRuntime}, import _root_.streaming.dsl._, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.store.DBStore, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.0574608,
+    "md5": "78b5c57f067564d5e2381c493d696cec"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-exception-render/src/test/scala/tech/mlsql/test/plugins/render/ExceptionReplaceRenderSuite.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-exception-render/src/test/scala/tech/mlsql/test/plugins/render/ExceptionReplaceRenderSuite.scala",
+    "symbols": " 函数：executeCode, is_match, format\n变量：script, params, e, context\n类：ExceptionReplaceRenderSuite, ExceptionReplaceRender, RequestCleanerManager\n导入语句：import org.apache.spark.streaming.SparkOperationUtil, import org.scalatest.funsuite.AnyFunSuite, import streaming.core.strategy.platform.SparkRuntime, import streaming.dsl.ScriptSQLExec, import tech.mlsql.job.JobManager, import tech.mlsql.plugins.render.ExceptionReplaceRender, import tech.mlsql.runtime.plugins.request_cleaner.RequestCleanerManager, import tech.mlsql.test.BasicMLSQLConfig",
+    "last_modified": 1685926267.8788567,
+    "md5": "b3b57f8a61d41a1c473e8eaa328bed9d"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-exception-render/src/main/scala/tech/mlsql/plugins/render/ExceptionReplaceRenderApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-exception-render/src/main/scala/tech/mlsql/plugins/render/ExceptionReplaceRenderApp.scala",
+    "symbols": " 函数：run, supportedVersions\n类：ExceptionReplaceRenderApp\n变量：\n导入语句：import tech.mlsql.runtime.AppRuntimeStore, import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的“函数”指的是类中的方法，而“类”指的是定义的类本身。变量在这个代码片段中没有显式声明，因此没有列出。导入语句包括了所有引入的包和类。",
+    "last_modified": 1685926267.8759959,
+    "md5": "294179a4372564af819e9cae1dd776b4"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-exception-render/src/main/scala/tech/mlsql/plugins/render/ExceptionReplaceRender.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-exception-render/src/main/scala/tech/mlsql/plugins/render/ExceptionReplaceRender.scala",
+    "symbols": " 函数：getMatchExp, format, is_match, getMsgTemplate, readJsonFile\n变量：matchExp, confFileName, inited, msgTemplate\n类：ExceptionReplaceRender, ExceptionReplaceTemplate, RegExpAndMessage\n导入语句：import org.apache.commons.lang3.StringUtils, import org.apache.spark.streaming.SparkOperationUtil, import streaming.core.strategy.platform.PlatformManager, import streaming.dsl.ScriptSQLExec, import tech.mlsql.app.ExceptionRender, import tech.mlsql.common.utils.serder.json.JsonUtils, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.log.LogUtils, import tech.mlsql.plugins.render.ExceptionReplaceTemplate.getMsgTemplate, import java.io.File, import java.util.regex.Pattern, import scala.io.Source\n\n请注意，这个输出是基于提供的源代码文本进行手动分析得出的。在实际的编程环境中，通常会使用代码分析工具或库来自动化这个过程。",
+    "last_modified": 1685926267.8744361,
+    "md5": "4930e79c857a354f7c181c2e46af790c"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/HBaseType.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/HBaseType.scala",
+    "symbols": " 函数：\n变量：\n类：\n导入语句：\n\n在这个示例中，没有明显的函数、变量、类或导入语句。源码中包含了一个包声明和一个包对象定义，其中定义了一个类型别名 `HBaseType`，但这并不符合上述符号类型的定义。因此，根据给定的格式，输出为空。",
+    "last_modified": 1685926268.0748239,
+    "md5": "b74e68a9aaa10ccc1344bb74cf42c207"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/HBaseConfBuilder.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/HBaseConfBuilder.scala",
+    "symbols": " 函数：build\n变量：testConf, hc\n类：HBaseConfBuilder\n导入语句：import org.apache.hadoop.hbase.HBaseConfiguration, import org.apache.spark.sql.SparkSession, import org.json4s.DefaultFormats, import scala.collection.JavaConversions._\n\n请注意，这里的“变量”指的是在函数内部定义的局部变量，而“类”指的是定义的`HBaseConfBuilder`对象，它实际上是一个单例对象（在Scala中称为伴生对象），而不是传统意义上的类。在Scala中，单例对象可以包含方法和变量，类似于Java中的静态成员。",
+    "last_modified": 1685926268.0740843,
+    "md5": "46a28c325cdac8c787909c9b4d3d8f74"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/DefaultSource.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/DefaultSource.scala",
+    "symbols": " 函数：createRelation, shortName, createRelation, createTable, insert, buildScan\n变量：a, rowkey, family, outputTableName, wrappedConf, hbaseConf, numReg, tName, connection, admin, tableDesc, cf, startKey, endKey, splitKeys, r, tempDir, fields, rowkeyIndex, otherFields, tsSuffix, f, tsField\n类：DefaultSource, InsertHBaseRelation, HBaseRelation\n导入语句：import java.sql.Timestamp, import org.apache.commons.lang3.StringUtils, import org.apache.hadoop.hbase._, import org.apache.hadoop.hbase.client.{ConnectionFactory, Put, Result}, import org.apache.hadoop.hbase.io.ImmutableBytesWritable, import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}, import org.apache.hadoop.hbase.util.Bytes, import org.apache.hadoop.mapreduce.Job, import org.apache.spark.internal.Logging, import org.apache.spark.rdd.RDD, import org.apache.spark.sql.sources._, import org.apache.spark.sql.types._, import org.apache.spark.sql.{DataFrame, Row, SQLContext, SaveMode}, import org.apache.spark.unsafe.types.UTF8String, import org.apache.spark.util.{SerializableConfiguration, Utils}, import org.joda.time.DateTime",
+    "last_modified": 1685926268.0733528,
+    "md5": "a62bd9a23217862d41710e7fd5912229"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/SparkHBaseConf.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/org/apache/spark/sql/execution/datasources/hbase2x/SparkHBaseConf.scala",
+    "symbols": " 函数：\n变量：testConf, credentialsManagerEnabled, expireTimeFraction, refreshTimeFraction, refreshDurationMins, principal, keytab, BulkGetSize, defaultBulkGetSize, CachingSize, defaultCachingSize, connectionCloseDelay\n类：SparkHBaseConf\n导入语句：import org.apache.hadoop.conf.Configuration\n\n请注意，这里的“变量”指的是类中的字段，而“类”指的是定义的SparkHBaseConf对象。由于Scala是面向对象的语言，这里的“变量”实际上是类的成员变量。同时，由于没有显式的函数定义，所以函数部分为空。",
+    "last_modified": 1685926268.076175,
+    "md5": "684154dcd38b3b2b15eb9cc05e007f24"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/tech/mlsql/plugins/ds/MLSQLHBase2x.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/ds-hbase-2x/src/main/java/tech/mlsql/plugins/ds/MLSQLHBase2x.scala",
+    "symbols": " 函数：load, save, register, sourceInfo, explainParams\n变量：namespace, format, inputTableName, outputTableName\n类：MLSQLHBase2x\n导入语句：import org.apache.spark.ml.param.Param, import streaming.core.datasource._, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import streaming.dsl.{ConnectMeta, DBMappingKey}, import org.apache.spark.sql._, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.0772455,
+    "md5": "559e6771b1f02a56e68735d80de95de2"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-openmldb/src/main/java/tech/mlsql/plugins/openmldb/ByzerApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-openmldb/src/main/java/tech/mlsql/plugins/openmldb/ByzerApp.scala",
+    "symbols": " 函数：run, supportedVersions\n变量：versions\n类：ByzerApp, MLSQLETApp\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.9769325,
+    "md5": "400ac124416ef0f44dad032090b6a49a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/delta-enhancer/src/main/scala/tech/mlsql/plugins/delta/app/ByzerDelta.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/delta-enhancer/src/main/scala/tech/mlsql/plugins/delta/app/ByzerDelta.scala",
+    "symbols": " 函数：run, supportedVersions\n变量：versions\n类：ByzerDelta, DeltaTable\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.plugins.delta.ets.DeltaTable, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1694431593.9016986,
+    "md5": "e21b1d6bdbd35d1b4a32936645970f3c"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-openmldb/src/main/java/tech/mlsql/plugins/openmldb/FeatureStoreExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-openmldb/src/main/java/tech/mlsql/plugins/openmldb/FeatureStoreExt.scala",
+    "symbols": " 函数：getRsCloumns, rsToMaps, rsToMap, main, train, batchPredict\n变量：_zkAddress, _zkPath, _code2, _code, _action, _db, sqlExecutor, state\n类：FeatureStoreExt\n导入语句：import com._4paradigm.openmldb.jdbc.SQLResultSet, import com._4paradigm.openmldb.sdk.SdkOption, import com._4paradigm.openmldb.sdk.impl.SqlClusterExecutor, import com._4paradigm.openmldb.{DataType, Schema => RsSchema}, import org.apache.spark.ml.param.Param, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.form.{Extra, FormParams, Text}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.version.VersionCompatibility, import java.sql.{ResultSet, Statement}, import scala.collection.mutable, import scala.collection.mutable.ArrayBuffer",
+    "last_modified": 1685926267.979106,
+    "md5": "7279bddbc841a0bd74cdce994c4ba0fa"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/test/java/tech/mlsql/test/BasicSQLConfig.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/test/java/tech/mlsql/test/BasicSQLConfig.scala",
+    "symbols": " 函数：batchParams, batchParamsWithoutHive, batchParamsWithJsonFile, batchParamsWithAPI, batchParamsWithCarbondata, mlsqlParams\n变量：\n类：BasicMLSQLConfig\n导入语句：import java.util.UUID\n\n请注意，Scala语言中的方法（def）在这里被视为函数。由于代码中没有显式的变量声明，因此变量部分为空。同样，没有导入语句，除了在文件顶部声明的`import java.util.UUID`。",
+    "last_modified": 1685926268.158624,
+    "md5": "9ae4c3981992cab8b082ac9c97b6af31"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/delta-enhancer/src/main/scala/tech/mlsql/plugins/delta/ets/DeltaTable.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/delta-enhancer/src/main/scala/tech/mlsql/plugins/delta/ets/DeltaTable.scala",
+    "symbols": " 函数：resolveRealPath, train\n变量：\n类：DeltaTable\n导入语句：import io.delta.tables.DeltaTable,import org.apache.hadoop.fs.{FileSystem, Path},import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.mlsql.session.MLSQLException,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.auth.TableAuthResult,import streaming.dsl.mmlib.SQLAlg,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.path.PathFun,import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.datalake.DataLake,import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod,import tech.mlsql.plugins.delta.app.ByzerDelta,import tech.mlsql.tool.HDFSOperatorV2,import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1694431593.90221,
+    "md5": "2e8f6f723e631a7ec43f3c7c625e8f76"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/test/java/tech/mlsql/plugins/mllib/ets/fe/Xtreme1DSTest.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/test/java/tech/mlsql/plugins/mllib/ets/fe/Xtreme1DSTest.scala",
+    "symbols": " 函数：startParams, test, setupBatchContext, autoGenerateContext\n变量：jsonPath, jsonFileStr, xtreme1Format, rows, p, withSchema, metaDF\n类：Xtreme1DSTest\n导入语句：import org.apache.spark.sql.types.{StringType, StructField, StructType}, import org.apache.spark.sql.{Row, SparkSession}, import org.apache.spark.streaming.SparkOperationUtil, import org.scalatest.funsuite.AnyFunSuite, import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}, import streaming.core.strategy.platform.SparkRuntime, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.plugins.ds.app.Xtreme1Format, import tech.mlsql.test.BasicMLSQLConfig, import java.net.URI, import java.util.UUID\n\n请注意，这里的输出是基于提供的Scala代码的结构和语法来识别的，实际的代码分析可能需要更复杂的工具和过程。",
+    "last_modified": 1685926268.1573353,
+    "md5": "9bdd60ab4d69e53a9cef05e91b20250a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/main/java/tech/mlsql/plugins/ds/app/format.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/main/java/tech/mlsql/plugins/ds/app/format.scala",
+    "symbols": " 函数：toCocoFormat\n类：Xtreme1Point, Xtreme1ResultObject, Xtreme1Result, Xtreme1ContentData, Xtreme1Content, Xtreme1Format, CocoInfoMsg, CocoLicense, CocoImage, CocoCategory, CocoAnnotation, CocoFormat\n变量：\n导入语句：import scala.collection.mutable.ArrayBuffer\n\n请注意，Scala 语言中没有显式的变量声明，因此没有列出变量。此外，Scala 中的 `object` 类似于 Java 中的静态类，这里 `Formats` 是一个对象，其中定义了一个函数 `toCocoFormat`。",
+    "last_modified": 1685926268.154855,
+    "md5": "7782619f8eebebb4914e7d01ec45ba5b"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/main/java/tech/mlsql/plugins/ds/app/MLSQLDs.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/main/java/tech/mlsql/plugins/ds/app/MLSQLDs.scala",
+    "symbols": " 函数：run, registerDS\n变量：versions\n类：MLSQLDs\n导入语句：import streaming.core.datasource.MLSQLRegistry, import tech.mlsql.common.utils.classloader.ClassLoaderTool, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.149076,
+    "md5": "8b458d42c83560cd40aab42b16c60506"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/main/java/tech/mlsql/plugins/ds/app/MLSQLXtreme1.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/main/java/tech/mlsql/plugins/ds/app/MLSQLXtreme1.scala",
+    "symbols": " 函数：load, sourceInfo, explainParams, register, supportedVersions\n类：MLSQLXtreme1\n变量：无明显变量声明\n导入语句：import org.apache.spark.sql.types.{StringType, StructField, StructType}, import org.apache.spark.sql.{DataFrame, DataFrameReader, Row, SparkSession, functions => F}, import streaming.core.datasource._, import streaming.dsl.ScriptSQLExec, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.version.VersionCompatibility, import java.net.URI",
+    "last_modified": 1685926268.152689,
+    "md5": "f961a781eebf0e4a64892193f5504cfa"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/main/java/tech/mlsql/plugins/ds/app/MLSQLXml.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ds/src/main/java/tech/mlsql/plugins/ds/app/MLSQLXml.scala",
+    "symbols": " 函数：sourceInfo, explainParams, register\n变量：fullFormat, shortFormat\n类：MLSQLXml\n导入语句：import org.apache.spark.sql.SparkSession, import streaming.core.datasource._, import streaming.dsl.ScriptSQLExec, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.1505105,
+    "md5": "e63b1549fe7fc58624e199d29f8b396a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-xgboost/src/main/java/tech/mlsql/plugins/xgboost/app/XGBoostETApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-xgboost/src/main/java/tech/mlsql/plugins/xgboost/app/XGBoostETApp.scala",
+    "symbols": " 函数：run, supportedVersions\n变量：versions\n类：XGBoostETApp\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.plugins.xgboost.ets.{SQLXGBoostClassifier, SQLXGBoostRegressor}, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.0134454,
+    "md5": "bca60bc4ba0adefca550bf2161a9c072"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/stream-persist/src/main/java/tech/mlsq/streambootstrapatstartup/StreamPersistCommand.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/stream-persist/src/main/java/tech/mlsq/streambootstrapatstartup/StreamPersistCommand.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n变量：无\n类：StreamPersistCommand\n导入语句：import _root_.streaming.dsl.ScriptSQLExec, import _root_.streaming.dsl.mmlib.SQLAlg, import _root_.streaming.dsl.mmlib.algs.Functions, import _root_.streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import org.apache.spark.sql.mlsql.session.MLSQLException, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.datalake.DataLake, import tech.mlsql.job.JobManager, import tech.mlsql.store.DBStore, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926269.7473025,
+    "md5": "eb59d30f9938a827d27b0e6070157332"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-xgboost/src/main/java/tech/mlsql/plugins/xgboost/ets/SQLXGBoostRegressor.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-xgboost/src/main/java/tech/mlsql/plugins/xgboost/ets/SQLXGBoostRegressor.scala",
+    "symbols": " 根据您提供的代码，以下是按照您要求的格式提取的符号信息：\n\n函数：train, batchPredict, explainParams, load, explainModel, predict, getXGBoostRegressor, getBestXGBoostModel, trainModelsWithMultiParamGroupOrCrossValidator\n变量：cvEnabled\n类：SQLXGBoostRegressor\n导入语句：import ml.dmlc.xgboost4j.scala.spark._, import org.apache.spark.ml.evaluation.RegressionEvaluator, import org.apache.spark.ml.linalg.SQLDataTypes.VectorType, import org.apache.spark.ml.linalg.Vector, import org.apache.spark.ml.param._, import org.apache.spark.ml.tuning.{CrossValidator, CrossValidatorModel, ParamGridBuilder}, import org.apache.spark.ml.util.MLWritable, import streaming.dsl.mmlib.algs.regression.BaseRegression, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs._, import streaming.dsl.mmlib.algs.param.BaseParams, import org.apache.spark.sql._, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.types._, import scala.collection.mutable.ArrayBuffer\n\n请注意，这里的“变量”指的是在类定义中声明的私有变量，而不是在方法内部使用的临时变量。此外，由于Scala是一种静态类型语言，变量通常在声明时就已经确定了类型，因此这里没有列出变量的类型。",
+    "last_modified": 1685926268.0180979,
+    "md5": "5fdd4af79618396910694d946f59b845"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/stream-persist/src/main/java/tech/mlsq/streambootstrapatstartup/StreamApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/stream-persist/src/main/java/tech/mlsq/streambootstrapatstartup/StreamApp.scala",
+    "symbols": " 函数：run, setUpScriptSQLExecListener, getSessionByOwner, runtime, supportedVersions\n变量：root, thread, streams\n类：StreamApp, Stream\n导入语句：import _root_.streaming.core.strategy.platform.{PlatformManager, SparkRuntime}, import _root_.streaming.dsl.{MLSQLExecuteContext, ScriptSQLExec, ScriptSQLExecListener}, import org.apache.spark.sql.SparkSession, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.ScriptRunner, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.job.{JobManager, MLSQLJobType}, import tech.mlsql.store.DBStore, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926269.7460854,
+    "md5": "b21a0b835af3366971ae991b4f1c65ff"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ke/src/main/java/tech/mlsql/plugins/ke/app/MLSQLKE.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ke/src/main/java/tech/mlsql/plugins/ke/app/MLSQLKE.scala",
+    "symbols": " 函数：run, supportedVersions\n变量：versions\n类：MLSQLKE\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.plugins.ke.ets.KEAPISchedule, import tech.mlsql.plugins.ke.ets.KEAutoModel, import tech.mlsql.plugins.ke.ets.KEBuildSegment, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.2062342,
+    "md5": "dbc8d06a07f051d935e34f43ad1a126a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-xgboost/src/main/java/tech/mlsql/plugins/xgboost/ets/SQLXGBoostClassifier.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-xgboost/src/main/java/tech/mlsql/plugins/xgboost/ets/SQLXGBoostClassifier.scala",
+    "symbols": " 根据您提供的Scala代码，以下是提取的符号信息：\n\n函数：train, batchPredict, explainParams, load, explainModel, predict, getXGBoostClassifier, getBestXGBoostModel, trainModelsWithMultiParamGroupOrCrossValidator\n\n变量：cvEnabled\n\n类：SQLXGBoostClassifier, TrackerConf, XGBoostClassificationModel, XGBoostClassifier, MulticlassClassificationEvaluator, CrossValidator, CrossValidatorModel, ParamGridBuilder, UserDefinedFunction, StructType, StructField, ArrayBuffer, BaseParams, DataFrame, Row, SaveMode, SparkSession, SQLAlg, MllibFunctions, Functions, BaseClassification, ModelType, Doc, Code, CodeExampleText, MetricValue, SQLPythonFunc, BaseParams, XGBoostClassifier, CrossValidator, MulticlassClassificationEvaluator, ParamGridBuilder, MLWritable\n\n导入语句：import ml.dmlc.xgboost4j.scala.spark.{TrackerConf, XGBoostClassificationModel, XGBoostClassifier}, import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator, import org.apache.spark.ml.param._, import org.apache.spark.ml.tuning.{CrossValidator, CrossValidatorModel, ParamGridBuilder}, import org.apache.spark.ml.util.MLWritable, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.types._, import org.apache.spark.sql.{DataFrame, Row, SaveMode, SparkSession}, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MetricValue, MllibFunctions, SQLPythonFunc}, import streaming.dsl.mmlib.algs.classfication.BaseClassification, import streaming.dsl.mmlib.algs.param.BaseParams\n\n请注意，Scala代码中的变量通常是类或方法的成员，因此它们可能与类或方法紧密相关。在这个例子中，`cvEnabled` 是一个私有变量，它是 `SQLXGBoostClassifier` 类的一个成员。",
+    "last_modified": 1685926268.0159009,
+    "md5": "fd70eb637bdf9cf35f0f197c5e8c5287"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ke/src/main/java/tech/mlsql/plugins/ke/ets/KEBuildSegment.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ke/src/main/java/tech/mlsql/plugins/ke/ets/KEBuildSegment.scala",
+    "symbols": " 函数：train\n变量：jsonObj, split, connectName, url\n类：KEBuildSegment\n导入语句：import com.alibaba.fastjson.{JSON, JSONObject}, import org.apache.spark.ml.util.Identifiable, import org.apache.spark.sql.DataFrame, import streaming.dsl.{ConnectMeta, DBMappingKey}, import streaming.dsl.mmlib.algs.param.WowParams, import tech.mlsql.common.utils.log.Logging",
+    "last_modified": 1685926268.210409,
+    "md5": "ef773dfb31c681273bb44674e6c660aa"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-sas-files/src/main/java/tech/mlsql/plugins/ds/MLSQLSASApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-sas-files/src/main/java/tech/mlsql/plugins/ds/MLSQLSASApp.scala",
+    "symbols": " 函数：run, supportedVersions\n变量：clzz, dataSource, versions\n类：MLSQLSASApp, MLSQLSASApp\n导入语句：import streaming.core.datasource.MLSQLRegistry, import tech.mlsql.common.utils.classloader.ClassLoaderTool, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1705642743.4742208,
+    "md5": "7b8d871008ff7b2b6ac9c43fe3c8c000"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ke/src/main/java/tech/mlsql/plugins/ke/ets/KEAPISchedule.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ke/src/main/java/tech/mlsql/plugins/ke/ets/KEAPISchedule.scala",
+    "symbols": " 函数：sendPostAPI, sendPutAPI, sendGETAPI, setHeader, executeHTTPMethod\n变量：url, connectName, method, jsonObject, httpPost, httpPut, httpGet, client, response, entity, result, jsonObject, code\n类：KEAPISchedule\n导入语句：import com.alibaba.fastjson.{JSON, JSONObject}, import org.apache.commons.codec.binary.Base64, import org.apache.http.HttpEntity, import org.apache.http.client.methods._, import org.apache.http.entity.StringEntity, import org.apache.http.impl.client.HttpClients, import org.apache.http.util.EntityUtils, import org.apache.spark.ml.util.Identifiable, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.functions.lit, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.param.WowParams, import streaming.dsl.{ConnectMeta, DBMappingKey}, import tech.mlsql.common.utils.log.Logging",
+    "last_modified": 1685926268.2073576,
+    "md5": "a3a3a711de766bb78917c7a650f4e7a7"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-sas-files/src/main/java/tech/mlsql/plugins/ds/MLSQLSAS.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-sas-files/src/main/java/tech/mlsql/plugins/ds/MLSQLSAS.scala",
+    "symbols": " 函数：load, register, sourceInfo, save, supportedVersions\n变量：fullFormat, shortFormat\n类：MLSQLSAS\n导入语句：import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter, Row}, import streaming.core.datasource._, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import streaming.dsl.ScriptSQLExec, import tech.mlsql.version.VersionCompatibility, import com.github.saurfang.sas.spark._\n\n请注意，这里的“变量”指的是在类定义中直接定义的常量或字段，而不是局部变量。此外，“函数”指的是类中的方法，而不是独立的函数。",
+    "last_modified": 1705642743.4740098,
+    "md5": "1d99db5169af3c0d4715a9a8158f0ff0"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ke/src/main/java/tech/mlsql/plugins/ke/ets/KEAutoModel.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ke/src/main/java/tech/mlsql/plugins/ke/ets/KEAutoModel.scala",
+    "symbols": " 函数：train, parserTablesFromSqls, parserTablesFromSql, getSourceRelation\n变量：jsonObj, split, connectName, sqls, with_segment, with_model_online, auto_add_tables, spark, lp, dataSources1, dataSources2, dataSources3, url1, jsonObj1, url\n类：KEAutoModel\n导入语句：import com.alibaba.fastjson.JSONObject,import org.apache.spark.ml.util.Identifiable,import org.apache.spark.sql.{DataFrame, SparkSession},import org.apache.spark.sql.catalyst.catalog.HiveTableRelation,import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan,import org.apache.spark.sql.execution.datasources.{HadoopFsRelation, LogicalRelation},import streaming.dsl.mmlib.algs.param.WowParams,import streaming.dsl.{ConnectMeta, DBMappingKey},import tech.mlsql.common.utils.log.Logging",
+    "last_modified": 1685926268.2090662,
+    "md5": "efc45a8cd138fa12080bf9ef4eead738"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/app/MLSQLAssert.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/app/MLSQLAssert.scala",
+    "symbols": " 函数：run\n类：MLSQLAssert\n变量：versions\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.plugins.assert.ets.{Assert, AssertCondition, AssertConditionThrow, AssertNotNull, AssertNotNullThrow, AssertUniqueKey, AssertUniqueKeyThrow, AssertUniqueKeys, AssertUniqueKeysThrow, MLSQLThrow}, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1693754374.6284995,
+    "md5": "3ca98c41ff7a929dd846bdf0089b1e17"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-expand-include/src/main/scala/tech/mlsql/plugins/expandinclude/MLSQLExpandInclude.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-expand-include/src/main/scala/tech/mlsql/plugins/expandinclude/MLSQLExpandInclude.scala",
+    "symbols": " 函数：parsePreProcessInclude, run\n变量：wow, max_preprocess, stop\n类：MLSQLExpandInclude, ExpandIncludeController\n导入语句：import org.apache.spark.sql.mlsql.session.MLSQLException, import streaming.dsl.ScriptSQLExec._parse, import streaming.dsl.{ScriptSQLExec, ScriptSQLExecListener}, import tech.mlsql.Stage, import tech.mlsql.app.CustomController, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.dsl.adaptor.PreProcessIncludeListener, import tech.mlsql.dsl.processor.PreProcessListener, import tech.mlsql.runtime.AppRuntimeStore, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.890621,
+    "md5": "0c40a40b38ab99f1bcd2cbd85e6e4369"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertNotNull.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertNotNull.scala",
+    "symbols": " 函数：train, load, predict, auth\n变量：df, path, params, args, tableName, columns, session, validateData, fieldIndexs, nullData\n类：AssertNotNull\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.mlsql.session.MLSQLException, import org.apache.spark.sql.{Column, DataFrame, SparkSession}, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.assert.app.MLSQLAssert, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1693754374.6147819,
+    "md5": "392017da3d495d09e160c665fb0f4941"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertUniqueKeys.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertUniqueKeys.scala",
+    "symbols": " 函数：train, load, predict, auth\n类：AssertUniqueKeys\n变量：args, session, fieldNames, sourceColumns\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.mlsql.session.MLSQLException, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.assert.app.MLSQLAssert, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1693754374.6157608,
+    "md5": "7ebc78f1f9c8fd20c0df1626b3b33000"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertConditionThrow.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertConditionThrow.scala",
+    "symbols": " 函数：train, load, predict, auth\n变量：args\n类：AssertConditionThrow\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.mlsql.session.MLSQLException,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.auth.TableAuthResult,import streaming.dsl.mmlib.SQLAlg,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod,import tech.mlsql.plugins.assert.app.MLSQLAssert,import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的输出是基于提供的代码片段，而不是实际的代码文件。在实际的代码文件中，可能会有更多的函数、变量和类。此外，Scala语言中的函数和方法在类内部定义时通常是隐含的，因此可能需要更详细的代码分析来准确识别所有函数。",
+    "last_modified": 1693754374.6292856,
+    "md5": "8d9db379087f2040276a479dd24d1a71"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/Assert.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/Assert.scala",
+    "symbols": " 函数：train, evaluateWithVariableTable, evaluate, rowToMaps, rowToMap, load, predict, auth\n变量：\n类：Assert\n导入语句：import java.util.UUID,import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.mlsql.session.MLSQLException,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.ScriptSQLExec,import streaming.dsl.auth.TableAuthResult,import streaming.dsl.mmlib.SQLAlg,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod,import tech.mlsql.lang.cmd.compile.internal.gc._,import tech.mlsql.plugins.assert.app.MLSQLAssert,import tech.mlsql.session.{SetItem, SetSession},import tech.mlsql.version.VersionCompatibility,import scala.collection.mutable,import scala.collection.mutable.ArrayBuffer",
+    "last_modified": 1685926268.108388,
+    "md5": "dac1091fe06212b7c27019c042a4709b"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertNotNullThrow.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertNotNullThrow.scala",
+    "symbols": " 函数：train, load, predict, auth\n变量：args, validateData, nullData, dirtyCount\n类：AssertNotNullThrow\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.mlsql.session.MLSQLException, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.assert.app.MLSQLAssert, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1693754374.629684,
+    "md5": "83599546b3fda8582f544248227d793a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertUniqueKey.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertUniqueKey.scala",
+    "symbols": " 函数：train, load, predict, auth\n变量：args, validateData, validateCount, distinctCount, validateResult\n类：AssertUniqueKey, SQLAlg, VersionCompatibility, Functions, WowParams, ETAuth\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.mlsql.session.MLSQLException, import org.apache.spark.sql.types.{StringType, StructField, StructType}, import org.apache.spark.sql.{DataFrame, Row, SparkSession}, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.assert.app.MLSQLAssert, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1693754374.6152828,
+    "md5": "b9ec2c63da1549f23dfdb73bd7d14ff8"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertUniqueKeyThrow.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertUniqueKeyThrow.scala",
+    "symbols": " 函数：train, load, predict, auth\n变量：args, validateData, validateCount, distinctCount, validateResult\n类：AssertUniqueKeyThrow, SQLAlg, VersionCompatibility, Functions, WowParams, ETAuth\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.mlsql.session.MLSQLException, import org.apache.spark.sql.types.{StringType, StructField, StructType}, import org.apache.spark.sql.{DataFrame, Row, SparkSession}, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.assert.app.MLSQLAssert, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1693754374.630066,
+    "md5": "06f7baab4f00df2db87ba37f97c0e841"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/MLSQLThrow.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/MLSQLThrow.scala",
+    "symbols": " 函数：train, batchPredict, load, predict, auth, modelType, doc, codeExample\n变量：\n类：MLSQLThrow\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.mlsql.session.MLSQLException,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.auth.TableAuthResult,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import streaming.dsl.mmlib._,import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod,import tech.mlsql.plugins.assert.app.MLSQLAssert,import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.1092215,
+    "md5": "403ea179b4ca99a937bf4e9b5fd3fc24"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertUniqueKeysThrow.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertUniqueKeysThrow.scala",
+    "symbols": " 函数：train, load, predict, auth\n类：AssertUniqueKeysThrow\n变量：无\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.mlsql.session.MLSQLException, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.assert.app.MLSQLAssert, import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的输出是基于提供的源代码文本进行分析得出的。在实际的编程环境中，通常需要使用特定的工具或库来解析代码并提取这些信息。",
+    "last_modified": 1693754374.630441,
+    "md5": "c1c2a4bc3c64a9a70d6b3fadf403c96f"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertCondition.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-assert/src/main/java/tech/mlsql/plugins/assert/ets/AssertCondition.scala",
+    "symbols": " 函数：train, load, predict, auth\n变量：args\n类：AssertCondition\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.mlsql.session.MLSQLException,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.auth.TableAuthResult,import streaming.dsl.mmlib.SQLAlg,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod,import tech.mlsql.plugins.assert.app.MLSQLAssert,import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的输出是基于提供的代码片段进行的分析。在实际的代码分析中，可能需要更全面的代码来准确识别所有的函数、变量和类。此外，Scala语言的特性可能导致某些元素的识别与Java或Python等其他语言有所不同。",
+    "last_modified": 1693754374.628932,
+    "md5": "6623cb7b236521c32d42165972f64a36"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/AthenaSchemaExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/AthenaSchemaExt.scala",
+    "symbols": " 函数：\n变量：\n类：AthenaSchemaExt\n导入语句：import org.apache.spark.ml.param.Param,import streaming.dsl.mmlib.{AlgType, Code, Doc, HtmlDoc, ModelType, SQLCode},import tech.mlsql.common.form.{Extra, FormParams, Text},import tech.mlsql.ets.BaseScriptAlgExt\n\n请注意，由于输入的代码是用Scala编写的，而Scala中的类通常包含方法（类似于函数），但在这个特定的代码片段中，没有显式定义的方法，因此没有列出函数。变量也没有直接列出，因为它们是通过`Param`类的实例间接定义的，而不是作为独立的变量声明。",
+    "last_modified": 1685926268.1890373,
+    "md5": "fe4f2cf3a421d06d14cc1882b35e7fa0"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/LSCommand.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/LSCommand.scala",
+    "symbols": " 函数：batchPredict, train, auth, load, predict\n变量：path\n类：LSCommand\n导入语句：import org.apache.commons.lang3.StringUtils,import org.apache.hadoop.conf.Configuration,import org.apache.hadoop.fs.{FileStatus, FileSystem, Path},import org.apache.spark.ml.param.Param,import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import org.joda.time.DateTime,import streaming.dsl.ScriptSQLExec,import streaming.dsl.auth._,import streaming.dsl.mmlib.algs.param.BaseParams,import streaming.dsl.mmlib.{Functions, MllibFunctions},import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode},import tech.mlsql.common.form.{Extra, FormParams, Text},import tech.mlsql.common.utils.path.PathFun,import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.1973925,
+    "md5": "7a9a3a31322d819b777aec81c8a1420a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/FileCommonFunctions.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/FileCommonFunctions.scala",
+    "symbols": " 函数：rewriteHadoopConfiguration\n变量：\n类：FileCommonFunctions\n导入语句：import org.apache.hadoop.conf.Configuration\n\n请注意，由于我无法执行代码分析，因此我假设所有的函数、类和变量都是根据它们的直接名称来识别的。在实际的代码分析中，可能需要更复杂的逻辑来正确识别和分类这些符号。",
+    "last_modified": 1685926268.1932974,
+    "md5": "e80b04ab7d80535469918973d5897aa2"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/MLSQLETApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/MLSQLETApp.scala",
+    "symbols": " 函数：run\n变量：versions\n类：MLSQLETApp\n导入语句：import tech.mlsql.common.utils.log.Logging,import tech.mlsql.dsl.CommandCollection,import tech.mlsql.ets.register.ETRegister,import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.1995084,
+    "md5": "ddeeb47adb9b13ce0cc455a571553ad5"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/ExistsCommand.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/ExistsCommand.scala",
+    "symbols": " 函数：load, predict, batchPredict, train\n变量：path\n类：ExistsCommand\n导入语句：import org.apache.commons.lang3.StringUtils,import org.apache.hadoop.conf.Configuration,import org.apache.hadoop.fs.{FileSystem, Path},import org.apache.spark.ml.param.Param,import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.ScriptSQLExec,import streaming.dsl.auth._,import streaming.dsl.mmlib.algs.param.BaseParams,import streaming.dsl.mmlib.algs.{Functions, MllibFunctions},import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode},import tech.mlsql.common.form.{Extra, FormParams, Text},import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod\n\n请注意，这里的输出是基于提供的代码示例，实际的代码可能包含更多的符号。此外，由于Java和Scala语言的特性，一些符号可能被嵌套在类或方法中，这里仅列出了最外层的符号。",
+    "last_modified": 1685926268.190954,
+    "md5": "706199a0062c24d9eaa10306c974604c"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/AthenaExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/AthenaExt.scala",
+    "symbols": " 函数：train\n变量：rayAddress, access_id, access_key, region, database, s3_bucket, s3_key, query\n类：AthenaExt\n导入语句：import org.apache.spark.ml.param.Param,import org.apache.spark.sql.DataFrame,import streaming.dsl.mmlib.{AlgType, Code, Doc, HtmlDoc, ModelType, SQLCode},import tech.mlsql.common.form.{Extra, FormParams, Text},import tech.mlsql.dsl.adaptor.MLMapping,import tech.mlsql.ets.{BaseScriptAlgExt, ScriptRunner}",
+    "last_modified": 1685926268.187895,
+    "md5": "f7f66397fa562341d14739494ea7f80c"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-hive312/src/main/java/tech/mlsql/plugins/hive/ByzerHive312.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-hive312/src/main/java/tech/mlsql/plugins/hive/ByzerHive312.scala",
+    "symbols": " 类：ByzerHive312\n函数：\n变量：\n导入语句：\n\n由于提供的代码片段中没有包含导入语句和变量声明，且类中没有定义任何函数，因此输出中这些部分为空。",
+    "last_modified": 1685926267.9065967,
+    "md5": "54c5c0c0723b0ebabca14ea625e31ad5"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/plugins/execsql/JDBCExec.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/plugins/execsql/JDBCExec.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n变量：df, path, params, args, session, connName, newDF, tableName, sql\n类：JDBCExec\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.ScriptSQLExec,import streaming.dsl.mmlib.SQLAlg,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1705642743.4716597,
+    "md5": "3c328c328e2a2c70bacdfc291f9c9b37"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/FileStatusCommand.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-ext-ets/src/main/java/tech/mlsql/plugins/ext/ets/app/FileStatusCommand.scala",
+    "symbols": " 函数：batchPredict, train, auth, load, predict\n变量：path\n类：FileStatusCommand\n导入语句：import org.apache.commons.lang3.StringUtils,import org.apache.hadoop.conf.Configuration,import org.apache.hadoop.fs.{FileStatus, FileSystem, Path},import org.apache.spark.ml.param.Param,import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import org.joda.time.DateTime,import streaming.dsl.ScriptSQLExec,import streaming.dsl.auth._,import streaming.dsl.mmlib.algs.param.BaseParams,import streaming.dsl.mmlib.algs.{Functions, MllibFunctions},import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode},import tech.mlsql.common.form.{Extra, FormParams, Text},import tech.mlsql.common.utils.path.PathFun,import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.1953976,
+    "md5": "ee2835009fe895de1e3511a84a89a36f"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-s3/src/main/java/tech/mlsql/plugins/objectstore/s3/ByzerAwsS3.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-s3/src/main/java/tech/mlsql/plugins/objectstore/s3/ByzerAwsS3.scala",
+    "symbols": " 函数：run, supportedVersions\n类：ByzerAwsS3\n变量：versions\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.9682403,
+    "md5": "53c0dc4f8c708ed80ff9cef6365d9c59"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/plugins/execsql/JDBCConn.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/plugins/execsql/JDBCConn.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n类：JDBCConn\n变量：无\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1698914572.2032506,
+    "md5": "61d7124aa9d983b04834dc9a563d05f2"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/plugins/execsql/ExecSQLApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/plugins/execsql/ExecSQLApp.scala",
+    "symbols": " 函数：run, supportedVersions, getTmpPath\n变量：versions\n类：ExecSQLApp\n导入语句：import streaming.core.strategy.platform.{PlatformManager, SparkRuntime}, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.tool.HDFSOperatorV2, import scala.collection.JavaConverters._, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1705642743.4713454,
+    "md5": "bd5c3ecb2fad20696846696ef68f5c6b"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-oss/src/main/java/tech/mlsql/plugins/objectstore/oss/ByzerAliyunOSS.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-oss/src/main/java/tech/mlsql/plugins/objectstore/oss/ByzerAliyunOSS.scala",
+    "symbols": " 函数：run, supportedVersions\n变量：versions\n类：ByzerAliyunOSS\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.9589965,
+    "md5": "5c3a5c1b2240d51176b74fd65b131969"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/CanalApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/CanalApp.scala",
+    "symbols": " 函数：run\n变量：supportedVersions\n类：CanalApp\n导入语句：import tech.mlsql.ets.register.ETRegister,import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的输出是基于提供的源码文本进行的简单解析，实际的代码分析可能需要更复杂的工具和过程。",
+    "last_modified": 1685926268.1179793,
+    "md5": "b13d89159911aca8d6623cefa3c3b860"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/util/JacksonUtil.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/util/JacksonUtil.scala",
+    "symbols": " 函数：toJson, fromJson, prettyPrint\n变量：_mapper\n类：JacksonUtil\n导入语句：import com.fasterxml.jackson.databind.ObjectMapper, import com.fasterxml.jackson.module.scala.DefaultScalaModule, import scala.util.control.NonFatal",
+    "last_modified": 1685926268.131292,
+    "md5": "4912fdb7da291d60d318f914094513d4"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/plugins/execsql/JobUtils.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-execute-sql/src/main/java/tech/mlsql/plugins/execsql/JobUtils.scala",
+    "symbols": " 函数：executeQueryInDriverWithoutResult, try_close, deleteCRCFile, executeQueryInDriver, fetchConnection, executeQueryWithDiskCache, executeQueryWithDiskCacheParquet, cleanOldFiles, newConnection, removeConnection\n变量：connectionPool, cacheFiles, cacheDir, cleanThread\n类：JobUtils, ConnectionHolder\n导入语句：import java.util.UUID, import java.util.concurrent.{Callable, ConcurrentHashMap, Executors, TimeUnit}, import com.fasterxml.jackson.databind.ObjectMapper, import com.fasterxml.jackson.databind.SerializationFeature, import com.fasterxml.jackson.module.scala.DefaultScalaModule, import org.apache.hadoop.fs.{FileSystem, Path}, import org.apache.spark.sql.{DataFrame, SparkSession}, import org.joda.time.DateTime, import org.joda.time.format.DateTimeFormat.forPattern, import streaming.core.datasource.JDBCUtils, import streaming.core.datasource.JDBCUtils.formatOptions, import tech.mlsql.common.utils.cache.{CacheBuilder, RemovalListener, RemovalNotification}, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.tool.HDFSOperatorV2, import com.alibaba.druid.util.{JdbcConstants, JdbcUtils}, import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule, import java.util, import java.util.concurrent.atomic.AtomicReference, import org.apache.parquet.hadoop.ParquetFileWriter, import scala.collection.JavaConverters._, import org.apache.parquet.avro.AvroParquetWriter, import org.apache.avro.generic.GenericData, import org.apache.avro.SchemaBuilder, import org.apache.parquet.hadoop.ParquetWriter, import org.apache.parquet.hadoop.metadata.CompressionCodecName",
+    "last_modified": 1708872028.047789,
+    "md5": "39c5cd739dd74d96f94aa3a4190fb0b0"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/sink/DeltaSink.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/sink/DeltaSink.scala",
+    "symbols": " 函数：tableLoad, updateSchema, mergeData, mergeToDelta\n变量：dataLake, finalPath\n类：DeltaSink\n导入语句：import io.delta.tables.DeltaTable, import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}, import tech.mlsql.common.utils.path.PathFun, import tech.mlsql.datalake.DataLake",
+    "last_modified": 1685926268.128913,
+    "md5": "766c46ad77fd8e418d2d4f77160cfe89"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/sink/Sink.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/sink/Sink.scala",
+    "symbols": " 函数：tableLoad, updateSchema, mergeData, addTsIfNotExsit, duplicate\n变量：\n类：Sink\n导入语句：import org.apache.spark.sql.functions._, import org.apache.spark.sql.types._, import org.apache.spark.sql.{DataFrame, Dataset, functions => F}, import tech.mlsql.plugins.canal.util.JacksonUtil\n\n请注意，由于我无法执行代码，因此我仅根据提供的代码片段进行分析。在实际的代码库中，可能存在更多的函数、变量和类。",
+    "last_modified": 1685926268.1300862,
+    "md5": "8ada061f94284e31bad4b9b95c039e68"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/sink/BinlogConstants.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/sink/BinlogConstants.scala",
+    "symbols": " 函数：\n变量：TS_FIELD, DELETE_FIELD\n类：BinlogRecord\n导入语句：\n\n解释：\n- 在该源码中，没有定义任何函数。\n- 变量包括 `TS_FIELD` 和 `DELETE_FIELD`，它们在 `BinlogConstants` 对象中定义。\n- 类是 `BinlogRecord`，它是一个 case class。\n- 由于这是 Scala 代码，并且没有 import 语句，所以没有导入语句。",
+    "last_modified": 1685926268.1264455,
+    "md5": "2f3c206608f1ea1c99a6ff9184dd1250"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/mysql/JdbcTypeParser.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/mysql/JdbcTypeParser.scala",
+    "symbols": " 函数：isSigned, parsePrecisionScale, getMysqlStructType, getSqlTypeCode, sqlTypeToDataType, getCatalystTypePrivate\n变量：UNSIGNED, FIXED_DECIMAL, FIXED_NUMERIC, FIXED_SCALE\n类：\n导入语句：import com.alibaba.druid.sql.ast.{SQLDataType, SQLDataTypeImpl}, import org.apache.spark.sql.types.{DataType, DecimalType, StructField, StructType}",
+    "last_modified": 1685926268.1209857,
+    "md5": "ee25d9e29254d9f42f2f8dfe54fb92d5"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/sink/BinlogWritter.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/sink/BinlogWritter.scala",
+    "symbols": " 函数：write, filter\n变量：spark, sink, df, maxTs, filterDF, ddls, dmlDS, tsMin, tsMax, ddlParser, table\n类：BinlogWritter\n导入语句：import org.apache.spark.sql.DataFrame,import tech.mlsql.plugins.canal.mysql.statement.DDLStatementParser,import tech.mlsql.plugins.canal.util.JacksonUtil,import spark.implicits._",
+    "last_modified": 1685926268.1277342,
+    "md5": "ff945bc9690d7a68dce315961e8d40f9"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-obs/src/main/java/tech/mlsql/plugins/objectstore/obs/ByzerObs.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-objectstore-obs/src/main/java/tech/mlsql/plugins/objectstore/obs/ByzerObs.scala",
+    "symbols": " 函数：run, supportedVersions\n类：ByzerObs\n变量：versions\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的输出是基于提供的代码示例的直接分析，不涉及代码的具体功能或逻辑。",
+    "last_modified": 1685926267.9529974,
+    "md5": "d2e2ff6482a418d62386faae9664da9f"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/test/java/tech/mlsql/plugins/visiualization/test/FigTest.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/test/java/tech/mlsql/plugins/visiualization/test/FigTest.scala",
+    "symbols": " 函数：printCode\n变量：template\n类：FigTest\n导入语句：import org.scalatest.funsuite.AnyFunSuite,import tech.mlsql.plugins.visualization.{PlotlyRuntime, PythonHint}",
+    "last_modified": 1685926268.0465028,
+    "md5": "6c1dd164497f7938eb4805d2709b4c10"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-extension-tests/src/main/java/tech/mlsql/test/BasicSQLConfig.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-extension-tests/src/main/java/tech/mlsql/test/BasicSQLConfig.scala",
+    "symbols": " 函数：batchParams, batchParamsWithoutHive, batchParamsWithJsonFile, batchParamsWithAPI, batchParamsWithCarbondata, mlsqlParams\n变量：\n类：BasicMLSQLConfig\n导入语句：import java.util.UUID\n\n请注意，由于没有直接的变量声明，因此变量部分为空。此外，由于Scala中的trait类似于Java中的接口，因此将其视为类。",
+    "last_modified": 1685926267.8997843,
+    "md5": "9ae4c3981992cab8b082ac9c97b6af31"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/test/java/tech/mlsql/plugins/visiualization/test/PyLangTest.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/test/java/tech/mlsql/plugins/visiualization/test/PyLangTest.scala",
+    "symbols": " 函数：\n变量：pl, df, context, genCode, a, day, y\n类：PyLangTest, PythonContext\n导入语句：import org.scalatest.funsuite.AnyFunSuite, import tech.mlsql.plugins.visualization.pylang.PyLang, from pyjava.api.mlsql import RayContext,PythonContext",
+    "last_modified": 1685926268.048125,
+    "md5": "8151741ae702e40f33a0f7b1d8831917"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/BaseHint.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/BaseHint.scala",
+    "symbols": " 函数：rewrite, _parse\n变量：headers, body, t, input, output, headerParams\n类：BaseHint, SQLHeadHint\n导入语句：\n\n请注意，由于Java和Scala语言的特性，通常不会在代码中显式地列出导入语句，而是由编译器自动处理。因此，在这个示例中没有列出导入语句。",
+    "last_modified": 1685926268.0282896,
+    "md5": "1ec7edbe2585c30b298dea4561ac2ad9"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/ets/BinlogToDelta.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/ets/BinlogToDelta.scala",
+    "symbols": " 函数：train, load, predict, explainParams\n变量：dbTable, maxTs\n类：BinlogToDelta\n导入语句：import org.apache.spark.ml.param.Param, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.mlsql.session.MLSQLException, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs.param.WowParams, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.plugins.canal.sink.{BinlogWritter, DeltaSink}",
+    "last_modified": 1685926268.1194348,
+    "md5": "6dc133148f8c3c7af7ab6add58abcfa0"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/mysql/statement/DDLStatementParser.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-canal/src/main/scala/tech/mlsql/plugins/canal/mysql/statement/DDLStatementParser.scala",
+    "symbols": " 函数：parseDF, truncateTable, alterAddColumn, alterDropColumn, alterChangeColumn, alterModifyColumn\n变量：df, isUpdate\n类：DDLStatementParser\n导入语句：import com.alibaba.druid.sql.ast.expr.SQLValuableExpr, import com.alibaba.druid.sql.ast.statement.{SQLAlterTableAddColumn, SQLAlterTableDropColumnItem, SQLAlterTableStatement, SQLTruncateStatement}, import com.alibaba.druid.sql.dialect.mysql.ast.statement.{MySqlAlterTableChangeColumn, MySqlAlterTableModifyColumn}, import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser, import org.apache.spark.sql.DataFrame, import org.apache.spark.sql.functions.{col, typedLit}, import tech.mlsql.plugins.canal.mysql.JdbcTypeParser, import scala.collection.JavaConverters._\n\n请注意，这里的输出是基于提供的代码示例，实际的代码可能包含更多的符号。",
+    "last_modified": 1685926268.12501,
+    "md5": "a0add05fb54a9e98103eaaf76a94d556"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/builder.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/builder.scala",
+    "symbols": " 函数：valueWithQuote, toCode, translate\n变量：realS, isStr, pyLang, imageType, builder, format, df, ray_context, cm, fpr, tpr, threshold, roc_auc, ax, auc, content\n类：FigUtils, TranslateRuntime, VVValue, VisualSource, PlotlyRuntime\n导入语句：import net.csdn.common.settings.{ImmutableSettings, Settings}, import org.apache.commons.lang3.StringUtils, import tech.mlsql.plugins.visualization.pylang.{Options, PyLang}, import scala.collection.JavaConverters._",
+    "last_modified": 1685926268.0355854,
+    "md5": "e0c70facc9ce9aebe96aa622abf5f41f"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/PythonHint.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/PythonHint.scala",
+    "symbols": " 函数：rewrite\n变量：header, input, output, cache, cacheStr, confTableOpt, model, schema, env, dataMode, runIn, pythonExec, pythonOutputEncoding\n类：PythonHint, BaseHint\n导入语句：import java.util.UUID\n\n请注意，由于Scala语言的特性，变量和函数通常在类或对象的上下文中定义，因此它们通常与类或对象相关联。在这个例子中，`rewrite` 是 `PythonHint` 类的一个方法，因此它被视为一个函数。其他变量如 `header`, `input`, `output` 等是在 `rewrite` 方法中定义的局部变量。`PythonHint` 和 `BaseHint` 是类名，而 `import java.util.UUID` 是唯一的导入语句。",
+    "last_modified": 1685926268.031894,
+    "md5": "9fbe9a2d1294e9ca2c71c2419be0a354"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/VisualizationExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/VisualizationExt.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n变量：args, pr, pythonCode, hint, byzerCode, newDF\n类：VisualizationExt\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.mmlib.SQLAlg,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.ets.ScriptRunner,import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.0339231,
+    "md5": "dbfd74c3ceb4cf1ec9cf8f6bfdd8026d"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/ByzerVisualizationApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/ByzerVisualizationApp.scala",
+    "symbols": " 函数：run\n类：ByzerVisualizationApp, VisualizationExt\n变量：versions\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.0299158,
+    "md5": "c823926462fefb961b19040fb318e284"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/pylang/py_lang.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/pylang/py_lang.scala",
+    "symbols": " 函数：apply, forward, back, ident, raw, let, func, getByTag, toScript\n变量：imports, blocks, current_ident\n类：PyLang, OptionKeyValue, Options, BaseNode, Str, Number, Boolean, ReferenceVariable, Binder\n导入语句：import scala.collection.mutable.ArrayBuffer",
+    "last_modified": 1685926268.0437858,
+    "md5": "23348d4661310ed1539c0fd1087c5346"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/pylang/Func.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/pylang/Func.scala",
+    "symbols": " 函数：end, namedVariableName, tag, options, toBlock, block, getTag, toJson, fromJson\n变量：_tag, _funcName, _newFuncName, _ident\n类：Func, Block\n导入语句：\n\n注意：由于输入的代码是Scala语言，而不是Python，因此没有导入语句。Scala代码中的`import`语句通常用于导入包或类，而不是像Python中的`import`语句那样用于导入模块。在提供的代码中，没有显式的`import`语句。",
+    "last_modified": 1685926268.0372024,
+    "md5": "a154cc3a0fcde97588c3d63cf9fe9337"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/pylang/Variable.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/pylang/Variable.scala",
+    "symbols": " 函数：params, end, addImport, create, extend, withParameters, end, bind, invokeFunc, invokeObjectCreate, invokeField, end, tag, options, toBlock, getTag, toJson, fromJson, block\n变量：o, _name, _extend, v, binder, _invokeFuncs, _invokeObjectCreate, _tag, _variableName, _newVariableName, _ident\n类：VariableFunc, VariableObjectCreate, Variable\n导入语句：import scala.collection.mutable.ArrayBuffer",
+    "last_modified": 1685926268.0415587,
+    "md5": "92e4ac54df1391e6d6d373997a12b988"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/pylang/RawCode.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/pylang/RawCode.scala",
+    "symbols": " 函数：variableName, namedVariableName, code, end, tag, options, toBlock, getTag, toJson, fromJson, block\n变量：_tag, _funcName, _newFuncName, _ident, _code\n类：RawCode\n导入语句：\n\n请注意，由于Java和Scala语言的特性，没有显式的导入语句，因为它们通常使用完全限定名称来引用类和方法。此外，Scala中的方法（如variableName, namedVariableName等）在Java中会被视为函数，但在Scala中它们是类的方法。",
+    "last_modified": 1685926268.0390437,
+    "md5": "eeddf33affb9e2889ea62be7fda36660"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-shell/src/main/java/tech/mlsql/plugins/shell/app/MLSQLShell.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-shell/src/main/java/tech/mlsql/plugins/shell/app/MLSQLShell.scala",
+    "symbols": " 函数：run, supportedVersions\n变量：versions\n类：MLSQLShell\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.plugins.shell.ets.{CopyFromLocal, ShellExecute}, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926269.729466,
+    "md5": "9d1b909ab78a7a4702ffcc31f00d0e9c"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/last-command/src/main/java/tech/mlsql/plugins/et/LastCommand.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/last-command/src/main/java/tech/mlsql/plugins/et/LastCommand.scala",
+    "symbols": " 函数：train, supportedVersions, doc, codeExample, batchPredict, load, predict\n变量：无\n类：LastCommand\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.ScriptSQLExec,import streaming.dsl.mmlib._,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.091415,
+    "md5": "66774b53772c25922bc9245a6cc46b5c"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-shell/src/main/java/tech/mlsql/plugins/shell/ets/ShellExecute.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-shell/src/main/java/tech/mlsql/plugins/shell/ets/ShellExecute.scala",
+    "symbols": " 函数：train, load, predict\n类：ShellExecute\n变量：无明显变量声明\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth._, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.common.utils.shell.ShellCommand, import tech.mlsql.dsl.auth.{BaseETAuth, ETAuth}, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.shell.app.MLSQLShell, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926269.732626,
+    "md5": "5533b53ff4b315a616a4834984969429"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/tech/mlsql/plugins/ds/MLSQLExcel.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/tech/mlsql/plugins/ds/MLSQLExcel.scala",
+    "symbols": " 函数：run, sourceInfo, explainParams, register, supportedVersions\n变量：clzz, dataSource, sheetName\n类：MLSQLExcelApp, MLSQLExcel\n导入语句：import _root_.streaming.core.datasource._, import _root_.streaming.dsl.ScriptSQLExec, import _root_.streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import org.apache.spark.ml.param.Param, import org.apache.spark.sql._, import tech.mlsql.common.utils.classloader.ClassLoaderTool, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.1815596,
+    "md5": "890803802321209b869682cee9c1408e"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-shell/src/main/java/tech/mlsql/plugins/shell/ets/CopyFromLocal.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-shell/src/main/java/tech/mlsql/plugins/shell/ets/CopyFromLocal.scala",
+    "symbols": " 函数：train, load, predict, auth\n变量：\n类：CopyFromLocal\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth._, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.shell.app.MLSQLShell, import tech.mlsql.tool.HDFSOperatorV2, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926269.730803,
+    "md5": "713db388903926c693f2fca1b302e30a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/DefaultSource.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/DefaultSource.scala",
+    "symbols": " 函数：createRelation, checkParameter\n变量：wbReader, dataLocator, path, filesystemPath, fs\n类：DefaultSource\n导入语句：import org.apache.hadoop.fs.Path, import org.apache.spark.sql.sources._, import org.apache.spark.sql.types.StructType, import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}\n\n请注意，由于Scala语言的特性，一些变量可能被定义为方法的参数或局部变量，这些变量在此列表中未被包含。此外，类中的方法被视为函数。",
+    "last_modified": 1685926268.170183,
+    "md5": "65c8ea320bea0455402310a96e9426e4"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/PlainNumberFormat.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/PlainNumberFormat.scala",
+    "symbols": " 函数：format, parseObject\n变量：\n类：PlainNumberFormat\n导入语句：import java.math.BigDecimal, import java.text.FieldPosition, import java.text.Format, import java.text.ParsePosition\n\n请注意，这里的“函数”指的是类中的方法，而“类”指的是定义的PlainNumberFormat类。变量未在代码中显式定义，因此为空。导入语句包括了所有引入的库和类。",
+    "last_modified": 1685926268.1764123,
+    "md5": "74f0d80a084073e3bfd141c1656e628a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/DataColumn.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/DataColumn.scala",
+    "symbols": " 函数：\n变量：\n类：DataColumn, HeaderDataColumn, ColorDataColumn\n导入语句：import java.math.BigDecimal,import java.sql.Timestamp,import org.apache.poi.ss.usermodel.{Cell, CellType, DataFormatter, DateUtil},import org.apache.spark.sql.types._,import scala.util.{Failure, Success, Try}\n\n请注意，由于输入的代码是用Scala编写的，而Scala中的类和特征（trait）在某些方面类似于Java中的接口，因此我将`DataColumn` trait也视为一个类。此外，Scala中的类通常包含方法，但这些方法在Scala中不被视为独立的函数。因此，我没有列出任何函数。变量也没有显式列出，因为它们通常是类的成员，而不是全局定义的。",
+    "last_modified": 1685926268.167162,
+    "md5": "10fee71b04d17484138b8b41a08d84d6"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/DefaultSource15.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/DefaultSource15.scala",
+    "symbols": " 函数：shortName\n变量：\n类：DefaultSource15\n导入语句：import org.apache.spark.sql.sources.DataSourceRegister\n\n请注意，由于Java和Scala语言的特性，函数通常是类的方法，因此在这个例子中，`shortName`是`DefaultSource15`类的一个方法，而不是一个独立的函数。在Scala中，类和对象可以包含方法，这些方法在功能上类似于函数。",
+    "last_modified": 1685926268.1715055,
+    "md5": "2f5e9640b6982102a9df2668bf556709"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/WorkbookReader.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/WorkbookReader.scala",
+    "symbols": " 函数：openWorkbook, withWorkbook, sheetNames\n变量：WithLocationMaxRowsInMemoryAndPassword\n类：WorkbookReader, DefaultWorkbookReader, StreamingWorkbookReader\n导入语句：import java.io.InputStream, import com.crealytics.spark.excel.Utils.MapIncluding, import com.github.pjfanning.xlsx.StreamingReader, import org.apache.hadoop.conf.Configuration, import org.apache.hadoop.fs.{FileSystem, Path}, import org.apache.poi.ss.usermodel.{Workbook, WorkbookFactory}\n\n请注意，这里的输出是基于提供的代码片段进行的分析。在实际的代码文件中，可能存在更多的函数、变量、类和导入语句。此外，由于Scala语言的特性，一些方法可能被定义在类的伴生对象中，这些方法在这里被视为函数。",
+    "last_modified": 1685926268.178552,
+    "md5": "d7065fb9fc9e7effa59cd3f6cda7cb10"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/Utils.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/Utils.scala",
+    "symbols": " 函数：\n变量：\n类：RichTry, MapIncluding, MapRequirements, RequiredKeys, OptionalKeys, MapWith\n导入语句：import scala.util.{Success, Try}",
+    "last_modified": 1685926268.1774755,
+    "md5": "e826626ef6c7d1fafba8895735cd9e7e"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/package.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/package.scala",
+    "symbols": " 函数：\n变量：\n类：RichRow, RichCell, RichSpoiwoSheet, ExcelDataFrameReader, ExcelDataFrameWriter\n导入语句：import com.norbitltd.spoiwo.model.Sheet, import org.apache.poi.ss.usermodel.Row.MissingCellPolicy, import org.apache.poi.ss.usermodel.{Cell, CellType, Row}, import org.apache.spark.sql.{DataFrameReader, DataFrameWriter}",
+    "last_modified": 1685926268.1796498,
+    "md5": "4a6f622f29ec5b6d03204224ce9396da"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/DataLocator.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/DataLocator.scala",
+    "symbols": " 函数：\n变量：dateFrmt, timestampFrmt\n类：DataLocator, AreaDataLocator, CellRangeAddressDataLocator, TableDataLocator\n导入语句：import com.crealytics.spark.excel.Utils.MapIncluding, import com.norbitltd.spoiwo.model.HasIndex._, import com.norbitltd.spoiwo.model.{CellDataFormat, CellRange, CellStyle, Table, TableColumn, Cell => WriteCell, Row => WriteRow, Sheet => WriteSheet}, import org.apache.poi.ss.SpreadsheetVersion, import org.apache.poi.ss.usermodel.{Cell, Sheet, Workbook}, import org.apache.poi.ss.util.{AreaReference, CellReference}, import org.apache.poi.xssf.usermodel.{XSSFTable, XSSFWorkbook}, import tech.mlsql.plugins.ds.MLSQLExcel, import scala.collection.JavaConverters._, import scala.util.Try",
+    "last_modified": 1685926268.168522,
+    "md5": "925b78f1b926715b594d7d1cec4af2c9"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/InferSchema.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/InferSchema.scala",
+    "symbols": " 函数：apply, inferRowType, mergeRowTypes, inferField, stringType, findTightestCommonType\n变量：CellType, startType, rootTypes, maxLength, defaultDataType, filledRowSoFar, filledNext, a, typeSoFar, field, numericPrecedence\n类：\n导入语句：import org.apache.spark.rdd.RDD,import org.apache.spark.sql.types._,package com.crealytics.spark.excel",
+    "last_modified": 1685926268.175318,
+    "md5": "b43a8e9a1c43c4c809a8f79a05537962"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/test/BasicSQLConfig.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/test/BasicSQLConfig.scala",
+    "symbols": " 函数：batchParams, batchParamsWithoutHive, batchParamsWithJsonFile, batchParamsWithAPI, batchParamsWithCarbondata, mlsqlParams\n变量：\n类：BasicMLSQLConfig\n导入语句：import java.util.UUID\n\n请注意，由于Scala语言的特性，这里将`def`定义的方法视为函数，而`trait`定义的视为类。同时，由于代码中没有显式的变量定义，因此变量部分为空。导入语句仅包含`import java.util.UUID`，其他代码中的`import`语句未列出，因为它们是Scala语言的特性，用于引入隐式转换等，不属于显式的导入语句。",
+    "last_modified": 1685926268.2866743,
+    "md5": "9ae4c3981992cab8b082ac9c97b6af31"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/ExcelFileSaver.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/ExcelFileSaver.scala",
+    "symbols": " 函数：save, sheet, writeToWorkbook, autoClose\n变量：DEFAULT_SHEET_NAME, DEFAULT_DATE_FORMAT, DEFAULT_TIMESTAMP_FORMAT\n类：ExcelFileSaver\n导入语句：import com.norbitltd.spoiwo.model._, import com.norbitltd.spoiwo.natures.streaming.xlsx.Model2XlsxConversions._, import org.apache.hadoop.fs.{FSDataInputStream, FileSystem, Path}, import org.apache.poi.xssf.usermodel.XSSFWorkbook, import org.apache.spark.sql.{DataFrame, SaveMode}, import java.io.BufferedOutputStream, import org.apache.poi.xssf.streaming.SXSSFWorkbook, import scala.collection.JavaConverters._",
+    "last_modified": 1685926268.1727076,
+    "md5": "3a40fa55246db7e1341c047a4e3f42c7"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/BenchmarkFunction.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/BenchmarkFunction.scala",
+    "symbols": " 函数：main\n变量：v, times\n类：BenchmarkFunction\n导入语句：\n\n请注意，由于Java和Scala语言的特性，没有显式的导入语句，因为它们通常会自动导入常用的包，如java.lang等。在这个示例中，没有显式列出导入语句，因为它们没有在代码中明确写出。",
+    "last_modified": 1685926268.27502,
+    "md5": "e1a557bd782cf1c74c32bf4025baee49"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLDescriptiveMetricsTest.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLDescriptiveMetricsTest.scala",
+    "symbols": " 函数：startParams, test, setupBatchContext, train\n变量：et, sseq, seq_df, seq_df1, res, r0, r1, r2, r3, r4\n类：SQLDescriptiveMetricsTest\n导入语句：import org.apache.spark.sql.functions.col,import org.apache.spark.sql.types.DoubleType,import org.apache.spark.streaming.SparkOperationUtil,import org.scalatest.funsuite.AnyFunSuite,import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach},import streaming.core.strategy.platform.SparkRuntime,import tech.mlsql.test.BasicMLSQLConfig,import java.sql.Timestamp,import java.time.LocalDateTime,import java.util.UUID",
+    "last_modified": 1685926268.2800791,
+    "md5": "cba536ee1a3ae53cc0fc7a530b762712"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLDataSummaryV2Test.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLDataSummaryV2Test.scala",
+    "symbols": " 函数：startParams, getCurProjectRootPath, train\n变量：allMetrics\n类：SQLDataSummaryV2Test\n导入语句：import org.apache.spark.sql.{DataFrame, Row, SparkSession}, import org.apache.spark.sql.types.{StringType, StructField, StructType}, import org.apache.spark.streaming.SparkOperationUtil, import org.scalatest.BeforeAndAfterAll, import org.scalatest.funsuite.AnyFunSuite, import streaming.core.strategy.platform.SparkRuntime, import tech.mlsql.test.BasicMLSQLConfig, import java.io.{File, IOException}, import java.sql.Timestamp, import java.time.LocalDateTime, import java.util.{Date, UUID}",
+    "last_modified": 1685926268.2778783,
+    "md5": "9eacae1e1af8f1dc77b2671f17d90af3"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLDataSummaryTest.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLDataSummaryTest.scala",
+    "symbols": " 函数：startParams, setupBatchContext, withBatchContext, train\n变量：seq_df, seq_df1, res, sseq, sseq2, seq_df2, res1, r0, r1, r2, r3, r4, r5, r6, r7\n类：SQLDataSummaryTest, SQLDataSummary\n导入语句：import org.apache.spark.sql.SparkSession, import org.apache.spark.sql.functions.col, import org.apache.spark.sql.types.DoubleType, import org.apache.spark.streaming.SparkOperationUtil, import org.scalatest.funsuite.AnyFunSuite, import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}, import streaming.core.strategy.platform.SparkRuntime, import tech.mlsql.test.BasicMLSQLConfig, import java.sql.Timestamp, import java.time.LocalDateTime, import java.util.UUID",
+    "last_modified": 1685926268.2760177,
+    "md5": "db132d91f71302f4d28c55eb18a2fc9d"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLUniqueIdentifierTest.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLUniqueIdentifierTest.scala",
+    "symbols": " 函数：startParams, test, withBatchContext, setupBatchContext\n变量：sseq, seq_df, seq_df1, res, r0, r1, r2, r3, r4, et, sseq, seq_df, seq_df1, res, r0, r1, r2, r3, r4\n类：SQLUniqueIdentifierTest, SQLUniqueIdentifier\n导入语句：import org.apache.spark.sql.functions.col, import org.apache.spark.sql.types.DoubleType, import org.apache.spark.streaming.SparkOperationUtil, import org.scalatest.funsuite.AnyFunSuite, import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}, import streaming.core.strategy.platform.SparkRuntime, import tech.mlsql.test.BasicMLSQLConfig, import java.sql.Timestamp, import java.time.LocalDateTime, import java.util.UUID",
+    "last_modified": 1685926268.2850246,
+    "md5": "22b997714b9d7e3d654357b9accede0e"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLPatternSummaryTest.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/test/java/tech/mlsql/plugins/mllib/ets/fe/SQLPatternSummaryTest.scala",
+    "symbols": " 函数：SQLPatternSummaryTest\n变量：startParams, runtime, spark, et, sseq, seq_df, res, r1, r12, data_seq2, df2, res2, r2, allNull, df3, res3\n类：SQLPatternDistribution, AnyFunSuite, SparkOperationUtil, BasicMLSQLConfig, BeforeAndAfterAll, BeforeAndAfterEach, SparkRuntime\n导入语句：import org.apache.spark.streaming.SparkOperationUtil, import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}, import tech.mlsql.test.BasicMLSQLConfig, import org.scalatest.funsuite.AnyFunSuite, import streaming.core.strategy.platform.SparkRuntime, import java.util.UUID",
+    "last_modified": 1685926268.2835076,
+    "md5": "be14d6cf0100f4ceef7af9cdf04f5f9d"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/org/apache/spark/ZippedWithGivenIndexRDD.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/org/apache/spark/ZippedWithGivenIndexRDD.scala",
+    "symbols": " 函数：\n变量：startIndices\n类：ZippedWithGivenIndexRDD\n导入语句：import org.apache.spark.rdd.{RDD, ZippedWithIndexRDD, ZippedWithIndexRDDPartition}, import org.apache.spark.util.Utils, import scala.reflect.ClassTag",
+    "last_modified": 1685926268.2334347,
+    "md5": "0ef8ca32377bd0fae3aeb7a4eeafa874"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/app/MLSQLMllib.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/app/MLSQLMllib.scala",
+    "symbols": " 函数：run\n变量：versions\n类：MLSQLMllib\n导入语句：import tech.mlsql.common.utils.log.Logging,import tech.mlsql.dsl.CommandCollection,import tech.mlsql.ets.register.ETRegister,import tech.mlsql.plugins.mllib.ets.fe.{DataTranspose, OnehotExt, PSIExt, SQLColumnsAnalysis, SQLDataSummaryV2, SQLDescriptiveMetrics, SQLDigitalColumnConvert, SQLMissingValueProcess, SQLPatternDistribution, SQLUniqueIdentifier},import tech.mlsql.plugins.mllib.ets.fintech.scorecard.{SQLBinning, SQLScoreCard},import tech.mlsql.plugins.mllib.ets.{ClassificationEvaluator, ColumnsExt, RegressionEvaluator, SampleDatasetExt, TakeRandomSampleExt},import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1699441092.37272,
+    "md5": "0fc0169ec233fad08d69c954a50d8648"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/ColumnsExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/ColumnsExt.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n类：ColumnsExt\n变量：action, fields\n导入语句：import org.apache.spark.ml.param.{Param, StringArrayParam}, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.mmlib.algs.classfication.BaseClassification, import streaming.dsl.mmlib.algs.param.BaseParams, import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}, import streaming.dsl.mmlib._",
+    "last_modified": 1685926268.2412198,
+    "md5": "2ad5725fbd090f777d588b3f0c376dd1"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/TakeRandomSampleExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/TakeRandomSampleExt.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n类：TakeRandomSampleExt\n变量：fraction, size\n导入语句：import org.apache.spark.ml.param.Param, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs.classfication.BaseClassification, import streaming.dsl.mmlib.algs.param.BaseParams, import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}\n\n请注意，这里的输出是基于提供的代码片段的直接分析，不涉及代码的执行或深入理解。",
+    "last_modified": 1685926268.2464633,
+    "md5": "3d94ae38860eeee087251a691cd59633"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/PluginBaseETAuth.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/PluginBaseETAuth.scala",
+    "symbols": " 函数：auth\n变量：vtable, context, etName\n类：PluginBaseETAuth\n导入语句：import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth._, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod\n\n请注意，由于我无法执行代码分析，这些结果是基于提供的代码片段的直接观察。在实际的代码库中，可能存在更多的函数、变量、类和导入语句。",
+    "last_modified": 1685926268.2425835,
+    "md5": "804d09a8a77152a691cf7abb1895fe09"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/ClassificationEvaluator.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/ClassificationEvaluator.scala",
+    "symbols": " 函数：train, batchPredict, load, predict, auth, explainParams\n变量：labelCol\n类：ClassificationEvaluator\n导入语句：import org.apache.spark.ml.param.Param,import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.auth.TableAuthResult,import streaming.dsl.mmlib._,import streaming.dsl.mmlib.algs.classfication.BaseClassification,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MetricValue},import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod,import tech.mlsql.plugins.mllib.app.MLSQLMllib,import tech.mlsql.version.VersionCompatibility\n\n请注意，这里的输出是基于提供的代码片段直接识别出的符号类型和名称，不涉及代码的实际执行或深入分析。",
+    "last_modified": 1685926268.2399068,
+    "md5": "e9f3d7dbd3ff2f3a8c4c980d268ec7cc"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/AutoMLExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/AutoMLExt.scala",
+    "symbols": " 函数：getAutoMLPath, train, getBestModelAlgoName, load, predict, explainParams, batchPredict, explainModel, auth, doc, codeExample\n变量：sortedBy\n类：AutoMLExt\n导入语句：import org.apache.spark.ml.param.Param,import org.apache.spark.sql.{DataFrame, Row, SparkSession, functions},import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.functions.{lit, regexp_replace, when},import streaming.dsl.ScriptSQLExec,import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType},import streaming.dsl.mmlib.{AlgType, Code, Doc, HtmlDoc, ModelType, SQLAlg, SQLCode},import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions, SQLPythonFunc},import streaming.dsl.mmlib.algs.classfication.BaseClassification,import streaming.dsl.mmlib.algs.param.BaseParams,import tech.mlsql.common.utils.path.PathFun,import tech.mlsql.dsl.adaptor.MLMapping,import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.2384021,
+    "md5": "5fba1ebe1c1e55865cf4918f1b994beb"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/SampleDatasetExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/SampleDatasetExt.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n类：SampleDatasetExt\n变量：columns, size, featuresSize, labelSize\n导入语句：import org.apache.spark.ml.param.{Param, StringArrayParam}, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.mlsql.session.MLSQLException, import org.apache.spark.sql.{DataFrame, SparkSession, functions => func}, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs.classfication.BaseClassification, import streaming.dsl.mmlib.algs.param.BaseParams, import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}\n\n请注意，这里的“变量”实际上是指类中的参数，它们在Scala中通常被定义为类的成员，而不是独立的变量。此外，Scala中的函数通常是类的方法，因此在上面的输出中，函数指的是类SampleDatasetExt中的方法。",
+    "last_modified": 1685926268.245062,
+    "md5": "3ecb20980e0ea406d95594d22ae14605"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/RegressionEvaluator.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/RegressionEvaluator.scala",
+    "symbols": " 函数：train, batchPredict, load, predict, auth, explainParams\n类：RegressionEvaluator\n变量：labelCol\n导入语句：import org.apache.spark.ml.param.Param, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs.classfication.BaseClassification, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MetricValue}, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.mllib.app.MLSQLMllib, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926268.2438931,
+    "md5": "b0fb675558a9829fc31a6a5cbb67a605"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/ExcelRelation.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-excel/src/main/java/com/crealytics/spark/excel/ExcelRelation.scala",
+    "symbols": " 函数：buildScan, buildScan, getSparkType, parallelize, inferSchema\n变量：dataLocator, header, treatEmptyValuesAsNulls, usePlainNumberFormat, inferSheetSchema, addColorColumns, userSchema, timestampFormat, excerptSize, workbookReader, skipFirstNLines, excerpt, headerColumnForName, schema, dataFormatter, timestampParser, columnNameRegex, columnExtractor, lookups, allDataIterator, iter, rows, result, cell, fields, colNames, colName, duplicates, headerNames, nonNullHeaderNames, firstRow, nonHeaderRows, dataTypes, cellTypes, headerIndices, cellExtractor, cellTypes, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor, cellExtractor,",
+    "last_modified": 1685926268.1740186,
+    "md5": "5c3a8a323c49def2328e4b2d61ba4d43"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/DataSummaryOld.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/DataSummaryOld.scala",
+    "symbols": " 函数：countColsNullNumber, countColsEmptyNumber, countColsStdDevNumber, countColsStdErrNumber, isPrimaryKey, getMaxNum, getMinNum, roundAtSingleCol, getModeNum, countNonNullValue, getMaxLength, getMinLength, getMeanValue, calQuantileValue, computePercentile, getQuantileNum, getTypeLength, roundNumericCols, train, load, predict, batchPredict, auth\n变量：round_at\n类：DataSummaryOld\n导入语句：import org.apache.spark.rdd.RDD, import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession, functions => F}, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.functions.{avg, col, count, countDistinct, expr, first, last, length, lit, map_zip_with, max, min, monotonically_increasing_id, round, row_number, spark_partition_id, stddev, when, window}, import org.apache.spark.sql.types.{BooleanType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, StructField, StructType, TimestampType, VarcharType}, import streaming.dsl.ScriptSQLExec, import scala.math._, import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}, import streaming.dsl.mmlib.algs.param.BaseParams, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.{ETMethod, PREDICT}, import scala.util.Try",
+    "last_modified": 1685926268.2491307,
+    "md5": "3443cba2ad593de860127d98ca74a2bf"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLUniqueIdentifier.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLUniqueIdentifier.scala",
+    "symbols": " 函数：batchPredict, train, load, predict, auth, getZippedWithIndexDF, inferSchema, verifyParams, hashMap2RDD\n变量：SOURCE_MODE_NEW, SOURCE_MODE_REPLACE, DEFAULT_COLUMN_NAME, DEFAULT_START_INDEX, INFER_MODE, DATA_MODE, mode, source, columnName, startIndex\n类：SQLUniqueIdentifier\n导入语句：import com.google.gson.{JsonArray, JsonParser}, import org.apache.commons.lang3.StringUtils, import org.apache.spark.ZippedWithGivenIndexRDD, import org.apache.spark.ml.param.Param, import org.apache.spark.rdd.RDD, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.types.{LongType, StringType, StructField, StructType}, import org.apache.spark.sql.{DataFrame, Row, SparkSession}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth._, import streaming.dsl.mmlib.algs.param.BaseParams, import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import tech.mlsql.common.form._, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.2691019,
+    "md5": "eb1572c81651cfa821650c402b5094fb"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fintech/scorecard/SQLScoreCard.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fintech/scorecard/SQLScoreCard.scala",
+    "symbols": " 函数：constructBinningMap, replaceFeatureWithWOE, scorecardTraining, scorecardPrediction, transformProdToScore, train, load, predict, batchPredict, auth\n变量：selectedFeaturesParam, binningTableParam, scaledValueParam, pdoValueParam, oddValueParam, goodValueParam\n类：SQLScoreCard\n导入语句：import org.apache.spark.ml.{Estimator, Model}, import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}, import org.apache.spark.ml.feature.{Bucketizer, DiscretizerFeature, VectorAssembler}, import org.apache.spark.ml.linalg.{DenseVector, Vector, Vectors}, import org.apache.spark.ml.linalg.SQLDataTypes.VectorType, import org.apache.spark.ml.param.Param, import org.apache.spark.ml.util.MLWritable, import org.apache.spark.sql.{DataFrame, MLSQLUtils, SparkSession}, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.functions.{bin, col, lit, udf, when}, import org.apache.spark.sql.types.{ArrayType, DoubleType, StringType}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions, SQLPythonFunc}, import streaming.dsl.mmlib.algs.param.BaseParams, import tech.mlsql.common.form.{Extra, FormParams, Text}, import tech.mlsql.common.utils.path.PathFun, import tech.mlsql.dsl.adaptor.MLMapping, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import scala.collection.mutable.ArrayBuffer, import scala.util.parsing.json.JSON",
+    "last_modified": 1685926268.273222,
+    "md5": "15296a5c658f2a1b8942c7caa0ea06cb"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fintech/scorecard/SQLBinning.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fintech/scorecard/SQLBinning.scala",
+    "symbols": " 函数：getBinningInfoByFeatureName, getBinningInfoByStrFeatureName, getConfigMapFromModel, getLabelArrayByIndexer, EFBiningTraining, EDBinningTraining, getBucketNumMap, parseParamsForED, getSplits, findOutStrCols, seperatedSelectedFeaByType, binningForStringCols, getStringIndexMapFromModel, getLabelIndexArray, getIndexer, transformFromLabelsArray, train, load, predict, batchPredict, auth\n变量：selectedFeaturesParam, labelColNameParam, numBucketParam, customizedConfigParam, goodValueParam, binningMethodParam\n类：SQLBinning\n导入语句：import org.apache.spark.SparkException, import org.apache.spark.ml.attribute.NominalAttribute, import org.apache.spark.ml.feature.{Bucketizer, DiscretizerFeature, QuantileDiscretizer, StringIndexer, StringIndexerModel, VectorAssembler}, import org.apache.spark.ml.param.Param, import tech.mlsql.common.utils.log.Logging, import org.apache.spark.sql.{Column, DataFrame, Dataset, MLSQLUtils, Row, SQLContext, SaveMode, SparkSession}, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.functions.{col, monotonically_increasing_id, udf, when}, import org.apache.spark.sql.types.{ArrayType, DoubleType, IntegerType, StringType, StructField, StructType}, import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import streaming.dsl.mmlib.algs.MetaConst.{DISCRETIZER_PATH, getMetaPath}, import streaming.dsl.mmlib.algs.meta.DiscretizerMeta, import streaming.dsl.mmlib.algs.{CodeExampleText, DiscretizerTrainData, Functions, MllibFunctions}, import streaming.dsl.mmlib.algs.param.BaseParams, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.{ETMethod, PREDICT}, import org.apache.spark.sql.functions._, import org.apache.spark.util.collection.OpenHashMap, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.form.{Extra, FormParams, KV, Select, Text}, import tech.mlsql.dsl.adaptor.MLMapping, import scala.collection.mutable, import scala.util.parsing.json.{JSON, JSONObject}",
+    "last_modified": 1685926268.2715287,
+    "md5": "97f4a61aaf5b5d33ad010620baaad81e"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/DataTranspose.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/DataTranspose.scala",
+    "symbols": " 函数：pivot, unpivot, train\n变量：method, indexCols, unpivotCols, aggCol, inputCol\n类：DataTranspose\n导入语句：import org.apache.spark.ml.param.Param,import org.apache.spark.sql.{DataFrame, SparkSession},import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.functions.col,import streaming.dsl.ScriptSQLExec,import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType},import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode},import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions},import streaming.dsl.mmlib.algs.classfication.BaseClassification,import streaming.dsl.mmlib.algs.param.BaseParams,import tech.mlsql.common.form.{Extra, FormParams, KV, Select, Text},import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.2514307,
+    "md5": "a81cba4251d3f55a6d0c751eff58ba43"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLMissingValueProcess.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLMissingValueProcess.scala",
+    "symbols": " 函数：fillByRandomForestRegressor, dropWithMissingValue, fillByMeanValue, fillByModeValue, train, load, predict, auth\n变量：processColumnsParam, methodParam\n类：SQLMissingValueProcess\n导入语句：import org.apache.spark.ml.Estimator, import org.apache.spark.ml.feature.{DiscretizerFeature, VectorAssembler}, import org.apache.spark.ml.param.Param, import org.apache.spark.sql.functions.{col, when}, import org.apache.spark.ml.regression.RandomForestRegressor, import org.apache.spark.sql.{DataFrame, SparkSession}, import org.apache.spark.sql.expressions.UserDefinedFunction, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}, import streaming.dsl.mmlib.algs.param.BaseParams, import tech.mlsql.common.form.{Extra, FormParams, KV, Select, Text}, import tech.mlsql.dsl.adaptor.MLMapping, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.2653348,
+    "md5": "2cf318da392e13ed06c10c4e75e97bfc"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLDataSummaryV2.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLDataSummaryV2.scala",
+    "symbols": " 函数：colWithFilterBlank, countColsStdDevNumber, countColsStdErrNumber, countUniqueValueRatio, getMaxNum, getMinNum, countNonNullValue, nullValueCount, emptyCount, getMaxLength, getMinLength, getMeanValue, getTypeLength, dataFormat, getPercentileRows, processSelectedMetrics, getModeValue, calculateCountMetrics, getDataType, getSkewness, getTotalCount, train, load, predict, batchPredict, auth\n变量：numericCols\n类：SQLDataSummaryV2\n导入语句：import java.util.Date, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.functions._, import org.apache.spark.sql.types._, import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession, functions => F}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth._, import streaming.dsl.mmlib.algs.param.BaseParams, import streaming.dsl.mmlib.{CodeExampleText, Functions, MllibFunctions}, import streaming.dsl.mmlib.algs, import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.2594566,
+    "md5": "4cc0eebb731a33a3db470c7b1120e1b3"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLColumnsAnalysis.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLColumnsAnalysis.scala",
+    "symbols": " 函数：train, ks, iv, pvalue, lack, horizontal, person\n变量：\n类：SQLColumnsAnalysis\n导入语句：import org.apache.spark.ml.feature.QuantileDiscretizer, import org.apache.spark.ml.param.{Param, StringArrayParam}, import org.apache.spark.ml.stat.KolmogorovSmirnovTest, import org.apache.spark.mllib.stat.Statistics, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.functions.{col, countDistinct, when}, import org.apache.spark.sql.types.DoubleType, import org.apache.spark.sql.{DataFrame, Row, SparkSession}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth._, import streaming.dsl.mmlib.algs.classfication.BaseClassification, import streaming.dsl.mmlib.algs.param.BaseParams, import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}, import streaming.dsl.mmlib._, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.plugins.mllib.ets.PluginBaseETAuth",
+    "last_modified": 1699441092.3730173,
+    "md5": "38d9881f95845607d47d70efc7a9f05d"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLPatternDistribution.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLPatternDistribution.scala",
+    "symbols": " 函数：train, load, predict, batchPredict, auth\n变量：limitNum, excludeEmptyVal, patternLimit\n类：SQLPatternDistribution\n导入语句：import org.apache.spark.ml.param.Param, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.functions.{col, desc, trim, udf}, import org.apache.spark.sql.types.{StringType, StructField, StructType}, import org.apache.spark.sql.{DataFrame, Row, SparkSession}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth._, import streaming.dsl.mmlib.algs.param.BaseParams, import streaming.dsl.mmlib.algs.{Functions, MllibFunctions}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import tech.mlsql.common.form.{Extra, FormParams, Input}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.267489,
+    "md5": "8c02b1dd6d3aa58674979786dd20fd59"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/OnehotExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/OnehotExt.scala",
+    "symbols": " 函数：get_dataType, onehotFunc, train, load, predict, batchPredict, auth\n变量：\n类：OnehotExt, OneHotTrainingData\n导入语句：import org.apache.spark.ml.feature.{DiscretizerFeature, Normalizer, OneHotEncoder, OneHotEncoderModel, StringIndexer, StringIndexerModel, VectorAssembler}, import org.apache.spark.ml.param.Param, import org.apache.spark.ml.util.MLWritable, import org.apache.spark.sql.{DataFrame, MLSQLUtils, Row, SaveMode, SparkSession}, import org.apache.spark.sql.expressions.UserDefinedFunction, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import streaming.dsl.mmlib.algs.MetaConst.getMetaPath, import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}, import streaming.dsl.mmlib.algs.classfication.BaseClassification, import streaming.dsl.mmlib.algs.param.BaseParams, import tech.mlsql.common.form.{Extra, FormParams, Text}, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.2536564,
+    "md5": "d6c3b2f06b0c12b86655477b10bb8e22"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLDigitalColumnConvert.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLDigitalColumnConvert.scala",
+    "symbols": " 函数：batchPredict, train, auth, load, predict, codeExample\n变量：sourceTable, destTable\n类：SQLDigitalColumnConvert\n导入语句：import org.apache.commons.lang3.StringUtils, import org.apache.spark.ml.param.Param, import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.functions.{col, lit, stddev, trim, when}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}, import streaming.dsl.mmlib.algs.param.BaseParams, import tech.mlsql.common.form.{Extra, FormParams, Input}, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod",
+    "last_modified": 1685926268.263963,
+    "md5": "8aa6fbb43a50dd2c1a4109e2258af786"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLDataSummary.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLDataSummary.scala",
+    "symbols": " 函数：SQLDataSummary, train, colWithFilterBlank, countColsStdDevNumber, countColsStdErrNumber, isPrimaryKey, countUniqueValueRatio, getMaxNum, getMinNum, roundAtSingleCol, maxUdf, processModeValue, isArrayString, getModeNum, countNonNullValue, countColsNullNumber, nullValueCount, emptyCount, getMaxLength, getMinLength, getMeanValue, computePercentile, getQuantileNum, getTypeLength, roundNumericCols, load, predict, batchPredict, auth\n变量：round_at, numericCols\n类：SQLDataSummary\n导入语句：import org.apache.spark.rdd.RDD, import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession, functions => F}, import org.apache.spark.sql.{functions => f}, import org.apache.spark.sql.expressions.{UserDefinedFunction, Window}, import org.apache.spark.sql.functions.{avg, coalesce, col, count, countDistinct, expr, first, last, length, lit, map_zip_with, max, min, monotonically_increasing_id, round, row_number, spark_partition_id, sqrt, stddev, sum, udf, when, window}, import org.apache.spark.sql.types.{BooleanType, DecimalType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, StructField, StructType, TimestampType, VarcharType}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType}, import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode}, import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions}, import streaming.dsl.mmlib.algs.param.BaseParams, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.{ETMethod, PREDICT}\n\n请注意，这里的输出是基于提供的代码片段手动识别的，实际的代码分析工具可能会提供更详细和准确的结果。",
+    "last_modified": 1685926268.2571914,
+    "md5": "e69184f8de8fded9feaabe5dcaa7c96d"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-eval/src/main/java/tech/mlsql/plugins/eval/ByzerEvalApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-eval/src/main/java/tech/mlsql/plugins/eval/ByzerEvalApp.scala",
+    "symbols": " 函数：run\n类：ByzerEvalApp, ByzerEval\n变量：versions\n导入语句：import tech.mlsql.common.utils.log.Logging, import tech.mlsql.dsl.CommandCollection, import tech.mlsql.ets.register.ETRegister, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.8671222,
+    "md5": "403f2a0dbf6375868acc921dbb569680"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/PSIExt.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/PSIExt.scala",
+    "symbols": " 函数：constructBinningMap, samplePercentageCalculator, PSI, train, auth, BINNING_RESULT_COLUNM_NAME_CONVERT\n变量：\n类：PSIExt\n导入语句：import org.apache.spark.ml.param.Param,import org.apache.spark.sql.{DataFrame, SparkSession},import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.functions.col,import streaming.dsl.ScriptSQLExec,import streaming.dsl.auth.{DB_DEFAULT, MLSQLTable, OperateType, TableAuthResult, TableType},import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode},import streaming.dsl.mmlib.algs.{CodeExampleText, Functions, MllibFunctions},import streaming.dsl.mmlib.algs.classfication.BaseClassification,import streaming.dsl.mmlib.algs.param.BaseParams,import tech.mlsql.common.form.{Extra, FormParams, Text},import tech.mlsql.dsl.adaptor.MLMapping,import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod,import scala.util.parsing.json.JSON",
+    "last_modified": 1685926268.2559123,
+    "md5": "e2ef6ff1bf0ad06b0e39a7be29a6c789"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLDescriptiveMetrics.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/mlsql-mllib/src/main/java/tech/mlsql/plugins/mllib/ets/fe/SQLDescriptiveMetrics.scala",
+    "symbols": " 函数：getDescriptiveMetrics, convertRowToJSON\n变量：excludeEmptyVal, metricSize\n类：SQLDescriptiveMetrics\n导入语句：import org.apache.commons.lang3.StringUtils,import org.apache.spark.ml.param.Param,import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.functions.{col, trim},import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession},import streaming.dsl.ScriptSQLExec,import streaming.dsl.auth._,import streaming.dsl.mmlib.algs.param.BaseParams,import streaming.dsl.mmlib.algs.{Functions, MllibFunctions},import streaming.dsl.mmlib.{Code, SQLAlg, SQLCode},import tech.mlsql.common.form.{Extra, FormParams, Input},import tech.mlsql.dsl.auth.ETAuth,import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod\n\n请注意，这里的输出是基于提供的代码示例进行分析得出的。在实际的代码分析中，可能需要使用专门的工具或库来准确地识别和提取这些符号。",
+    "last_modified": 1685926268.2616208,
+    "md5": "4799e1e204341ac6510f850d5fa45de4"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/table-repartition/src/main/java/tech/mlsql/plugins/et/TableRepartition.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/table-repartition/src/main/java/tech/mlsql/plugins/et/TableRepartition.scala",
+    "symbols": " 函数：train, auth, supportedVersions, doc, codeExample, batchPredict, load, predict, explainParams\n类：TableRepartition\n变量：partitionNum, partitionType, partitionCols\n导入语句：import org.apache.spark.ml.param.{IntParam, Param}, import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.mlsql.session.MLSQLException, import org.apache.spark.sql.{DataFrame, SparkSession, functions => F}, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.dsl.auth.ETAuth, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926269.754465,
+    "md5": "8e846faa4957bb1752e06076fd06e799"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/test/scala/tech/mlsql/plugins/llm/utils/LLMUtilsTest.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/test/scala/tech/mlsql/plugins/llm/utils/LLMUtilsTest.scala",
+    "symbols": " 函数：test_content_split\n变量：content, output\n类：LLMUtilsTest\n导入语句：import org.scalatest.funsuite.AnyFunSuiteLike,import scala.io.Source\n\n请注意，由于我无法执行代码或使用代码分析工具，我的回答是基于对代码结构的观察。在实际应用中，您可能需要使用代码分析工具来准确提取这些信息。",
+    "last_modified": 1690545843.7240543,
+    "md5": "5d29f896222f36b7625d24efce7d0a95"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/YieldByteArrayOutputStream.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/YieldByteArrayOutputStream.scala",
+    "symbols": " 函数：write, write, flush, close\n变量：\n类：YieldByteArrayOutputStream\n导入语句：import java.io.ByteArrayOutputStream",
+    "last_modified": 1685926267.9249136,
+    "md5": "c0e01ee4c1c3b5611fa9bf720a0b2a75"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-eval/src/main/java/tech/mlsql/plugins/eval/ByzerEval.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-eval/src/main/java/tech/mlsql/plugins/eval/ByzerEval.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n变量：无明显变量声明\n类：ByzerEval\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.auth.TableAuthResult, import streaming.dsl.mmlib._, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.dsl.auth.{BaseETAuth, ETAuth}, import tech.mlsql.dsl.auth.dsl.mmlib.ETMethod.ETMethod, import tech.mlsql.ets.ScriptRunner, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1685926267.8650908,
+    "md5": "3c31d4a934384b4b107bb39c5ef64718"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/MLSQLModelFast.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/MLSQLModelFast.scala",
+    "symbols": " 函数：load, save, explainParams, register\n变量：ROW_BLOCK_SIZE\n类：MLSQLModelFast\n导入语句：import _root_.streaming.core.datasource._, import _root_.streaming.dsl.ScriptSQLExec, import _root_.streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import org.apache.hadoop.fs.{FileSystem, Path}, import org.apache.spark.TaskContext, import org.apache.spark.sql._, import org.apache.spark.sql.types.{BinaryType, LongType, StructField, StructType}, import org.apache.spark.util.TaskCompletionListener, import tech.mlsql.tool.HDFSOperatorV2, import java.io.InputStream, import java.util.UUID",
+    "last_modified": 1685926324.4011831,
+    "md5": "6669422625cb640e98ae6c9486bb540a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/LLMUDF.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/LLMUDF.scala",
+    "symbols": " 函数：llm_stack, llm_param, llm_result, llm_response_predict, llm_prompt, llm_split\n变量：\n类：\n导入语句：import org.apache.spark.sql.UDFRegistration,import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.plugins.llm.utils.LLMUtils.content_split,import tech.mlsql.tool.Templates2,import scala.collection.JavaConverters._,import scala.collection.mutable.ArrayBuffer,import scala.collection.mutable\n\n请注意，Scala语言中的`object`关键字用于定义单例对象，而不是类。在这个代码示例中，`LLMUDF`是一个单例对象，它包含了一系列的函数定义，但没有显式定义类。因此，在“类”这一项中，我们没有列出任何内容。",
+    "last_modified": 1708872028.0851676,
+    "md5": "ea2478b2b3877fb025ede7e9099c524a"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/LLM.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/LLM.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n变量：\n类：LLM\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1708872028.0845146,
+    "md5": "f6dc8530df6515cf83321284fe2356bb"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/Retrieval.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/Retrieval.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n变量：无\n类：ClusterSettings, EnvSettings, JVMSettings, ResourceRequirement, ResourceRequirementSettings, TableSettings, Retrieval\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.ets.Ray, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1698296481.7479136,
+    "md5": "06faf21694ac85357e0eda9180da651d"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/MLSQLConfig.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/MLSQLConfig.scala",
+    "symbols": " 函数：createScriptSQLExecListener, run\n变量：allPathPrefix, defaultPathPrefix, context, ownerOption, userDefineParams, session, byzerParams, byzerInstanceName, configServiceEnabledInRay, trainer, params, rayAddress, conf_params, confTable, df, pythonConf, command, pythonExec, dataMode, runIn, num_gpus, standalone, maxConcurrency, infer_backend, masterMaxConcurrency, workerMaxConcurrency, owner, schema\n类：\n导入语句：import org.apache.spark.sql.{Row, SparkSession}, import streaming.core.strategy.platform.{PlatformManager, SparkRuntime}, import streaming.dsl.{MLSQLExecuteContext, ScriptSQLExec, ScriptSQLExecListener}, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.{PythonCommand, Ray}, import scala.collection.mutable, import scala.collection.JavaConverters._",
+    "last_modified": 1696297782.9340255,
+    "md5": "aad610283cd196d0c3f2c902b520529e"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/LLMApp.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/LLMApp.scala",
+    "symbols": " 函数：registerUDF, registerDS\n变量：versions\n类：LLMApp, LLM, Retrieval, ByzerLLMQABuilder, ModelAdmin, MLSQLModel, MLSQLModelFast\n导入语句：import org.apache.spark.sql.SparkSession,import org.apache.spark.sql.{functions=>F},import streaming.core.datasource.MLSQLRegistry,import streaming.core.strategy.platform.{PlatformManager, SparkRuntime},import streaming.dsl.ScriptSQLExec,import tech.mlsql.common.utils.classloader.ClassLoaderTool,import tech.mlsql.common.utils.log.Logging,import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.dsl.CommandCollection,import tech.mlsql.ets.register.ETRegister,import tech.mlsql.plugins.llm.qa.ByzerLLMQABuilder,import tech.mlsql.plugins.llm.tools.ModelAdmin,import tech.mlsql.version.VersionCompatibility,import java.lang.reflect.Modifier",
+    "last_modified": 1697375705.7641315,
+    "md5": "bac67a33aa463cd86a28e8ae71344304"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/bark/Infer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/bark/Infer.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, modelTable, udfName, pythonConf, device_index, devices, quantizationBit, quantizationBitCode\n类：Infer\n导入语句：import org.apache.spark.sql.DataFrame,import streaming.dsl.ScriptSQLExec,import tech.mlsql.common.utils.log.Logging,import tech.mlsql.ets.{PythonCommand, Ray},import tech.mlsql.common.utils.log.Logging,import tech.mlsql.ets.{PythonCommand, Ray}",
+    "last_modified": 1685926324.411714,
+    "md5": "c2dbb14be365322bd567f15900fb9e0c"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/moss/Finetune.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/moss/Finetune.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, learningRate, devices, maxSteps, saveSteps, pretrainedModel\n类：Finetune\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.ets.Ray\n\n请注意，这里的输出是基于提供的代码片段的直接分析，没有考虑代码的上下文或完整性。在实际的代码分析中，可能需要更全面的代码视图来准确识别所有符号。",
+    "last_modified": 1685926324.4179332,
+    "md5": "1625bc51f955e41d7fb8db19329d4487"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/MLSQLModel.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/MLSQLModel.scala",
+    "symbols": " 函数：load, save, explainParams, register\n变量：ROW_BLOCK_SIZE, PARTITION_NUM, enableDebug, bufferNum, bufferTimeout, blocks, blocksNumPerPartition, partitionStartEnd\n类：MLSQLModel\n导入语句：import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}, import _root_.streaming.core.datasource._, import _root_.streaming.dsl.ScriptSQLExec, import _root_.streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import org.apache.commons.io.IOUtils, import org.apache.hadoop.fs.{FileSystem, Path}, import org.apache.spark.{Partitioner, TaskContext}, import org.apache.spark.sql.types.{BinaryType, LongType, StructField, StructType}, import org.apache.spark.sql.{functions => f, _}, import org.kamranzafar.jtar.{TarEntry, TarInputStream}, import tech.mlsql.common.utils.distribute.socket.server.JavaUtils, import tech.mlsql.common.utils.path.PathFun, import tech.mlsql.tool.{HDFSOperatorV2, SparkTarfileUtil}",
+    "last_modified": 1685926324.400216,
+    "md5": "acf2b0c438a07e0de53a38ce4a6cde17"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/moss/Infer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/moss/Infer.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, modelTable, udfName, pythonConf, devices, quantizationBit, quantizationBitCode\n类：Infer\n导入语句：import org.apache.spark.sql.DataFrame,import streaming.dsl.ScriptSQLExec,import tech.mlsql.common.utils.log.Logging,import tech.mlsql.ets.{PythonCommand, Ray},import tech.mlsql.plugins.llm.moss\n\n请注意，这里的输出是基于提供的代码片段的直接分析，不涉及代码的执行或深入理解。",
+    "last_modified": 1686908248.0880919,
+    "md5": "8202d9bd053777835a946e5b8e095cae"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/chatglm/Finetune.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/chatglm/Finetune.scala",
+    "symbols": " 函数：run\n类：Finetune\n变量：session, localModelDir, localPathPrefix, trainer, learningRate, devices, maxSteps, saveSteps, pretrainedModel\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.ets.Ray",
+    "last_modified": 1685926324.4128807,
+    "md5": "eea31dab6b9a5c052773b876ed203417"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/chatglm/Infer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/chatglm/Infer.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, modelTable, udfName, pythonConf, devices, quantizationBit, quantizationBitNum\n类：Infer, Ray, PythonCommand\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.ets.{PythonCommand, Ray}",
+    "last_modified": 1685926324.4140437,
+    "md5": "c81f2a8a00cfee248745ce6a2b3534b5"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/chatglm/PInfer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/chatglm/PInfer.scala",
+    "symbols": " 函数：run, init_model\n变量：session, localModelDir, localPathPrefix, finetuningType, trainer, modelTable, udfName, devices, quantizationBit, quantizationBitNum, maxLength, topP, temperature, quantizationBitCode, code\n类：PInfer, Ray\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.ets.{PythonCommand, Ray}",
+    "last_modified": 1686908349.4039557,
+    "md5": "baa00d0245d1f571e89f378b2d77661c"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/chatglm/PFinetune.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/chatglm/PFinetune.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, learningRate, finetuningType, numTrainEpochs, devices, maxSteps, saveSteps, pretrainedModel, quantizationBit, quantizationBitNum, code\n类：PFinetune\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.ets.Ray",
+    "last_modified": 1685926324.4148867,
+    "md5": "a82912d45dead3d368c76c2177ee7816"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/tools/ModelAdmin.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/tools/ModelAdmin.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n变量：v\n类：ModelAdmin\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.ScriptSQLExec, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.{PythonCommand, Ray}, import tech.mlsql.session.SetSession, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1697419095.994106,
+    "md5": "d25d0912b24a08e2661e2fbae519f52c"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/qa/ByzerLLMQABuilder.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/qa/ByzerLLMQABuilder.scala",
+    "symbols": " 函数：train, batchPredict, load, predict\n类：ByzerLLMQABuilder\n变量：无\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction, import org.apache.spark.sql.{DataFrame, SparkSession}, import streaming.dsl.mmlib.SQLAlg, import streaming.dsl.mmlib.algs.Functions, import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams}, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.Ray, import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1694431593.9405785,
+    "md5": "401aa354696f38c04b3eb8f8a6506a47"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/utils/LLMUtils.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/utils/LLMUtils.scala",
+    "symbols": " 函数：content_split\n变量：output, start, end, part, validEnd\n类：SplitInfo, LLMUtils\n导入语句：\n\n请注意，Scala 代码中的 `object` 类似于 Java 中的静态类，而 `case class` 定义了一个类。在这个例子中，没有显式的导入语句，因为所有的代码都在同一个包内。",
+    "last_modified": 1690545843.723096,
+    "md5": "9b89011b78d61e20dab6bc93330c8bdf"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/qa/ByzerLLMQADeploy.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/qa/ByzerLLMQADeploy.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, modelTable, udfName, embeddingFunc, chatFunc, byzerUrl, devices, infer_params, code\n类：ByzerLLMQADeploy\n导入语句：import org.apache.spark.sql.expressions.UserDefinedFunction,import org.apache.spark.sql.{DataFrame, SparkSession},import streaming.dsl.ScriptSQLExec,import streaming.dsl.mmlib.SQLAlg,import streaming.dsl.mmlib.algs.Functions,import streaming.dsl.mmlib.algs.param.{BaseParams, WowParams},import tech.mlsql.common.utils.log.Logging,import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.ets.Ray,import tech.mlsql.version.VersionCompatibility",
+    "last_modified": 1688483082.6950946,
+    "md5": "34b402b0218085a02459d78dfe3951fb"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/sass/CustomSaasAPI.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/sass/CustomSaasAPI.scala",
+    "symbols": " 函数：run\n变量：session, infer_params, trainer, modelTable, udfName, code, predictCode\n类：CustomSaasAPI\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.Ray, package tech.mlsql.plugins.llm.sass",
+    "last_modified": 1715667044.2705898,
+    "md5": "60cacfdc0e656b26dcd5ee780af42d24"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/m3e/Infer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/m3e/Infer.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, modelTable, udfName, devices\n类：Infer\n导入语句：import org.apache.spark.sql.DataFrame,import streaming.dsl.ScriptSQLExec,import tech.mlsql.common.utils.log.Logging,import tech.mlsql.ets.Ray\n\n请注意，这里的输出是基于提供的源码文本直接识别出的符号类型和名称，没有进行代码分析或执行。在实际的代码分析中，可能需要使用特定的工具或库来准确地提取这些信息。",
+    "last_modified": 1686908229.3015563,
+    "md5": "835f4f7021d72f0504ab2524e482ae5e"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/sass/chatglm/ChatGLMAPI.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/sass/chatglm/ChatGLMAPI.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, apiKey, publicKey, trainer, modelTable, udfName, devices, infer_params\n类：ChatGLMAPI\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.Ray",
+    "last_modified": 1687843326.2438838,
+    "md5": "c145ee303aa234fc0bc115acad3e1295"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/SFT.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/SFT.scala",
+    "symbols": " 函数：run\n变量：session, trainer, devices, pretrainedModelType, realPretrainedModelType, train_params\n类：SFT\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.Ray",
+    "last_modified": 1687493555.609194,
+    "md5": "da0c5467a56b89200138f484e64a9dba"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/ConvertDeepspeed.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/ConvertDeepspeed.scala",
+    "symbols": " 函数：run\n变量：session, trainer, devices, pretrainedModelType, realPretrainedModelType, train_params, code\n类：ConvertDeepspeed\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.Ray",
+    "last_modified": 1695129594.9260976,
+    "md5": "c7a839125a20f64cbe594d185f733b13"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/Infer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/Infer.scala",
+    "symbols": " 函数：run\n变量：session, modelTable, udfName, trainer, infer_params, code, predictCode\n类：Infer\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.Ray",
+    "last_modified": 1715667191.6207716,
+    "md5": "2286344a5c84a724d03d41e320146020"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/SFFT.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/SFFT.scala",
+    "symbols": " 函数：run\n变量：session, trainer, devices, pretrainedModelType, realPretrainedModelType, train_params, confTable, code\n类：SFFT\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.Ray\n\n请注意，由于Java和Scala代码的特性，变量和函数通常是类的一部分，因此没有单独列出。此外，Scala代码中的导入语句是按照Scala的惯例列出的。",
+    "last_modified": 1693198232.2306929,
+    "md5": "9fe1f3f6d063c3b4fbcb0be1641db49b"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/dolly/Infer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/dolly/Infer.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, modelTable, udfName, pythonConf, devices, quantizationBit, quantizationBitCode\n类：Infer\n导入语句：import org.apache.spark.sql.DataFrame,import streaming.dsl.ScriptSQLExec,import tech.mlsql.common.utils.log.Logging,import tech.mlsql.ets.{PythonCommand, Ray}",
+    "last_modified": 1685926324.4169497,
+    "md5": "452d8e9d68b356be6811012ef21d8e61"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/llama/Infer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/llama/Infer.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, modelTable, udfName, devices, infer_params, code\n类：Infer\n导入语句：import org.apache.spark.sql.DataFrame,import streaming.dsl.ScriptSQLExec,import tech.mlsql.common.utils.log.Logging,import tech.mlsql.common.utils.serder.json.JSONTool,import tech.mlsql.ets.Ray\n\n请注意，这里的输出是基于提供的源码文本进行的分析，实际的代码分析可能需要使用特定的工具或库来处理。",
+    "last_modified": 1690195370.9507222,
+    "md5": "4cff74554b5e2b020e44d03d808e7468"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/LoraMerge.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/custom/LoraMerge.scala",
+    "symbols": " 函数：run\n变量：session, trainer, devices, pretrainedModelType, realPretrainedModelType, train_params\n类：LoraMerge\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.Ray\n\n请注意，由于输入代码是Scala语言，而Scala语言中没有显式的变量声明，变量通常是通过val或var关键字在函数或方法内部定义的。在上面的输出中，我列出了在run函数中定义的变量。此外，Scala中的类通常是通过class关键字定义的，这里定义了一个名为LoraMerge的类。导入语句是用于引入其他包或类的语句，这里列出了所有的导入语句。",
+    "last_modified": 1694593465.532604,
+    "md5": "7bb0bf8b684c3377e386f06d177d7d37"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/falcon/Infer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/falcon/Infer.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, modelTable, udfName, devices, infer_params, code\n类：Infer\n导入语句：import org.apache.spark.sql.DataFrame, import streaming.dsl.ScriptSQLExec, import tech.mlsql.common.utils.log.Logging, import tech.mlsql.common.utils.serder.json.JSONTool, import tech.mlsql.ets.{PythonCommand, Ray}, import transformers, import datasets, import logging, import sys, import ray, import numpy as np, import os, import json, import time, import uuid, from pyjava.api.mlsql import RayContext,PythonContext, from pyjava.udf import UDFMaster,UDFWorker,UDFBuilder,UDFBuildInFunc, from typing import Any, NoReturn, Callable, Dict, List, from ray.util.client.common import ClientActorHandle, ClientObjectRef, from byzerllm import common_init_model, import byzerllm.falcon as infer, from byzerllm.utils.text_generator import simple_predict_func",
+    "last_modified": 1690195370.9502733,
+    "md5": "cc051729578d05f53863ee11d84c9ab4"
+  },
+  "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/whisper/Infer.scala": {
+    "module_name": "/Users/allwefantasy/projects/byzer-extension/byzer-llm/src/main/java/tech/mlsql/plugins/llm/whisper/Infer.scala",
+    "symbols": " 函数：run\n变量：session, localModelDir, localPathPrefix, trainer, modelTable, udfName, devices\n类：Infer\n导入语句：import org.apache.spark.sql.DataFrame,import streaming.dsl.ScriptSQLExec,import tech.mlsql.common.utils.log.Logging,import tech.mlsql.ets.{PythonCommand, Ray}",
+    "last_modified": 1685926324.423827,
+    "md5": "d21a0b6d8866dff521119dd88f0c6422"
+  }
+}

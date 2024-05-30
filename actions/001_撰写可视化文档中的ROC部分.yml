@@ -1,0 +1,34 @@
+include_file:
+  - ./base/base.yml
+  - ./base/enable_wholefile.yml
+
+query: |
+  byzer-yaml-visualization下的 builder.scala 部分支持了下面的功能：
+  
+  ```sql
+  load excel.`./example-data/excel/user-behavior.xlsx` 
+  where header="true" as user_behavior;
+  
+  select cast(datatime as date) as day,
+  sum(case when behavior_type = 'pv' then 1 else 0 end) as pv,
+  count(distinct user_id) as uv
+  from user_behavior
+  group by cast(datatime as date)
+  order by day as day_pv_uv;
+  
+  !visualize day_pv_uv '''
+  fig:
+    bar:
+      title: "日PV/UV柱状图"
+      x: day
+      y:
+        - pv
+        - uv
+      labels:
+        day: "日期"
+    ''';
+  ```
+  可以控制 fig, bar 等参数，生成不同的图表。
+  
+  请根据 builder.scala 的实现，撰写可视化文档中的 ROC 部分（markdown语法）。
+  写好的文档放在 byzer-yaml-visualization docs 目录下。
