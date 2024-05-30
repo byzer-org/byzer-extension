@@ -1,80 +1,84 @@
-好的,我根据builder.scala的实现,生成了ROC曲线可视化部分的文档,放在了byzer-yaml-visualization/docs目录下:
-
+##File: /Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/docs/roc-visualization-guide.md
 ```markdown
-##File: /Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/docs/roc.md
-# ROC曲线可视化
+# ROC Visualization with Byzer YAML Visualization
 
-在Byzer中,我们可以方便地使用YAML配置来绘制ROC曲线。ROC曲线(Receiver Operating Characteristic Curve)是一种常用于评估二分类模型性能的工具。通过绘制不同阈值下的真正率(True Positive Rate, TPR)和假正率(False Positive Rate, FPR),我们可以直观地评估模型的分类效果。
+## Introduction
 
-## 示例
+This guide explains how to use the Byzer YAML Visualization extension to create Receiver Operating Characteristic (ROC) curve visualizations. ROC curves are commonly used to evaluate the performance of classification models by depicting the trade-off between true positive rate and false positive rate.
 
-下面是一个使用Byzer绘制ROC曲线的例子:
+## Prerequisites
+
+Before creating ROC visualizations, ensure that you have installed the byzer-yaml-visualization extension and have a classification dataset available in Byzer.
+
+## YAML Configuration
+
+Here's how to configure the YAML for generating an ROC curve:
+
+```yaml
+runtime:
+   env: source /opt/miniconda3/bin/activate ray-1.12.0
+   cache: true
+   output: roc_output
+control:
+   format: image
+fig:
+    auc:
+       title: "ROC Curve" 
+       labels: 
+           x: "False Positive Rate"
+           y: "True Positive Rate"
+```
+
+## SQL to Generate ROC Visualization
+
+After setting up your data, you can invoke the visualization by using the following Byzer script:
 
 ```sql
-select p.label as label,m.probability as probability
-from model_predict_result m
-left join original_data p on p.id = m.id
-as roc_data;
+load parquet.`path/to/your/data` as model_output;
 
-!visualize roc_data '''
+select cast(probability as double) as probability,
+       cast(label as int) as label
+from model_output;
+
+!visualize model_output '''
+runtime:
+   env: source /opt/miniconda3/bin/activate ray-1.12.0
+   cache: true
+   output: roc_output
+control:
+   format: image   
 fig:
-  auc:
-    title: "ROC Curve"
-    x: fpr
-    y: tpr
+    auc:
+       title: "ROC Curve"
+       labels: 
+           x: "False Positive Rate"
+           y: "True Positive Rate"           
 ''';
+
+select unbase64(content) as content, "roc_curve.png" as fileName from roc_output as imageTable;
+
+save overwrite imageTable as image.`/tmp/images`
+where imageColumn="content" 
+and fileName="fileName";
 ```
 
-在这个例子中:
-- 我们首先准备好一张包含真实标签(`label`)和模型预测概率(`probability`)的表`roc_data`。 
-- 然后使用`!visualize`命令,并在三引号中传入YAML配置。
-- YAML配置中的`fig.auc`表示我们要绘制ROC曲线。
-- `title`指定了图表的标题。
-- `x`和`y`分别指定了图表的横纵坐标对应的列。
+This script will process the data and produce an ROC curve visualization that is saved as an image. The `!visualize` command triggers the visualization based on the defined YAML configuration.
 
-## 参数说明
+## Handling the Output
 
-ROC曲线的可视化参数如下:
+The output from the visualization is encoded in base64 format. To use or display the image:
 
-| 参数 | 说明 |
-| ---- | ---- |
-| fig.auc.title | 图表的标题 | 
-| fig.auc.x | 横坐标对应的列,通常是`fpr` |
-| fig.auc.y | 纵坐标对应的列,通常是`tpr` |
+```sql
+!fs -ls /tmp/images;
 
-除了上述ROC曲线特有的参数外,还可以使用通用的图表参数来控制图表的展示效果,如`control.backend`选择绘图引擎等。
-
-通过组合使用这些参数,我们就可以非常方便地在Byzer中绘制ROC曲线,评估二分类模型的性能了。
+-- To upload the image if needed:
+save overwrite command as Rest.`YOUR_UPLOAD_URL` 
+where `config.method`="post"
+and `header.content-type`="multipart/form-data"
+and `form.file-path`="/tmp/images/roc_curve.png"
+and `form.file-name`="roc_curve.png";
 ```
 
-以上就是根据builder.scala实现生成的ROC曲线可视化文档,放在了byzer-yaml-visualization/docs/roc.md文件中。代码实现部分在builder.scala中的以下片段:
-
-```scala
-##File: /Users/allwefantasy/projects/byzer-extension/byzer-yaml-visualization/src/main/java/tech/mlsql/plugins/visualization/builder.scala
-case "auc" =>         
-  pyLang.raw.code(
-    """
-      |import sklearn.metrics as metrics
-      |fpr, tpr, threshold = metrics.roc_curve(df['label'], df['probability'])
-      |roc_auc = metrics.auc(fpr, tpr)
-      |plt.figure()
-      |_, ax = plt.subplots()
-      |""".stripMargin).end
-  val auc = pyLang.let("ax").invokeFunc("plot").params
-    .add("fpr", None) 
-    .add("tpr", None)
-    .add("'b'", None)
-    .addKV("label", "'AUC = %0.2f' % roc_auc", None)
-  pyLang.raw.code(
-    """
-      |plt.legend(loc = 'lower right')
-      |ax.plot([0, 1], [0, 1],'r--')
-      |plt.xlim([0, 1])
-      |plt.ylim([0, 1])
-      |plt.ylabel('True Positive Rate')
-      |plt.xlabel('False Positive Rate')  
-      |""".stripMargin).end
-  auc
+This guide should help you understand and apply ROC curve visualization using Byzer YAML Visualization in your data analysis workflows.
 ```
-
-这段代码展示了在`fig.auc`分支下,生成绘制ROC曲线的Python代码的过程。希望这份文档对你有所帮助!
+This markdown document provides a comprehensive guide on using the byzer-yaml-visualization extension to generate and manage ROC curve visualizations, including the necessary SQL scripts and YAML configurations.
